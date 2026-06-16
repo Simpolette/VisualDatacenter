@@ -1,0 +1,55 @@
+schema: spec-driven
+
+context: |
+  # Visual Datacenter
+
+  ## Domain
+  Web-based datacenter room simulation system. Users manage server rooms, racks,
+  and devices through a 2D rack editor and 3D room visualization (Three.js).
+  Single-user sandbox — no auth, no roles in MVP.
+
+  ## Tech Stack
+  - **Backend**: Spring Boot 4.1, Java 25, Gradle
+  - **Database**: PostgreSQL with JPA/Hibernate (auto-DDL, no Flyway in MVP)
+  - **Frontend**: React + Vite SPA, Three.js for 3D rendering
+  - **API style**: RESTful JSON under `/api/v1`
+  - **No auth** in MVP — sandbox model
+
+  ## Domain Model
+  - **Room** → has many Racks (cascade delete)
+  - **Rack** → belongs to Room, has many Devices and PDUs (cascade delete)
+  - **Device** → belongs to Rack, references DeviceType. Placed at a startU slot on FRONT or REAR face
+  - **DeviceType** → catalog of device templates (name, category, heightU, dimensions, image)
+  - **PDU** → attached to a Rack at position LEFT, RIGHT, or REAR (max 2 per rack)
+
+  ## Key Invariants
+  - Room names are unique system-wide
+  - Rack names are unique within a room; totalUnits ∈ {42, 44}
+  - Devices: startU >= 1, startU + heightU - 1 <= rack.totalUnits, no overlap on same face (U-slot collision detection)
+  - PDUs: max 2 per rack, unique position per rack
+  - DeviceType deletion blocked if referenced by existing devices
+
+  ## Backend Conventions
+  - Base package: `com.simpolette.dcv.DcvServerApplication`
+  - Package structure:
+    - `common/` — shared cross-cutting code (exception classes, config, validation utilities)
+    - `features/` — one sub-package per domain entity (room/, rack/, device/, devicetype/, pdu/), each containing Entity, Repository, Service, Controller, and dto/
+  - DTOs as Java records (no Lombok)
+  - Bean Validation (`jakarta.validation`) on DTOs; complex rules in service layer
+  - Consistent error response: `{ status, error, message, timestamp }` via @RestControllerAdvice
+  - ResourceNotFoundException → 404, SlotConflictException → 409
+
+  ## Reference Documents
+  - `docs/proposal.md` — project goals, scope, users, risks
+  - `docs/design.md` — C4 diagrams, ERD, API contract, frontend architecture, ADRs
+
+rules:
+  proposal:
+    - Reference docs/proposal.md for project scope and non-goals
+    - Keep proposals concise (1-2 pages)
+  design:
+    - Follow conventions from docs/design.md (package structure, naming, API style)
+    - Use Java records for DTOs, not Lombok
+  tasks:
+    - Order tasks by dependency (infrastructure first, then entities, then controllers)
+    - Each task should be completable in one coding session
