@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ============================================
+   Tailwind v4 Theme — Design Tokens
+   ============================================ */
+@theme {
+  /* --- Font --- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* --- Accent Colors --- */
+  --color-primary: hsl(30, 90%, 55%);
+  --color-primary-hover: hsl(30, 90%, 48%);
+  --color-primary-alpha-10: hsla(30, 90%, 55%, 0.10);
+  --color-primary-alpha-20: hsla(30, 90%, 55%, 0.20);
+  --color-success: hsl(145, 55%, 45%);
+  --color-danger: hsl(350, 60%, 55%);
+
+  /* --- Neutral Palette (Charcoal Gray) --- */
+  --color-canvas: hsl(220, 5%, 8%);
+  --color-surface: hsl(220, 5%, 13%);
+  --color-surface-hover: hsl(220, 5%, 18%);
+  --color-surface-active: hsl(220, 5%, 22%);
+
+  --color-border: hsl(220, 5%, 18%);
+  --color-border-hover: hsl(220, 5%, 25%);
+
+  /* --- Text --- */
+  --color-text-primary: hsl(210, 20%, 98%);
+  --color-text-secondary: hsl(210, 12%, 75%);
+  --color-text-muted: hsl(210, 8%, 50%);
+
+  /* --- Shadows --- */
+  --shadow-glow-primary: 0 0 15px hsla(30, 90%, 55%, 0.3);
+
+  /* --- Sidebar --- */
+  --spacing-sidebar: 260px;
+}
+
+/* ============================================
+   Base Layer Overrides
+   ============================================ */
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-canvas text-text-primary font-sans text-sm leading-normal min-h-screen;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+
+  a {
+    @apply text-inherit no-underline;
+  }
+
+  button {
+    @apply font-sans cursor-pointer border-none bg-transparent text-inherit;
+  }
+
+  ul, ol {
+    @apply list-none;
+  }
+
+  img {
+    @apply block max-w-full;
+  }
+}
+
+/* ============================================
+   Spinner Animation
+   ============================================ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
