@@ -251,11 +251,11 @@ export default function RoomScene3D({
               renderOrder={-1}
               position={[0, 0.01, 0]}
               args={[room.widthM, room.depthM]}
-              cellSize={0.5}
-              cellThickness={0.7}
-              cellColor="#505050"
-              sectionSize={1.0}
-              sectionThickness={1.2}
+              cellSize={1.0}
+              cellThickness={1.0}
+              cellColor="#757575"
+              sectionSize={0}
+              sectionThickness={0}
               sectionColor="#757575"
               fadeDistance={20}
               infiniteGrid={false}

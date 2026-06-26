@@ -84,23 +84,23 @@ export default function RoomDetailsPage() {
 
   return (
     <div 
-      className="h-screen flex flex-col overflow-hidden bg-slate-950" 
+      className="h-screen flex flex-col overflow-hidden bg-canvas" 
       id="room-details-dashboard"
     >
       {/* Unified Toolbar (Header and Controls) */}
-      <div className="flex items-center justify-between px-6 py-3.5 bg-slate-950 border-b border-border/85 shrink-0 z-20">
+      <div className="flex items-center justify-between px-6 py-3.5 bg-surface border-b border-border/85 shrink-0 z-20">
         {/* Left side: Back Navigation and Room Metadata */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate('/rooms')}
-            className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-800 transition-all cursor-pointer"
+            className="p-2 bg-canvas hover:bg-surface-hover text-text-secondary hover:text-text-primary rounded-lg border border-border transition-all cursor-pointer"
             id="btn-back-to-rooms-header"
             title="Back to Room List"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
           
-          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+          <div className="h-6 w-px bg-border hidden sm:block" />
           
           <div>
             <div className="flex items-center gap-2">
@@ -113,7 +113,7 @@ export default function RoomDetailsPage() {
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">
+            <p className="text-[10px] text-text-secondary mt-1">
               {room.widthM}m × {room.depthM}m Floor
             </p>
           </div>
@@ -124,14 +124,14 @@ export default function RoomDetailsPage() {
           {/* Reset Camera Button */}
           <button
             onClick={handleResetCamera}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-canvas border border-border text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-hover hover:border-border-hover transition-all cursor-pointer"
             title="Reset camera view to overview"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Reset View</span>
           </button>
 
-          <div className="h-5 w-px bg-slate-800" />
+          <div className="h-5 w-px bg-border" />
 
           {/* Show Grid Switch */}
           <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -142,7 +142,7 @@ export default function RoomDetailsPage() {
               className="sr-only peer"
             />
             <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
-            <span className="text-xs text-slate-300 hidden md:inline">Grid</span>
+            <span className="text-xs text-text-secondary hidden md:inline">Grid</span>
           </label>
 
           {/* Show Labels Switch */}
@@ -154,7 +154,7 @@ export default function RoomDetailsPage() {
               className="sr-only peer"
             />
             <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
-            <span className="text-xs text-slate-300 hidden md:inline">Labels</span>
+            <span className="text-xs text-text-secondary hidden md:inline">Labels</span>
           </label>
         </div>
 
@@ -185,18 +185,18 @@ export default function RoomDetailsPage() {
           />
 
           {/* Floating Stats Overlay Pill */}
-          <div className="absolute top-4 right-4 bg-slate-950/85 backdrop-blur-md border border-slate-800/80 px-4 py-2.5 rounded-xl text-xs flex items-center gap-4 shadow-lg pointer-events-none select-none z-10">
-            <div className="flex items-center gap-2 pr-3.5 border-r border-slate-800">
+          <div className="absolute top-4 right-4 bg-surface/85 backdrop-blur-md border border-border px-4 py-2.5 rounded-xl text-xs flex items-center gap-4 shadow-lg pointer-events-none select-none z-10">
+            <div className="flex items-center gap-2 pr-3.5 border-r border-border">
               <Database className="w-3.5 h-3.5 text-primary shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-500 font-semibold uppercase leading-none">Racks</p>
+                <p className="text-[10px] text-text-muted font-semibold uppercase leading-none">Racks</p>
                 <p className="text-xs font-bold text-white mt-1 leading-none">{totalRacks}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <Server className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <div>
-                <p className="text-[10px] text-slate-500 font-semibold uppercase leading-none">Occupancy</p>
+                <p className="text-[10px] text-text-muted font-semibold uppercase leading-none">Occupancy</p>
                 <p className="text-xs font-bold text-white mt-1 leading-none">
                   {occupiedU}U / {totalU}U ({roomUtilization.toFixed(0)}%)
                 </p>
