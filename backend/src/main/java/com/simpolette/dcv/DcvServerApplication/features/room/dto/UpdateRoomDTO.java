@@ -9,8 +9,6 @@ public record UpdateRoomDTO(
         @Positive(message = "Width must be positive")
         Float widthM,
 
-        @Positive(message = "Depth must be positive")
-        Float depthM,
-
-        Float heightM
+        @Positive(message = "Length must be positive")
+        Float lengthM
 ) {}

@@ -2,6 +2,7 @@ package com.simpolette.dcv.DcvServerApplication.features.devicetype.dto;
 
 import com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType;
 import jakarta.validation.constraints.Min;
+import java.util.List;
 
 public record UpdateDeviceTypeDTO(
         String name,
@@ -11,6 +12,11 @@ public record UpdateDeviceTypeDTO(
         Integer heightU,
 
         Float widthMm,
-        Float depthMm,
-        Float weightKg
+        Float lengthMm,
+        Float weightKg,
+
+        List<InterfaceTemplateDTO> interfaces,
+        List<PowerPortTemplateDTO> powerPorts,
+        List<ConsolePortTemplateDTO> consolePorts,
+        List<ModuleBayTemplateDTO> moduleBays
 ) {}

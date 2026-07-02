@@ -9,8 +9,7 @@ public record RoomDetailDTO(
         String name,
         String location,
         float widthM,
-        float depthM,
-        Float heightM,
+        float lengthM,
         String floorPlanImage,
         Instant createdAt,
         Instant updatedAt,
@@ -25,7 +24,8 @@ public record RoomDetailDTO(
             int totalUnits,
             float posX,
             float posY,
-            float rotationDeg
+            float rotationDeg,
+            float length
     ) {
         public static RackSummary from(Rack rack) {
             return new RackSummary(
@@ -34,7 +34,8 @@ public record RoomDetailDTO(
                     rack.getTotalUnits(),
                     rack.getPosX(),
                     rack.getPosY(),
-                    rack.getRotationDeg()
+                    rack.getRotationDeg(),
+                    rack.getLength()
             );
         }
     }

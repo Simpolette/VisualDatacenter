@@ -5,6 +5,9 @@ import com.simpolette.dcv.DcvServerApplication.features.rack.Rack;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "device")
@@ -41,6 +44,51 @@ public class Device {
 
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("device-interfaces")
+    private List<Interface> interfaces = new ArrayList<>();
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("device-powerports")
+    private List<PowerPort> powerPorts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("device-consoleports")
+    private List<ConsolePort> consolePorts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("device-modulebays")
+    private List<ModuleBay> moduleBays = new ArrayList<>();
+
+    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("device-modules")
+    private List<Module> modules = new ArrayList<>();
+
+    public void addInterface(Interface i) {
+        interfaces.add(i);
+        i.setDevice(this);
+    }
+
+    public void addPowerPort(PowerPort p) {
+        powerPorts.add(p);
+        p.setDevice(this);
+    }
+
+    public void addConsolePort(ConsolePort c) {
+        consolePorts.add(c);
+        c.setDevice(this);
+    }
+
+    public void addModuleBay(ModuleBay mb) {
+        moduleBays.add(mb);
+        mb.setDevice(this);
+    }
+
+    public void addModule(Module m) {
+        modules.add(m);
+        m.setDevice(this);
+    }
 
     public enum Face {
         FRONT, REAR
@@ -89,4 +137,19 @@ public class Device {
 
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<Interface> getInterfaces() { return interfaces; }
+    public void setInterfaces(List<Interface> interfaces) { this.interfaces = interfaces; }
+
+    public List<PowerPort> getPowerPorts() { return powerPorts; }
+    public void setPowerPorts(List<PowerPort> powerPorts) { this.powerPorts = powerPorts; }
+
+    public List<ConsolePort> getConsolePorts() { return consolePorts; }
+    public void setConsolePorts(List<ConsolePort> consolePorts) { this.consolePorts = consolePorts; }
+
+    public List<ModuleBay> getModuleBays() { return moduleBays; }
+    public void setModuleBays(List<ModuleBay> moduleBays) { this.moduleBays = moduleBays; }
+
+    public List<Module> getModules() { return modules; }
+    public void setModules(List<Module> modules) { this.modules = modules; }
 }

@@ -23,11 +23,9 @@ public class Room {
     @Column(name = "width_m", nullable = false)
     private float widthM;
 
-    @Column(name = "depth_m", nullable = false)
-    private float depthM;
+    @Column(name = "length_m", nullable = false)
+    private float lengthM;
 
-    @Column(name = "height_m")
-    private Float heightM;
 
     @Column(name = "floor_plan_image")
     private String floorPlanImage;
@@ -67,11 +65,9 @@ public class Room {
     public float getWidthM() { return widthM; }
     public void setWidthM(float widthM) { this.widthM = widthM; }
 
-    public float getDepthM() { return depthM; }
-    public void setDepthM(float depthM) { this.depthM = depthM; }
+    public float getLengthM() { return lengthM; }
+    public void setLengthM(float lengthM) { this.lengthM = lengthM; }
 
-    public Float getHeightM() { return heightM; }
-    public void setHeightM(Float heightM) { this.heightM = heightM; }
 
     public String getFloorPlanImage() { return floorPlanImage; }
     public void setFloorPlanImage(String floorPlanImage) { this.floorPlanImage = floorPlanImage; }

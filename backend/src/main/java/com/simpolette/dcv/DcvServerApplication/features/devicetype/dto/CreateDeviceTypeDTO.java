@@ -4,6 +4,7 @@ import com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.List;
 
 public record CreateDeviceTypeDTO(
         @NotBlank(message = "Name is required")
@@ -16,6 +17,11 @@ public record CreateDeviceTypeDTO(
         int heightU,
 
         Float widthMm,
-        Float depthMm,
-        Float weightKg
+        Float lengthMm,
+        Float weightKg,
+
+        List<InterfaceTemplateDTO> interfaces,
+        List<PowerPortTemplateDTO> powerPorts,
+        List<ConsolePortTemplateDTO> consolePorts,
+        List<ModuleBayTemplateDTO> moduleBays
 ) {}

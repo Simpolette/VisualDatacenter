@@ -53,6 +53,7 @@ public class RackService {
         rack.setPosX(dto.posX());
         rack.setPosY(dto.posY());
         rack.setRotationDeg(dto.rotationDeg() != null ? dto.rotationDeg() : 0f);
+        rack.setLength(dto.length() != null ? dto.length() : 1.0f);
         return rackRepository.save(rack);
     }
 
@@ -82,6 +83,7 @@ public class RackService {
                 rack.getPosX(),
                 rack.getPosY(),
                 rack.getRotationDeg(),
+                rack.getLength(),
                 rack.getCreatedAt(),
                 rack.getUpdatedAt(),
                 devices,

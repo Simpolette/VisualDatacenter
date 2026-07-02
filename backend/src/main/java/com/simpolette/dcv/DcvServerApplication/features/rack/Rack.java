@@ -38,6 +38,9 @@ public class Rack {
     @Column(name = "rotation_deg")
     private float rotationDeg;
 
+    @Column(name = "length", nullable = false)
+    private float length = 1.0f;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -85,6 +88,9 @@ public class Rack {
 
     public float getRotationDeg() { return rotationDeg; }
     public void setRotationDeg(float rotationDeg) { this.rotationDeg = rotationDeg; }
+
+    public float getLength() { return length; }
+    public void setLength(float length) { this.length = length; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

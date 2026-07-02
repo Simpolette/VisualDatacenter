@@ -2,6 +2,9 @@ package com.simpolette.dcv.DcvServerApplication.features.devicetype;
 
 import jakarta.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "device_type")
@@ -24,8 +27,8 @@ public class DeviceType {
     @Column(name = "width_mm")
     private Float widthMm;
 
-    @Column(name = "depth_mm")
-    private Float depthMm;
+    @Column(name = "length_mm")
+    private Float lengthMm;
 
     @Column(name = "weight_kg")
     private Float weightKg;
@@ -35,6 +38,42 @@ public class DeviceType {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "deviceType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("devicetype-interfaces")
+    private List<InterfaceTemplate> interfaces = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deviceType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("devicetype-powerports")
+    private List<PowerPortTemplate> powerPorts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deviceType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("devicetype-consoleports")
+    private List<ConsolePortTemplate> consolePorts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deviceType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("devicetype-modulebays")
+    private List<ModuleBayTemplate> moduleBays = new ArrayList<>();
+
+    public void addInterfaceTemplate(InterfaceTemplate t) {
+        interfaces.add(t);
+        t.setDeviceType(this);
+    }
+
+    public void addPowerPortTemplate(PowerPortTemplate t) {
+        powerPorts.add(t);
+        t.setDeviceType(this);
+    }
+
+    public void addConsolePortTemplate(ConsolePortTemplate t) {
+        consolePorts.add(t);
+        t.setDeviceType(this);
+    }
+
+    public void addModuleBayTemplate(ModuleBayTemplate t) {
+        moduleBays.add(t);
+        t.setDeviceType(this);
+    }
 
     public enum Category {
         COMPUTE, NETWORK, STORAGE
@@ -87,12 +126,12 @@ public class DeviceType {
         this.widthMm = widthMm;
     }
 
-    public Float getDepthMm() {
-        return depthMm;
+    public Float getLengthMm() {
+        return lengthMm;
     }
 
-    public void setDepthMm(Float depthMm) {
-        this.depthMm = depthMm;
+    public void setLengthMm(Float lengthMm) {
+        this.lengthMm = lengthMm;
     }
 
     public Float getWeightKg() {
@@ -117,5 +156,37 @@ public class DeviceType {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public List<InterfaceTemplate> getInterfaces() {
+        return interfaces;
+    }
+
+    public void setInterfaces(List<InterfaceTemplate> interfaces) {
+        this.interfaces = interfaces;
+    }
+
+    public List<PowerPortTemplate> getPowerPorts() {
+        return powerPorts;
+    }
+
+    public void setPowerPorts(List<PowerPortTemplate> powerPorts) {
+        this.powerPorts = powerPorts;
+    }
+
+    public List<ConsolePortTemplate> getConsolePorts() {
+        return consolePorts;
+    }
+
+    public void setConsolePorts(List<ConsolePortTemplate> consolePorts) {
+        this.consolePorts = consolePorts;
+    }
+
+    public List<ModuleBayTemplate> getModuleBays() {
+        return moduleBays;
+    }
+
+    public void setModuleBays(List<ModuleBayTemplate> moduleBays) {
+        this.moduleBays = moduleBays;
     }
 }

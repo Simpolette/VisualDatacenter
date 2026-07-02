@@ -16,5 +16,7 @@ public record CreateRackDTO(
         @NotNull(message = "Position Y is required")
         Float posY,
 
-        Float rotationDeg
+        Float rotationDeg,
+
+        Float length
 ) {}

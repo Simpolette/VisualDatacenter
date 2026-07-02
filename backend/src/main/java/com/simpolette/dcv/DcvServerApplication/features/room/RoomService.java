@@ -35,8 +35,7 @@ public class RoomService {
         room.setName(dto.name());
         room.setLocation(dto.location());
         room.setWidthM(dto.widthM());
-        room.setDepthM(dto.depthM());
-        room.setHeightM(dto.heightM());
+        room.setLengthM(dto.lengthM());
         return roomRepository.save(room);
     }
 
@@ -62,8 +61,7 @@ public class RoomService {
                 room.getName(),
                 room.getLocation(),
                 room.getWidthM(),
-                room.getDepthM(),
-                room.getHeightM(),
+                room.getLengthM(),
                 room.getFloorPlanImage(),
                 room.getCreatedAt(),
                 room.getUpdatedAt(),
@@ -86,8 +84,7 @@ public class RoomService {
         }
         if (dto.location() != null) room.setLocation(dto.location());
         if (dto.widthM() != null) room.setWidthM(dto.widthM());
-        if (dto.depthM() != null) room.setDepthM(dto.depthM());
-        if (dto.heightM() != null) room.setHeightM(dto.heightM());
+        if (dto.lengthM() != null) room.setLengthM(dto.lengthM());
 
         return roomRepository.save(room);
     }
