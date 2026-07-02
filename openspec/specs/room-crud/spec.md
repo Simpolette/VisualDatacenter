@@ -12,14 +12,14 @@ The system SHALL return a list of all datacenter rooms when the `GET /api/v1/roo
 - **THEN** the system returns HTTP 200 with a JSON array containing both rooms with their id, name, location, dimensions, and timestamps
 
 ### Requirement: Create a room
-The system SHALL create a new datacenter room when a valid `POST /api/v1/rooms` request is received with a `CreateRoomDTO` body containing name, widthM, depthM, and optionally location and heightM.
+The system SHALL create a new datacenter room when a valid `POST /api/v1/rooms` request is received with a `CreateRoomDTO` body containing name, widthM, lengthM, and optionally location.
 
 #### Scenario: Valid room creation
-- **WHEN** a POST request is sent with `{ "name": "DC-1", "widthM": 10.0, "depthM": 8.0, "heightM": 3.0, "location": "Building A" }`
+- **WHEN** a POST request is sent with `{ "name": "DC-1", "widthM": 10.0, "lengthM": 8.0, "location": "Building A" }`
 - **THEN** the system creates the room and returns HTTP 201 with the created room including a generated id and timestamps
 
 #### Scenario: Missing required fields
-- **WHEN** a POST request is sent without a name or with widthM/depthM missing
+- **WHEN** a POST request is sent without a name or with widthM/lengthM missing
 - **THEN** the system returns HTTP 400 with field-level validation errors
 
 #### Scenario: Duplicate room name
@@ -27,7 +27,7 @@ The system SHALL create a new datacenter room when a valid `POST /api/v1/rooms` 
 - **THEN** the system returns HTTP 409 with a conflict error message
 
 #### Scenario: Invalid dimensions
-- **WHEN** a POST request is sent with widthM <= 0 or depthM <= 0
+- **WHEN** a POST request is sent with widthM <= 0 or lengthM <= 0
 - **THEN** the system returns HTTP 400 with a validation error
 
 ### Requirement: Get room with details
@@ -45,7 +45,7 @@ The system SHALL return a room with its racks summary when the `GET /api/v1/room
 The system SHALL update an existing room's properties when a valid `PUT /api/v1/rooms/:id` request is received.
 
 #### Scenario: Valid update
-- **WHEN** a PUT request is sent with `{ "name": "DC-1 Updated", "widthM": 12.0, "depthM": 10.0 }` for an existing room
+- **WHEN** a PUT request is sent with `{ "name": "DC-1 Updated", "widthM": 12.0, "lengthM": 10.0 }` for an existing room
 - **THEN** the system updates the room and returns HTTP 200 with the updated room data and an updated `updatedAt` timestamp
 
 #### Scenario: Room not found for update

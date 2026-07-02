@@ -5,7 +5,7 @@ The system SHALL return all device types in the catalog when `GET /api/v1/device
 
 #### Scenario: Device types exist
 - **WHEN** the catalog contains Server, Switch, and Storage device types
-- **THEN** the system returns HTTP 200 with a JSON array of all device types including id, name, category, heightU, widthMm, depthMm, weightKg, imagePath, and createdAt
+- **THEN** the system returns HTTP 200 with a JSON array of all device types including id, name, category, heightU, widthMm, lengthMm, weightKg, imagePath, and createdAt
 
 #### Scenario: No device types exist
 - **WHEN** the catalog is empty
@@ -15,7 +15,7 @@ The system SHALL return all device types in the catalog when `GET /api/v1/device
 The system SHALL add a new device type to the catalog when a valid `POST /api/v1/device-types` request is received with a `CreateDeviceTypeDTO`.
 
 #### Scenario: Valid device type creation
-- **WHEN** a POST request is sent with `{ "name": "Dell R740", "category": "COMPUTE", "heightU": 2, "widthMm": 482.0, "depthMm": 734.0, "weightKg": 24.5 }`
+- **WHEN** a POST request is sent with `{ "name": "Dell R740", "category": "COMPUTE", "heightU": 2, "widthMm": 482.0, "lengthMm": 734.0, "weightKg": 24.5 }`
 - **THEN** the system creates the device type and returns HTTP 201 with the created record
 
 #### Scenario: Height below minimum

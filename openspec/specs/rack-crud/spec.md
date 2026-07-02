@@ -5,7 +5,7 @@ The system SHALL return all racks belonging to a specific room when `GET /api/v1
 
 #### Scenario: Room has racks
 - **WHEN** a GET request is sent for a room with 3 racks
-- **THEN** the system returns HTTP 200 with a JSON array of all 3 racks including their id, name, totalUnits, posX, posY, rotationDeg, and timestamps
+- **THEN** the system returns HTTP 200 with a JSON array of all 3 racks including their id, name, totalUnits, posX, posY, rotationDeg, length, and timestamps
 
 #### Scenario: Room has no racks
 - **WHEN** a GET request is sent for a room with no racks
@@ -19,7 +19,7 @@ The system SHALL return all racks belonging to a specific room when `GET /api/v1
 The system SHALL create a new rack in a specific room when a valid `POST /api/v1/rooms/:roomId/racks` request is received with a `CreateRackDTO`.
 
 #### Scenario: Valid rack creation
-- **WHEN** a POST request is sent with `{ "name": "RACK-A01", "totalUnits": 42, "posX": 2.5, "posY": 3.0, "rotationDeg": 0 }` for an existing room
+- **WHEN** a POST request is sent with `{ "name": "RACK-A01", "totalUnits": 42, "posX": 2.5, "posY": 3.0, "rotationDeg": 0, "length": 1.0 }` for an existing room
 - **THEN** the system creates the rack linked to the room and returns HTTP 201
 
 #### Scenario: Invalid total units
@@ -39,7 +39,7 @@ The system SHALL return a rack with its installed devices and attached PDUs when
 
 #### Scenario: Rack exists with devices
 - **WHEN** a GET request is sent for a rack that has 3 devices and 1 PDU
-- **THEN** the system returns HTTP 200 with the rack details including the devices array, pdus array, freeUnits, and occupiedUnits
+- **THEN** the system returns HTTP 200 with the rack details including the devices array, pdus array, length, freeUnits, and occupiedUnits
 
 #### Scenario: Rack does not exist
 - **WHEN** a GET request is sent for a non-existent rack id
