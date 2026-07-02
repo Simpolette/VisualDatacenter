@@ -8,8 +8,7 @@ const createRoomSchema = z.object({
   name: z.string().trim().min(1, 'Room name is required'),
   location: z.string().trim().optional(),
   widthM: z.number({ error: 'Width is required' }).positive('Width must be a positive number'),
-  depthM: z.number({ error: 'Depth is required' }).positive('Depth must be a positive number'),
-  heightM: z.number().positive('Height must be a positive number').optional().or(z.nan().transform(() => undefined)),
+  lengthM: z.number({ error: 'Length is required' }).positive('Length must be a positive number'),
 })
 
 type CreateRoomFormInputs = z.infer<typeof createRoomSchema>;
@@ -36,8 +35,7 @@ function CreateRoomForm({ onSuccess, onCancel }: CreateRoomFormProps) {
       name: '',
       location: '',
       widthM: undefined,
-      depthM: undefined,
-      heightM: undefined,
+      lengthM: undefined,
     },
   })
 
@@ -49,8 +47,7 @@ function CreateRoomForm({ onSuccess, onCancel }: CreateRoomFormProps) {
         name: values.name,
         location: values.location?.trim() || undefined,
         widthM: values.widthM,
-        depthM: values.depthM,
-        heightM: values.heightM,
+        lengthM: values.lengthM,
       })
       onSuccess()
     } catch (err) {
@@ -104,7 +101,7 @@ function CreateRoomForm({ onSuccess, onCancel }: CreateRoomFormProps) {
       </div>
 
       {/* Dimensions (Grid) */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {/* Width */}
         <div className="flex flex-col gap-1.5">
           <label htmlFor="room-width" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
@@ -126,45 +123,24 @@ function CreateRoomForm({ onSuccess, onCancel }: CreateRoomFormProps) {
           )}
         </div>
 
-        {/* Depth */}
+        {/* Length */}
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="room-depth" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Depth (m) <span className="text-danger">*</span>
+          <label htmlFor="room-length" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            Length (m) <span className="text-danger">*</span>
           </label>
           <input
-            id="room-depth"
+            id="room-length"
             type="number"
             step="any"
             placeholder="8"
             disabled={creating}
-            {...register('depthM', { valueAsNumber: true })}
+            {...register('lengthM', { valueAsNumber: true })}
             className={`w-full px-3.5 py-2 text-sm bg-canvas border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 ${
-              errors.depthM ? 'border-danger' : 'border-border'
+              errors.lengthM ? 'border-danger' : 'border-border'
             }`}
           />
-          {errors.depthM && (
-            <span className="text-xs text-danger mt-1">{errors.depthM.message}</span>
-          )}
-        </div>
-
-        {/* Height */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="room-height" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
-            Height (m)
-          </label>
-          <input
-            id="room-height"
-            type="number"
-            step="any"
-            placeholder="3"
-            disabled={creating}
-            {...register('heightM', { valueAsNumber: true })}
-            className={`w-full px-3.5 py-2 text-sm bg-canvas border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50 ${
-              errors.heightM ? 'border-danger' : 'border-border'
-            }`}
-          />
-          {errors.heightM && (
-            <span className="text-xs text-danger mt-1">{errors.heightM.message}</span>
+          {errors.lengthM && (
+            <span className="text-xs text-danger mt-1">{errors.lengthM.message}</span>
           )}
         </div>
       </div>

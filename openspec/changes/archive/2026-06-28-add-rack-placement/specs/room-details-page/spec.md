@@ -10,19 +10,19 @@ The application SHALL render a details page for a room when the user navigates t
 ## ADDED Requirements
 
 ### Requirement: Click-and-drag grid placement interaction
-The 3D canvas viewport SHALL support interactive click-and-drag gestures to position and orient new racks on the floor grid plane.
+The 3D canvas viewport SHALL support interactive click-and-drag gestures to position and orient new racks on the floor grid plane. The grid and floor coordinates SHALL align perfectly with room boundaries using the bottom-left corner of the room floor as the origin (0, 0, 0) in world space, preventing fractional or half-tiles on odd dimensions.
 
 #### Scenario: Snapping ghost rack to grid
 - **WHEN** the user moves the pointer over the room floor in placement mode
-- **THEN** a semi-transparent ghost rack mesh snaps to the nearest 1.0m grid coordinate.
+- **THEN** a semi-transparent ghost rack mesh snaps to the nearest 1.0m grid coordinate relative to the bottom-left origin.
 
 #### Scenario: Defining position and orientation by drag gesture
 - **WHEN** the user clicks down on a grid cell and drags the mouse in a direction
-- **THEN** the system locks the rack coordinates `(posX, posY)`, disables OrbitControls, and snaps the rack's `rotationDeg` to 90-degree increments matching the drag direction (0° for drag up, 90° for drag right, 180° for drag down, 270° for drag left).
+- **THEN** the system locks the rack start coordinates `(posX, posY)`, disables OrbitControls, snaps the rack's `rotationDeg` to 90-degree increments matching the drag direction, and dynamically sizes the rack length up to a maximum of 4 cells (4.0m) based on the drag distance.
 
 #### Scenario: Completing placement gesture
 - **WHEN** the user releases the mouse button
-- **THEN** the ghost rack's final position and rotation are locked, and the RightSidebar slides open in Creation mode.
+- **THEN** the ghost rack's final position, length (up to 4.0m), and rotation are locked, and the RightSidebar slides open in Creation mode.
 
 ### Requirement: Reusable RightSidebar container
 The application SHALL extract and utilize a unified slide-out `RightSidebar` container component to host both details inspection and creation forms.

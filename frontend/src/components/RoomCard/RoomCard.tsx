@@ -20,7 +20,7 @@ function RoomCard({ room }: RoomCardProps) {
             <svg className="shrink-0 text-text-muted" width="16" height="16" viewBox="0 0 16 16" fill="none">
               <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.2" strokeDasharray="3 2" />
             </svg>
-            <span>{room.widthM}m × {room.depthM}m</span>
+            <span>{room.widthM}m × {room.lengthM}m</span>
           </div>
           {room.location && (
             <div className="flex items-center gap-2 text-[13px] text-text-secondary">

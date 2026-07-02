@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Server, Ruler, MapPin, Database, RotateCcw, Plus } from 'lucide-react'
+import { ArrowLeft, Server, Database, RotateCcw, Plus, Focus } from 'lucide-react'
 import { useRoomStore } from '../../stores/useRoomStore'
 import { useRackStore } from '../../stores/useRackStore'
 import RoomScene3D from './RoomScene3D'
 import RackSidebar2D from './RackSidebar2D'
+import CreateRackSidebar2D from './CreateRackSidebar2D'
 
 export default function RoomDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,6 +19,10 @@ export default function RoomDetailsPage() {
   const [showGrid, setShowGrid] = useState(true)
   const [showLabels, setShowLabels] = useState(true)
   const [resetKey, setResetKey] = useState(0)
+
+  const [workspaceMode, setWorkspaceMode] = useState<'NORMAL' | 'PLACEMENT_PENDING' | 'PLACEMENT_DRAGGING' | 'CREATION_FORM' | 'ISOLATION_SELECT' | 'ISOLATION_VIEW'>('NORMAL')
+  const [isolatedRackIds, setIsolatedRackIds] = useState<number[]>([])
+  const [newRackCoords, setNewRackCoords] = useState<{ posX: number; posY: number; rotationDeg: number; length: number } | null>(null)
 
   // Fetch rooms list (if empty) and racks for this specific room
   useEffect(() => {
@@ -35,6 +40,24 @@ export default function RoomDetailsPage() {
     // If a rack is selected, deselect it first to unlock the camera constraints
     setSelectedRackId(null)
     setResetKey((prev) => prev + 1)
+  }
+
+  const handleCancelPlacement = () => {
+    setWorkspaceMode('NORMAL')
+    setNewRackCoords(null)
+  }
+
+  const handleCreateRackSuccess = () => {
+    if (roomId) {
+      fetchRacksForRoom(roomId)
+    }
+    setWorkspaceMode('NORMAL')
+    setNewRackCoords(null)
+  }
+
+  const handleAddRackClick = () => {
+    setSelectedRackId(null)
+    setWorkspaceMode('PLACEMENT_PENDING')
   }
 
   // Calculate overall room statistics
@@ -88,87 +111,166 @@ export default function RoomDetailsPage() {
       id="room-details-dashboard"
     >
       {/* Unified Toolbar (Header and Controls) */}
-      <div className="flex items-center justify-between px-6 py-3.5 bg-surface border-b border-border/85 shrink-0 z-20">
-        {/* Left side: Back Navigation and Room Metadata */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => navigate('/rooms')}
-            className="p-2 bg-canvas hover:bg-surface-hover text-text-secondary hover:text-text-primary rounded-lg border border-border transition-all cursor-pointer"
-            id="btn-back-to-rooms-header"
-            title="Back to Room List"
-          >
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          
-          <div className="h-6 w-px bg-border hidden sm:block" />
-          
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold text-white tracking-tight leading-none" id="room-details-title">
-                {room.name}
-              </h1>
-              {room.location && (
-                <span className="text-[10px] font-semibold text-primary bg-primary-alpha-10 px-1.5 py-0.5 rounded border border-primary-alpha-20">
-                  {room.location}
-                </span>
-              )}
+      {workspaceMode === 'PLACEMENT_PENDING' || workspaceMode === 'PLACEMENT_DRAGGING' || workspaceMode === 'CREATION_FORM' ? (
+        <div className="flex items-center justify-between px-6 py-3.5 bg-orange-950/20 border-b border-orange-500/30 shrink-0 z-20 transition-all">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+            </span>
+            <div>
+              <span className="text-[10px] font-semibold text-orange-400 uppercase tracking-wider block">Add Rack Mode</span>
+              <p className="text-[11px] text-slate-300 mt-0.5" id="placement-instructions">
+                {workspaceMode === 'CREATION_FORM'
+                  ? 'Complete the rack details form in the sidebar'
+                  : 'Click and drag on the floor grid to place and rotate a new rack'}
+              </p>
             </div>
-            <p className="text-[10px] text-text-secondary mt-1">
-              {room.widthM}m × {room.depthM}m Floor
-            </p>
+          </div>
+          <button
+            onClick={handleCancelPlacement}
+            className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700 rounded-lg text-xs font-semibold shadow-md transition-all cursor-pointer"
+            id="btn-cancel-placement"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : workspaceMode === 'ISOLATION_SELECT' ? (
+        <div className="flex items-center justify-between px-6 py-3.5 bg-sky-950/20 border-b border-sky-500/30 shrink-0 z-20 transition-all">
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+            </span>
+            <div>
+              <span className="text-[10px] font-semibold text-sky-400 uppercase tracking-wider block">Isolation Select Mode</span>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Click and drag a box on the floor grid to select the racks you want to isolate
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setIsolatedRackIds([])
+              setWorkspaceMode('NORMAL')
+            }}
+            className="px-3 py-1.5 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700 rounded-lg text-xs font-semibold shadow-md transition-all cursor-pointer"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between px-6 py-3.5 bg-surface border-b border-border/85 shrink-0 z-20">
+          {/* Left side: Back Navigation and Room Metadata */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/rooms')}
+              className="p-2 bg-canvas hover:bg-surface-hover text-text-secondary hover:text-text-primary rounded-lg border border-border transition-all cursor-pointer"
+              id="btn-back-to-rooms-header"
+              title="Back to Room List"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            
+            <div className="h-6 w-px bg-border hidden sm:block" />
+            
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-bold text-white tracking-tight leading-none" id="room-details-title">
+                  {room.name}
+                </h1>
+                {room.location && (
+                  <span className="text-[10px] font-semibold text-primary bg-primary-alpha-10 px-1.5 py-0.5 rounded border border-primary-alpha-20">
+                    {room.location}
+                  </span>
+                )}
+              </div>
+              <p className="text-[10px] text-text-secondary mt-1">
+                {room.widthM}m × {room.lengthM}m Floor
+              </p>
+            </div>
+          </div>
+
+          {/* Center: Workspace Scene Toggles and Controls */}
+          <div className="flex items-center gap-3">
+            {/* Reset Camera Button */}
+            <button
+              onClick={handleResetCamera}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-canvas border border-border text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-hover hover:border-border-hover transition-all cursor-pointer"
+              title="Reset camera view to overview"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Reset View</span>
+            </button>
+
+            {/* Isolate Button */}
+            <button
+              onClick={() => {
+                if (workspaceMode === 'NORMAL') {
+                  setSelectedRackId(null)
+                  setIsolatedRackIds([])
+                  setWorkspaceMode('ISOLATION_SELECT')
+                } else if (workspaceMode === 'ISOLATION_VIEW') {
+                  setIsolatedRackIds([])
+                  setWorkspaceMode('NORMAL')
+                }
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+                workspaceMode === 'ISOLATION_VIEW'
+                  ? 'bg-sky-950/80 border-sky-500 text-sky-200'
+                  : 'bg-canvas border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover hover:border-border-hover'
+              }`}
+              title="Isolate a subset of racks"
+            >
+              <Focus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">
+                {workspaceMode === 'ISOLATION_VIEW' ? 'Exit Isolate' : 'Isolate'}
+              </span>
+            </button>
+
+            <div className="h-5 w-px bg-border" />
+
+            {/* Show Grid Switch */}
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showGrid}
+                onChange={(e) => setShowGrid(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
+              <span className="text-xs text-text-secondary hidden md:inline">Grid</span>
+            </label>
+
+            {/* Show Labels Switch */}
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showLabels}
+                onChange={(e) => setShowLabels(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
+              <span className="text-xs text-text-secondary hidden md:inline">Labels</span>
+            </label>
+          </div>
+
+          {/* Right side: Operations Action */}
+          <div>
+            {workspaceMode !== 'ISOLATION_VIEW' && (
+              <button
+                onClick={handleAddRackClick}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-semibold shadow-md transition-all cursor-pointer"
+                title="Add new rack"
+                id="btn-add-rack"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Add Rack</span>
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Center: Workspace Scene Toggles and Controls */}
-        <div className="flex items-center gap-3">
-          {/* Reset Camera Button */}
-          <button
-            onClick={handleResetCamera}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-canvas border border-border text-xs font-semibold text-text-secondary hover:text-text-primary hover:bg-surface-hover hover:border-border-hover transition-all cursor-pointer"
-            title="Reset camera view to overview"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Reset View</span>
-          </button>
-
-          <div className="h-5 w-px bg-border" />
-
-          {/* Show Grid Switch */}
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={showGrid}
-              onChange={(e) => setShowGrid(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
-            <span className="text-xs text-text-secondary hidden md:inline">Grid</span>
-          </label>
-
-          {/* Show Labels Switch */}
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={showLabels}
-              onChange={(e) => setShowLabels(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 peer-checked:after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-full relative border border-slate-700" />
-            <span className="text-xs text-text-secondary hidden md:inline">Labels</span>
-          </label>
-        </div>
-
-        {/* Right side: Operations Action */}
-        <div>
-          <button
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary hover:bg-primary-hover text-white rounded-lg text-xs font-semibold shadow-md transition-all cursor-pointer"
-            title="Add new rack"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Add Rack</span>
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* Main 3D Viewport with Sidebar Drawer overlay */}
       <div className="flex-1 relative flex overflow-hidden" id="room-main-scene">
@@ -182,6 +284,14 @@ export default function RoomDetailsPage() {
             showGrid={showGrid}
             showLabels={showLabels}
             resetKey={resetKey}
+            workspaceMode={workspaceMode}
+            setWorkspaceMode={setWorkspaceMode}
+            isolatedRackIds={isolatedRackIds}
+            setIsolatedRackIds={setIsolatedRackIds}
+            onPlacementComplete={(coords) => {
+              setNewRackCoords(coords)
+              setWorkspaceMode('CREATION_FORM')
+            }}
           />
 
           {/* Floating Stats Overlay Pill */}
@@ -206,10 +316,20 @@ export default function RoomDetailsPage() {
         </div>
 
         {/* 2D Slide-out Sidebar Panel */}
-        <RackSidebar2D
-          rackId={selectedRackId}
-          onClose={() => setSelectedRackId(null)}
-        />
+        {workspaceMode === 'CREATION_FORM' && newRackCoords ? (
+          <CreateRackSidebar2D
+            room={room}
+            racks={racks}
+            coords={newRackCoords}
+            onClose={handleCancelPlacement}
+            onSuccess={handleCreateRackSuccess}
+          />
+        ) : (
+          <RackSidebar2D
+            rackId={selectedRackId}
+            onClose={() => setSelectedRackId(null)}
+          />
+        )}
       </div>
     </div>
   )

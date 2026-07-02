@@ -6,8 +6,7 @@ export interface Room {
   name: string;
   location: string | null;
   widthM: number;
-  depthM: number;
-  heightM: number | null;
+  lengthM: number;
   floorPlanImage: string | null;
   createdAt: string;
   updatedAt: string;
@@ -17,8 +16,7 @@ export interface CreateRoomPayload {
   name: string;
   location?: string;
   widthM: number;
-  depthM: number;
-  heightM?: number;
+  lengthM: number;
 }
 
 interface RoomState {
