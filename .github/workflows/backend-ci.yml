@@ -52,6 +52,9 @@ jobs:
       - name: Install Snyk CLI
         run: npm install -g snyk
 
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
       - name: Run Snyk Security Scans
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
