@@ -59,7 +59,11 @@ export function RackSlotGrid2D({
         })}
 
         {devices?.map((device) => {
-          const gridStart = totalUnits - device.startU - device.heightU + 2
+          const heightU = device.heightU || device.deviceType?.heightU || 1
+          const deviceTypeName = device.deviceTypeName || device.deviceType?.name || 'Device'
+          const imagePath = device.imagePath || device.deviceType?.imagePath
+
+          const gridStart = totalUnits - device.startU - heightU + 2
           const gridEnd = totalUnits - device.startU + 2
           const isConfirmingDelete = confirmDeleteId === device.id
 
@@ -110,10 +114,10 @@ export function RackSlotGrid2D({
                 </div>
               ) : (
                 <>
-                  {device.imagePath ? (
+                  {imagePath ? (
                     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-slate-950">
                       <img
-                        src={device.imagePath}
+                        src={imagePath}
                         className="w-full h-full object-fill pointer-events-none select-none"
                         alt={device.name}
                       />
@@ -135,7 +139,7 @@ export function RackSlotGrid2D({
                     <>
                       <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center pointer-events-none select-none">
                         <div className="hidden md:flex flex-col gap-1 w-24 opacity-25 select-none shrink-0">
-                          {Array.from({ length: Math.min(6, device.heightU * 2 - 1) }).map((_, i) => (
+                          {Array.from({ length: Math.min(6, heightU * 2 - 1) }).map((_, i) => (
                             <div key={i} className="h-[2px] bg-slate-500 rounded-full" />
                           ))}
                         </div>
@@ -143,30 +147,30 @@ export function RackSlotGrid2D({
 
                       <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-slate-800/80 border-r border-slate-700/30 flex flex-col justify-between py-1 opacity-50 select-none z-10">
                         <div className="w-1 h-1 rounded-full bg-slate-600 border border-slate-950 mx-auto" />
-                        {device.heightU > 1 && (
+                        {heightU > 1 && (
                           <div className="w-1 h-1 rounded-full bg-slate-600 border border-slate-950 mx-auto" />
                         )}
                       </div>
 
                       <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-slate-800/80 border-l border-slate-700/30 flex flex-col justify-between py-1 opacity-50 select-none z-10">
                         <div className="w-1 h-1 rounded-full bg-slate-600 border border-slate-950 mx-auto" />
-                        {device.heightU > 1 && (
+                        {heightU > 1 && (
                           <div className="w-1 h-1 rounded-full bg-slate-600 border border-slate-950 mx-auto" />
                         )}
                       </div>
 
-                      <div className={`relative z-10 flex items-center justify-between w-full h-full pl-3.5 pr-3.5 select-none ${device.heightU === 1 ? 'py-1.5' : 'py-2.5'}`}>
+                      <div className={`relative z-10 flex items-center justify-between w-full h-full pl-3.5 pr-3.5 select-none ${heightU === 1 ? 'py-1.5' : 'py-2.5'}`}>
                         <div className="flex items-center gap-2.5 overflow-hidden">
                           <div className="p-1.5 rounded bg-slate-950/80 border border-slate-800 shrink-0 text-slate-400 group-hover/device:border-primary/20 transition-all select-none">
-                            {getDeviceIcon(device.deviceTypeName)}
+                            {getDeviceIcon(deviceTypeName)}
                           </div>
                           <div className="overflow-hidden">
                             <div className="flex items-center gap-1.5">
                               <span className="text-[9px] font-bold text-slate-550 uppercase tracking-widest font-mono truncate">
-                                {device.deviceTypeName}
+                                {deviceTypeName}
                               </span>
                               <span className="text-[8px] font-bold text-slate-400 bg-slate-800 border border-slate-700/60 px-1 rounded-sm">
-                                {device.heightU}U
+                                {heightU}U
                               </span>
                             </div>
                             <p className="text-xs font-bold text-white truncate leading-snug tracking-wide mt-0.5">

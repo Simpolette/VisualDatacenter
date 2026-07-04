@@ -11,7 +11,7 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    let message = 'An unexpected error occurred'
+    let message: string
     if (error.response) {
       if (error.response.data && error.response.data.message) {
         message = error.response.data.message
@@ -21,7 +21,7 @@ api.interceptors.response.use(
     } else if (error.request) {
       message = 'No response received from server. Please check your network connection.'
     } else {
-      message = error.message
+      message = error.message || 'An unexpected error occurred'
     }
 
     const customError = new Error(message)

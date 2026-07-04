@@ -134,7 +134,7 @@ export function RackMesh({
             <RackDevice3D
               key={device.id}
               device={device}
-              totalU={totalU}
+              totalUnits={totalU}
               rackLength={meshLength}
             />
           ))}

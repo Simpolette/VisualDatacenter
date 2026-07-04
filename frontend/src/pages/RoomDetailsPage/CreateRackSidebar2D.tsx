@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import RightSidebar from '../../components/Sidebar/RightSidebar'
 import { useRackStore } from '../../stores/useRackStore'
 import { Server, Database, Compass, AlertCircle } from 'lucide-react'
@@ -21,32 +21,30 @@ export default function CreateRackSidebar2D({
   onSuccess
 }: CreateRackSidebar2DProps) {
   const { createRack } = useRackStore()
-  const [name, setName] = useState('')
-  const [totalUnits, setTotalUnits] = useState<number>(42)
-  const [formError, setFormError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-
-  // Generate default name: next letter in A-Z sequence
-  useEffect(() => {
+  // Helper to generate default name: next letter in A-Z sequence
+  const getDefaultRackName = (rackList: Rack[]) => {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const lettersInUse = new Set<string>()
-    racks.forEach((r) => {
+    rackList.forEach((r) => {
       const match = r.name.match(/^Rack\s+([A-Z])$/i)
       if (match) {
         lettersInUse.add(match[1].toUpperCase())
       }
     })
 
-    let defaultName = `Rack ${racks.length + 1}`
     for (let i = 0; i < alphabet.length; i++) {
       const char = alphabet[i]
       if (!lettersInUse.has(char)) {
-        defaultName = `Rack ${char}`
-        break
+        return `Rack ${char}`
       }
     }
-    setName(defaultName)
-  }, [racks])
+    return `Rack ${rackList.length + 1}`
+  }
+
+  const [name, setName] = useState(() => getDefaultRackName(racks))
+  const [totalUnits, setTotalUnits] = useState<number>(42)
+  const [formError, setFormError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,8 +76,9 @@ export default function CreateRackSidebar2D({
         length: coords.length
       })
       onSuccess()
-    } catch (err: any) {
-      setFormError(err.message || 'Failed to create rack. Please try again.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create rack. Please try again.'
+      setFormError(msg)
     } finally {
       setSubmitting(false)
     }

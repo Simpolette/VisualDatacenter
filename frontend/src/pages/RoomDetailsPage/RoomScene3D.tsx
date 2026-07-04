@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { Grid, Edges } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Rack } from '../../stores/useRackStore'
@@ -79,7 +79,7 @@ export default function RoomScene3D({
     setIsolatedRackIds,
   })
 
-  const handlePointerMove = (e: any) => {
+  const handlePointerMove = (e: ThreeEvent<PointerEvent>) => {
     if (workspaceMode === 'NORMAL' || workspaceMode === 'CREATION_FORM') return
     e.stopPropagation()
 
@@ -93,7 +93,7 @@ export default function RoomScene3D({
   return (
     <div ref={containerRef} className="w-full h-full relative" id="room-canvas-container">
       <Canvas
-        eventSource={containerRef}
+        eventSource={containerRef as React.RefObject<HTMLElement>}
         shadows
         camera={{ position: [0, 8, 10], fov: 45 }}
         gl={{ antialias: true }}

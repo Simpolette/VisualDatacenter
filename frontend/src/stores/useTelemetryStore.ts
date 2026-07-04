@@ -64,8 +64,7 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
       set({ connected: true });
     };
 
-    eventSource.addEventListener('INIT', (e: MessageEvent) => {
-      // console.log('[SSE] Telemetry Stream Initialized:', e.data);
+    eventSource.addEventListener('INIT', () => {
       set({ connected: true });
     });
 

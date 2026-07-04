@@ -108,6 +108,13 @@ export interface DeviceSummary {
   deviceType: DeviceType;
   moduleBays?: ModuleBay[];
   modules?: Module[];
+  consolePorts?: ConsolePort[];
+  powerPorts?: PowerPort[];
+  interfaces?: Interface[];
+  deviceTypeName?: string;
+  status?: string;
+  heightU?: number;
+  imagePath?: string;
 }
 
 export interface PduSummary {
@@ -127,6 +134,7 @@ export interface Rack {
   length: number;
   createdAt: string;
   updatedAt: string;
+  devices?: (DeviceSummary & { heightU?: number })[];
 }
 
 export interface RackDetails extends Rack {

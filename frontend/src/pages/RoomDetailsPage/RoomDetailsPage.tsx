@@ -75,9 +75,7 @@ export default function RoomDetailsPage() {
 
   racks.forEach((rack) => {
     totalU += rack.totalUnits || 42
-    // @ts-ignore
     const devices = rack.devices || []
-    // @ts-ignore
     devices.forEach((dev) => {
       const height = dev.heightU !== undefined ? dev.heightU : (dev.deviceType?.heightU || 1)
       occupiedU += height

@@ -4,23 +4,33 @@ import { useTelemetryStore } from '../../stores/useTelemetryStore'
 
 const RACK_HEIGHT = 2.0
 
+export interface Device3DItem {
+  id: number
+  name?: string
+  heightU?: number
+  widthMm?: number
+  lengthMm?: number
+  startU?: number
+  face?: string
+  imagePath?: string
+  status?: string
+}
+
 export interface RackDevice3DProps {
-  device: any
+  device: Device3DItem
   totalUnits: number
   rackLength: number
 }
 
 function TexturedMaterial({ path, attach }: { path: string; attach: 'material-4' | 'material-5' }) {
   const texture = useTexture(path)
-  if (texture) {
-    texture.colorSpace = THREE.SRGBColorSpace
-  }
 
   return (
     <meshStandardMaterial
       attach={attach}
       color="#ffffff"
       map={texture}
+      map-colorSpace={THREE.SRGBColorSpace}
       roughness={0.2}
       metalness={0.1}
     />
