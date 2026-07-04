@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react'
 import { ShieldAlert, Plus, Trash2, Loader2 } from 'lucide-react'
-import { useRackStore, type DeviceSummary } from '../../stores/useRackStore'
+import axios from 'axios'
+import {
+  useRackStore,
+  type DeviceSummary,
+  type ModuleBay,
+  type ConsolePort,
+  type PowerPort,
+  type Interface,
+} from '../../stores/useRackStore'
 import { useTelemetryStore } from '../../stores/useTelemetryStore'
 import RightSidebar from '../../components/Sidebar/RightSidebar'
 import InstallDeviceForm from './InstallDeviceForm'
@@ -48,6 +56,18 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
   const [uninstallLoadingId, setUninstallLoadingId] = useState<number | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
 
+  const [prevRackId, setPrevRackId] = useState<number | null>(rackId)
+  if (rackId !== prevRackId) {
+    setPrevRackId(rackId)
+    setShowInstallForm(false)
+    setConfirmDeleteId(null)
+    setDeleteError(null)
+    setSelectedDevice(null)
+    setInstallingBayId(null)
+    setSelectedModuleTypeId('')
+    setActionError(null)
+  }
+
   const { connectStream } = useTelemetryStore()
 
   useEffect(() => {
@@ -68,18 +88,8 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     }
   }, [fetchModuleTypes, moduleTypes.length])
 
-  useEffect(() => {
-    setShowInstallForm(false)
-    setConfirmDeleteId(null)
-    setDeleteError(null)
-    setSelectedDevice(null)
-    setInstallingBayId(null)
-    setSelectedModuleTypeId('')
-    setActionError(null)
-  }, [rackId])
-
   const activeDevice = selectedDevice && rack?.devices
-    ? rack.devices.find((d: any) => d.id === selectedDevice.id) || null
+    ? rack.devices.find((d: DeviceSummary) => d.id === selectedDevice.id) || null
     : null
 
   const isOpen = rackId !== null
@@ -151,8 +161,10 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
       await installModule(deviceId, bayId, Number(selectedModuleTypeId), rackId)
       setInstallingBayId(null)
       setSelectedModuleTypeId('')
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || 'Failed to install module'
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) && err.response?.data
+        ? (typeof err.response.data === 'string' ? err.response.data : err.response.data.message || 'Failed to install module')
+        : (err instanceof Error ? err.message : 'Failed to install module')
       setActionError(msg)
     } finally {
       setInstallLoading(false)
@@ -165,8 +177,10 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     setActionError(null)
     try {
       await uninstallModule(deviceId, moduleId, rackId)
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || 'Failed to uninstall module'
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) && err.response?.data
+        ? (typeof err.response.data === 'string' ? err.response.data : err.response.data.message || 'Failed to uninstall module')
+        : (err instanceof Error ? err.message : 'Failed to uninstall module')
       setActionError(msg)
     } finally {
       setUninstallLoadingId(null)
@@ -186,8 +200,10 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
       })
       setShowAddPduForm(false)
       setPduName('PDU B')
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || 'Failed to create PDU'
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) && err.response?.data
+        ? (typeof err.response.data === 'string' ? err.response.data : err.response.data.message || 'Failed to create PDU')
+        : (err instanceof Error ? err.message : 'Failed to create PDU')
       setPduError(msg)
     } finally {
       setPduLoading(false)
@@ -200,8 +216,10 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     setPduError(null)
     try {
       await deletePdu(pduId, rackId)
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.response?.data || err.message || 'Failed to delete PDU'
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) && err.response?.data
+        ? (typeof err.response.data === 'string' ? err.response.data : err.response.data.message || 'Failed to delete PDU')
+        : (err instanceof Error ? err.message : 'Failed to delete PDU')
       setPduError(msg)
     } finally {
       setDeletingPduId(null)
@@ -253,7 +271,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 <span className="text-[10px] font-bold text-primary uppercase tracking-widest font-mono">
                   {activeDevice.deviceTypeName}
                 </span>
-                {getStatusBadge(activeDevice.status)}
+                {getStatusBadge(activeDevice.status || 'ACTIVE')}
               </div>
               <h3 className="text-lg font-bold text-white leading-tight">
                 {activeDevice.name}
@@ -283,7 +301,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
               <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Module Bays</h4>
               {activeDevice.moduleBays && activeDevice.moduleBays.length > 0 ? (
                 <div className="space-y-3">
-                  {activeDevice.moduleBays.map((bay: any) => {
+                  {activeDevice.moduleBays.map((bay: ModuleBay) => {
                     const isInstalling = installingBayId === bay.id
                     const isOccupied = bay.installedModule !== null
 
@@ -301,9 +319,9 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                             <p className="text-[10px] font-bold text-slate-550 uppercase tracking-wider">
                               {bay.name} {bay.label ? `(${bay.label})` : ''}
                             </p>
-                            {isOccupied ? (
+                            {isOccupied && bay.installedModule ? (
                               <p className="text-sm font-semibold text-white mt-1">
-                                {bay.installedModule.manufacturer} {bay.installedModule.model}
+                                {bay.installedModule.moduleType?.manufacturer || ''} {bay.installedModule.moduleType?.model || ''}
                               </p>
                             ) : (
                               <p className="text-xs text-slate-600 italic mt-0.5">Empty Bay</p>
@@ -393,7 +411,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Console Ports</h5>
                 {activeDevice.consolePorts && activeDevice.consolePorts.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
-                    {activeDevice.consolePorts.map((cp: any) => (
+                    {activeDevice.consolePorts.map((cp: ConsolePort) => (
                       <div key={cp.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
                         <span className="text-xs font-mono font-bold text-white truncate">{cp.name}</span>
                         <span className="text-[9px] font-bold text-slate-450 bg-slate-950 px-1 py-0.5 rounded border border-slate-800 uppercase tracking-wide">
@@ -411,7 +429,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Power Ports</h5>
                 {activeDevice.powerPorts && activeDevice.powerPorts.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
-                    {activeDevice.powerPorts.map((pp: any) => (
+                    {activeDevice.powerPorts.map((pp: PowerPort) => (
                       <div key={pp.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
                         <span className="text-xs font-mono font-bold text-white truncate">{pp.name}</span>
                         <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20 uppercase tracking-wide">
@@ -429,13 +447,13 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Network Interfaces</h5>
                 {activeDevice.interfaces && activeDevice.interfaces.length > 0 ? (
                   <div className="space-y-1.5">
-                    {activeDevice.interfaces.map((i: any) => (
+                    {activeDevice.interfaces.map((i: Interface & { moduleId?: number }) => (
                       <div key={i.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
                         <div className="flex items-center gap-2 overflow-hidden mr-2">
                           <span className="text-xs font-mono font-bold text-white truncate">{i.name}</span>
                           {i.moduleId && (
                             <span className="text-[8px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/25 px-1 py-0.5 rounded-sm shrink-0 uppercase tracking-wider">
-                              Slot {activeDevice.moduleBays?.find((mb: any) => mb.installedModule?.id === i.moduleId)?.name || 'Module'}
+                              Slot {activeDevice.moduleBays?.find((mb: ModuleBay) => mb.installedModule?.id === i.moduleId)?.name || 'Module'}
                             </span>
                           )}
                         </div>
@@ -611,7 +629,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                       </label>
                       <select
                         value={pduPosition}
-                        onChange={(e) => setPduPosition(e.target.value as any)}
+                        onChange={(e) => setPduPosition(e.target.value as 'LEFT' | 'RIGHT' | 'REAR')}
                         className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500 cursor-pointer"
                       >
                         <option value="LEFT" disabled={rack.pdus?.some((p) => p.position === 'LEFT')}>LEFT</option>

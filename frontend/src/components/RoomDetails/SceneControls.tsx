@@ -108,18 +108,19 @@ export function SceneControls({
     )
   }, [resetKey, room])
 
-  const mouseConfig = (workspaceMode === 'PLACEMENT_DRAGGING' || workspaceMode === 'ISOLATION_SELECT')
-    ? { left: 0, middle: 0, right: 0, wheel: 16 }
-    : selectedRack
-      ? { left: 1, middle: 0, right: 0, wheel: 16 }
-      : { left: 1, middle: 8, right: 2, wheel: 16 }
+  const mouseConfig: { left: number; middle: number; right: number; wheel: number } =
+    workspaceMode === 'PLACEMENT_DRAGGING' || workspaceMode === 'ISOLATION_SELECT'
+      ? { left: 0, middle: 0, right: 0, wheel: 16 }
+      : selectedRack
+        ? { left: 1, middle: 0, right: 0, wheel: 16 }
+        : { left: 1, middle: 8, right: 2, wheel: 16 }
 
   return (
     <CameraControls
       ref={controlsRef}
       minDistance={1}
       maxDistance={25}
-      mouseButtons={mouseConfig as any}
+      mouseButtons={mouseConfig as unknown as React.ComponentProps<typeof CameraControls>['mouseButtons']}
     />
   )
 }

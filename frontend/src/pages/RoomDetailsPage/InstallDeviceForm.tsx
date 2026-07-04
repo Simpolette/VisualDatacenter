@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { AlertTriangle, Loader2, Network, RefreshCw } from 'lucide-react'
@@ -43,7 +43,7 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<InstallDeviceInputs>({
     resolver: zodResolver(installDeviceSchema),
@@ -66,7 +66,7 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
   }, [deviceTypes.length, deviceTypesLoading, fetchDeviceTypes])
 
   // Auto-generate device name when device type changes
-  const selectedDeviceTypeId = watch('deviceTypeId')
+  const selectedDeviceTypeId = useWatch({ control, name: 'deviceTypeId' })
   useEffect(() => {
     if (!selectedDeviceTypeId) return
     const selectedType = deviceTypes.find((dt) => dt.id === selectedDeviceTypeId)
