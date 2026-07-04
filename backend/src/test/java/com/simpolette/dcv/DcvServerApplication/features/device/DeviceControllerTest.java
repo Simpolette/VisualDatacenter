@@ -1,12 +1,12 @@
 package com.simpolette.dcv.DcvServerApplication.features.device;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.simpolette.dcv.DcvServerApplication.common.exception.SlotConflictException;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.InstallDeviceDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -25,8 +25,7 @@ class DeviceControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
     @MockitoBean
     private DeviceService deviceService;
@@ -42,7 +41,7 @@ class DeviceControllerTest {
 
         mockMvc.perform(post("/api/v1/racks/10/devices")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(500))
                 .andExpect(jsonPath("$.name").value("Server-01"));
@@ -57,7 +56,7 @@ class DeviceControllerTest {
 
         mockMvc.perform(post("/api/v1/racks/10/devices")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(jsonMapper.writeValueAsString(dto)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409));
     }

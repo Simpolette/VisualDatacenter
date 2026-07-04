@@ -1,12 +1,12 @@
 package com.simpolette.dcv.DcvServerApplication.features.alert;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.simpolette.dcv.DcvServerApplication.features.alert.dto.AcknowledgeAlarmRequest;
 import com.simpolette.dcv.DcvServerApplication.features.telemetry.TelemetrySseController;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,8 +31,7 @@ class EquipmentAlarmControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper = JsonMapper.builder().build();
 
     @MockitoBean
     private EquipmentAlarmRepository alarmRepository;
@@ -67,7 +66,7 @@ class EquipmentAlarmControllerTest {
 
         mockMvc.perform(post("/api/v1/alarms/10/acknowledge")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                        .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.acknowledgedBy").value("admin"));
 
