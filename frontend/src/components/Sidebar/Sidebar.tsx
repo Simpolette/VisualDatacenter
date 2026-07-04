@@ -39,7 +39,7 @@ function Sidebar() {
       {/* Section 2: Navigation */}
       <nav className="flex-1 flex flex-col justify-between py-3 overflow-y-auto">
         <div className="flex flex-col gap-1 px-3">
-          <NavLink to="/" end className={navLinkClasses} id="nav-dashboard">
+          {/* <NavLink to="/" end className={navLinkClasses} id="nav-dashboard">
             <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
               <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
               <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
@@ -47,7 +47,7 @@ function Sidebar() {
               <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
             </svg>
             <span>Dashboard</span>
-          </NavLink>
+          </NavLink> */}
 
           <NavLink to="/rooms" className={navLinkClasses} id="nav-rooms">
             <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
@@ -60,7 +60,7 @@ function Sidebar() {
           </NavLink>
         </div>
 
-        <div className="flex flex-col gap-1 px-3">
+        {/* <div className="flex flex-col gap-1 px-3">
           <NavLink to="/settings" className={navLinkClasses} id="nav-settings">
             <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
               <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
@@ -73,7 +73,7 @@ function Sidebar() {
             </svg>
             <span>Settings</span>
           </NavLink>
-        </div>
+        </div> */}
       </nav>
     </aside>
   )

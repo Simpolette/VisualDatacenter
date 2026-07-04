@@ -5,6 +5,7 @@ import * as THREE from 'three'
 import { useRackStore, type Rack } from '../../stores/useRackStore'
 import { RackDevice3D } from './RackDevice3D'
 import { RackPdu3D } from './RackPdu3D'
+import { getThemeColor, getRackThemeColor } from '../../utils/themeColors'
 
 const RACK_WIDTH = 0.7
 const RACK_HEIGHT = 2.0
@@ -69,13 +70,11 @@ export function RackMesh({
     }
   }, [])
 
-  let color = isSelected ? '#1e293b' : '#334155'
-  if (hovered && !isSelected) {
-    color = '#475569'
-  }
-  if (isSearchMatched && !isSelected) {
-    color = '#0284c7'
-  }
+  const color = getThemeColor('rack', 'body', { isSelected, hovered, isSearchMatched })
+  const xrayColor = getRackThemeColor('xray')
+  const pillarColor = getRackThemeColor('pillars')
+  const selectedEdgeColor = getThemeColor('rack', 'edge', { isSelected: true })
+  const defaultEdgeColor = getThemeColor('rack', 'edge', { isSearchMatched })
 
   const rx_pillar = RACK_WIDTH / 2 - 0.02
   const rz_pillar = meshLength / 2 - 0.02
@@ -99,35 +98,35 @@ export function RackMesh({
             onPointerOut={() => setHovered(false)}
           >
             <boxGeometry args={[RACK_WIDTH, RACK_HEIGHT, meshLength]} />
-            <meshStandardMaterial attach="material-0" color="#334155" roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
-            <meshStandardMaterial attach="material-1" color="#334155" roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
-            <meshStandardMaterial attach="material-2" color="#334155" roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
-            <meshStandardMaterial attach="material-3" color="#334155" roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
+            <meshStandardMaterial attach="material-0" color={xrayColor} roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
+            <meshStandardMaterial attach="material-1" color={xrayColor} roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
+            <meshStandardMaterial attach="material-2" color={xrayColor} roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
+            <meshStandardMaterial attach="material-3" color={xrayColor} roughness={0.15} metalness={0.9} transparent opacity={hovered ? 0.20 : 0.12} depthWrite={false} />
             <meshBasicMaterial attach="material-4" visible={false} />
             <meshBasicMaterial attach="material-5" visible={false} />
           </mesh>
 
           <mesh position={[rx_pillar, y, rz_pillar]}>
             <boxGeometry args={[0.04, RACK_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.8} />
+            <meshStandardMaterial color={pillarColor} roughness={0.6} metalness={0.8} />
           </mesh>
           <mesh position={[-rx_pillar, y, rz_pillar]}>
             <boxGeometry args={[0.04, RACK_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.8} />
+            <meshStandardMaterial color={pillarColor} roughness={0.6} metalness={0.8} />
           </mesh>
           <mesh position={[rx_pillar, y, -rz_pillar]}>
             <boxGeometry args={[0.04, RACK_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.8} />
+            <meshStandardMaterial color={pillarColor} roughness={0.6} metalness={0.8} />
           </mesh>
           <mesh position={[-rx_pillar, y, -rz_pillar]}>
             <boxGeometry args={[0.04, RACK_HEIGHT, 0.04]} />
-            <meshStandardMaterial color="#0f172a" roughness={0.6} metalness={0.8} />
+            <meshStandardMaterial color={pillarColor} roughness={0.6} metalness={0.8} />
           </mesh>
 
           <mesh position={[0, y, 0]}>
             <boxGeometry args={[RACK_WIDTH + 0.01, RACK_HEIGHT + 0.01, meshLength + 0.01]} />
             <meshBasicMaterial visible={false} />
-            <Edges color="#00f0ff" transparent opacity={0.8} />
+            <Edges color={selectedEdgeColor} transparent opacity={0.8} />
           </mesh>
 
           {devices.map((device) => (
@@ -179,7 +178,7 @@ export function RackMesh({
             <boxGeometry args={[RACK_WIDTH + 0.01, RACK_HEIGHT + 0.01, meshLength + 0.01]} />
             <meshBasicMaterial visible={false} />
             <Edges
-              color={isSearchMatched ? '#38bdf8' : '#4a4a4a'}
+              color={defaultEdgeColor}
               transparent
               opacity={isSearchMatched ? 0.9 : 0.15}
             />

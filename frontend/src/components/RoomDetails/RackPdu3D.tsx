@@ -1,4 +1,5 @@
 import type { PduSummary } from '../../stores/useRackStore'
+import { getThemeColor, getPduThemeColor } from '../../utils/themeColors'
 
 export interface RackPdu3DProps {
   pdu: PduSummary
@@ -33,31 +34,36 @@ export function RackPdu3D({ pdu, rackLength, rackHeight = 2.0 }: RackPdu3DProps)
   const outletCount = Math.min(pdu.outletCount || 8, 12)
   const sockets = Array.from({ length: outletCount })
 
+  const housingColor = getPduThemeColor('housing')
+  const activeLedColor = getThemeColor('pdu', 'led', { position: 'LEFT' })
+  const rearLedColor = getThemeColor('pdu', 'led', { position: 'REAR' })
+  const outletColor = getPduThemeColor('outlet')
+
   return (
     <group position={position}>
       {/* Main PDU Light Metallic Housing (Mounted Outside) */}
       <mesh castShadow receiveShadow>
         <boxGeometry args={args} />
-        <meshStandardMaterial color="#94a3b8" metalness={0.7} roughness={0.3} />
+        <meshStandardMaterial color={housingColor} metalness={0.7} roughness={0.3} />
       </mesh>
 
       {/* Status Power LED Facing Outward */}
       {isLeft && (
         <mesh position={[-0.027, (rackHeight * 0.85) / 2 - 0.05, 0]}>
           <boxGeometry args={[0.005, 0.015, 0.015]} />
-          <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.8} />
+          <meshStandardMaterial color={activeLedColor} emissive={activeLedColor} emissiveIntensity={0.8} />
         </mesh>
       )}
       {isRight && (
         <mesh position={[0.027, (rackHeight * 0.85) / 2 - 0.05, 0]}>
           <boxGeometry args={[0.005, 0.015, 0.015]} />
-          <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.8} />
+          <meshStandardMaterial color={activeLedColor} emissive={activeLedColor} emissiveIntensity={0.8} />
         </mesh>
       )}
       {isRear && (
         <mesh position={[(RACK_WIDTH * 0.7) / 2 - 0.05, 0, -0.027]}>
           <boxGeometry args={[0.015, 0.015, 0.005]} />
-          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={0.8} />
+          <meshStandardMaterial color={rearLedColor} emissive={rearLedColor} emissiveIntensity={0.8} />
         </mesh>
       )}
 
@@ -69,7 +75,7 @@ export function RackPdu3D({ pdu, rackLength, rackHeight = 2.0 }: RackPdu3DProps)
           return (
             <mesh key={i} position={[-0.027, yPos, 0]}>
               <boxGeometry args={[0.004, 0.03, 0.04]} />
-              <meshStandardMaterial color="#1e293b" metalness={0.4} roughness={0.6} />
+              <meshStandardMaterial color={outletColor} metalness={0.4} roughness={0.6} />
             </mesh>
           )
         } else if (isRight) {
@@ -78,7 +84,7 @@ export function RackPdu3D({ pdu, rackLength, rackHeight = 2.0 }: RackPdu3DProps)
           return (
             <mesh key={i} position={[0.027, yPos, 0]}>
               <boxGeometry args={[0.004, 0.03, 0.04]} />
-              <meshStandardMaterial color="#1e293b" metalness={0.4} roughness={0.6} />
+              <meshStandardMaterial color={outletColor} metalness={0.4} roughness={0.6} />
             </mesh>
           )
         } else {
@@ -87,7 +93,7 @@ export function RackPdu3D({ pdu, rackLength, rackHeight = 2.0 }: RackPdu3DProps)
           return (
             <mesh key={i} position={[xPos, 0, -0.027]}>
               <boxGeometry args={[0.03, 0.03, 0.004]} />
-              <meshStandardMaterial color="#1e293b" metalness={0.4} roughness={0.6} />
+              <meshStandardMaterial color={outletColor} metalness={0.4} roughness={0.6} />
             </mesh>
           )
         }

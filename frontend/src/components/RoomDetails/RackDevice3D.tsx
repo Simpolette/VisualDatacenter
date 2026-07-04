@@ -1,6 +1,7 @@
 import { useTexture, Edges } from '@react-three/drei'
 import * as THREE from 'three'
 import { useTelemetryStore } from '../../stores/useTelemetryStore'
+import { getThemeColor, getDeviceThemeColor } from '../../utils/themeColors'
 
 const RACK_HEIGHT = 2.0
 
@@ -42,11 +43,13 @@ function DeviceFaceMaterial({ path, attach, status }: { path?: string; attach: '
     return <TexturedMaterial path={path} attach={attach} />
   }
 
-  const emissiveColor = status === 'ACTIVE' ? '#10b981' : status === 'MAINTENANCE' ? '#d97706' : '#991b1b'
+  const emissiveColor = getThemeColor('device', 'face', { status })
+  const defaultFaceColor = getDeviceThemeColor('top')
+
   return (
     <meshStandardMaterial
       attach={attach}
-      color="#cbd5e1"
+      color={defaultFaceColor}
       roughness={0.2}
       metalness={0.8}
       emissive={emissiveColor}
@@ -80,34 +83,40 @@ export function RackDevice3D({ device, totalUnits, rackLength }: RackDevice3DPro
 
   const alarms = useTelemetryStore((s) => s.alarms)
   const activeAlarm = alarms.find((a) => a.deviceId === device.id && a.status === 'TRIGGERED')
-  const alarmColor = activeAlarm?.severity === 'CRITICAL' ? '#ef4444' : activeAlarm?.severity === 'WARNING' ? '#f59e0b' : null
+  const alarmSeverity = activeAlarm?.severity as 'CRITICAL' | 'WARNING' | undefined
+  const alarmColor = alarmSeverity ? getThemeColor('device', 'edge', { alarmSeverity }) : null
+
+  const bodyColor = getDeviceThemeColor('body')
+  const topColor = getDeviceThemeColor('top')
+  const bottomColor = getDeviceThemeColor('bottom')
+  const defaultEdgeColor = getDeviceThemeColor('edge')
 
   return (
     <group>
       <mesh position={[0, y_pos, z_pos]} castShadow receiveShadow>
         <boxGeometry args={[meshWidth, meshHeight, meshLength]} />
-        <meshStandardMaterial attach="material-0" color="#94a3b8" roughness={0.3} metalness={0.8} />
-        <meshStandardMaterial attach="material-1" color="#94a3b8" roughness={0.3} metalness={0.8} />
-        <meshStandardMaterial attach="material-2" color="#cbd5e1" roughness={0.3} metalness={0.8} />
-        <meshStandardMaterial attach="material-3" color="#64748b" roughness={0.4} metalness={0.8} />
+        <meshStandardMaterial attach="material-0" color={bodyColor} roughness={0.3} metalness={0.8} />
+        <meshStandardMaterial attach="material-1" color={bodyColor} roughness={0.3} metalness={0.8} />
+        <meshStandardMaterial attach="material-2" color={topColor} roughness={0.3} metalness={0.8} />
+        <meshStandardMaterial attach="material-3" color={bottomColor} roughness={0.4} metalness={0.8} />
         
         {isFront ? (
           <DeviceFaceMaterial path={device.imagePath} attach="material-4" status={alarmColor ? 'CRITICAL' : device.status} />
         ) : (
-          <meshStandardMaterial attach="material-4" color="#94a3b8" roughness={0.4} metalness={0.6} />
+          <meshStandardMaterial attach="material-4" color={bodyColor} roughness={0.4} metalness={0.6} />
         )}
 
         {isRear ? (
           <DeviceFaceMaterial path={device.imagePath} attach="material-5" status={alarmColor ? 'CRITICAL' : device.status} />
         ) : (
-          <meshStandardMaterial attach="material-5" color="#94a3b8" roughness={0.4} metalness={0.6} />
+          <meshStandardMaterial attach="material-5" color={bodyColor} roughness={0.4} metalness={0.6} />
         )}
       </mesh>
 
       <mesh position={[0, y_pos, z_pos]}>
         <boxGeometry args={[meshWidth + 0.004, meshHeight + 0.004, meshLength + 0.004]} />
         <meshBasicMaterial visible={false} />
-        <Edges color={alarmColor || '#a1a1aa'} transparent opacity={alarmColor ? 0.9 : 0.35} />
+        <Edges color={alarmColor || defaultEdgeColor} transparent opacity={alarmColor ? 0.9 : 0.35} />
       </mesh>
     </group>
   )
