@@ -36,6 +36,21 @@ public class DeviceType {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "oid_uptime")
+    private String oidUptime;
+
+    @Column(name = "oid_cpu")
+    private String oidCpu;
+
+    @Column(name = "oid_ram")
+    private String oidRam;
+
+    @Column(name = "oid_network")
+    private String oidNetwork;
+
+    @Column(name = "oid_temp")
+    private String oidTemp;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -148,6 +163,46 @@ public class DeviceType {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    public String getOidUptime() {
+        return oidUptime;
+    }
+
+    public void setOidUptime(String oidUptime) {
+        this.oidUptime = oidUptime;
+    }
+
+    public String getOidCpu() {
+        return oidCpu;
+    }
+
+    public void setOidCpu(String oidCpu) {
+        this.oidCpu = oidCpu;
+    }
+
+    public String getOidRam() {
+        return oidRam;
+    }
+
+    public void setOidRam(String oidRam) {
+        this.oidRam = oidRam;
+    }
+
+    public String getOidNetwork() {
+        return oidNetwork;
+    }
+
+    public void setOidNetwork(String oidNetwork) {
+        this.oidNetwork = oidNetwork;
+    }
+
+    public String getOidTemp() {
+        return oidTemp;
+    }
+
+    public void setOidTemp(String oidTemp) {
+        this.oidTemp = oidTemp;
     }
 
     public Instant getCreatedAt() {

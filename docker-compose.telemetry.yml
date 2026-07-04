@@ -1,0 +1,12 @@
+services:
+  mock-snmp-server:
+    build: ./mock-hardware/snmp-server
+    container_name: mock-snmp-server
+    ports:
+      - "1161:161/udp"
+
+  mock-modbus-ups:
+    build: ./mock-hardware/modbus-ups
+    container_name: mock-modbus-ups
+    ports:
+      - "5502:502"

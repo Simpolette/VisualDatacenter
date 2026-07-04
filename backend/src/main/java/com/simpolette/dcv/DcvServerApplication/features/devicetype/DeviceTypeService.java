@@ -35,6 +35,11 @@ public class DeviceTypeService {
         deviceType.setWidthMm(dto.widthMm());
         deviceType.setLengthMm(dto.lengthMm());
         deviceType.setWeightKg(dto.weightKg());
+        deviceType.setOidUptime(dto.oidUptime());
+        deviceType.setOidCpu(dto.oidCpu());
+        deviceType.setOidRam(dto.oidRam());
+        deviceType.setOidNetwork(dto.oidNetwork());
+        deviceType.setOidTemp(dto.oidTemp());
 
         if (dto.interfaces() != null) {
             for (var idto : dto.interfaces()) {
@@ -84,6 +89,11 @@ public class DeviceTypeService {
         if (dto.widthMm() != null) deviceType.setWidthMm(dto.widthMm());
         if (dto.lengthMm() != null) deviceType.setLengthMm(dto.lengthMm());
         if (dto.weightKg() != null) deviceType.setWeightKg(dto.weightKg());
+        if (dto.oidUptime() != null) deviceType.setOidUptime(dto.oidUptime());
+        if (dto.oidCpu() != null) deviceType.setOidCpu(dto.oidCpu());
+        if (dto.oidRam() != null) deviceType.setOidRam(dto.oidRam());
+        if (dto.oidNetwork() != null) deviceType.setOidNetwork(dto.oidNetwork());
+        if (dto.oidTemp() != null) deviceType.setOidTemp(dto.oidTemp());
 
         if (dto.interfaces() != null) {
             deviceType.getInterfaces().clear();

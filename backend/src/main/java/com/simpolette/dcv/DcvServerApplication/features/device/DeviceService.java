@@ -52,6 +52,9 @@ public class DeviceService {
         device.setStartU(dto.startU());
         device.setFace(face);
         device.setStatus(Device.Status.ACTIVE);
+        device.setIpAddress(dto.ipAddress());
+        device.setPort(dto.port());
+        device.setSnmpCommunity(dto.snmpCommunity());
 
         initializeComponents(device, deviceType);
 
@@ -85,6 +88,9 @@ public class DeviceService {
 
         if (dto.name() != null) device.setName(dto.name());
         if (dto.status() != null) device.setStatus(dto.status());
+        if (dto.ipAddress() != null) device.setIpAddress(dto.ipAddress());
+        if (dto.port() != null) device.setPort(dto.port());
+        if (dto.snmpCommunity() != null) device.setSnmpCommunity(dto.snmpCommunity());
 
         return deviceRepository.save(device);
     }

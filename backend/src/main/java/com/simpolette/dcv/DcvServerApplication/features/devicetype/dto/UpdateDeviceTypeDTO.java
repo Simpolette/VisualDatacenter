@@ -15,6 +15,12 @@ public record UpdateDeviceTypeDTO(
         Float lengthMm,
         Float weightKg,
 
+        String oidUptime,
+        String oidCpu,
+        String oidRam,
+        String oidNetwork,
+        String oidTemp,
+
         List<InterfaceTemplateDTO> interfaces,
         List<PowerPortTemplateDTO> powerPorts,
         List<ConsolePortTemplateDTO> consolePorts,

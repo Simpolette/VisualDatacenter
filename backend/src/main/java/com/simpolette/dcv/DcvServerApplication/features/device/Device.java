@@ -39,6 +39,15 @@ public class Device {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "port")
+    private Integer port;
+
+    @Column(name = "snmp_community")
+    private String snmpCommunity;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
@@ -131,6 +140,15 @@ public class Device {
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+
+    public Integer getPort() { return port; }
+    public void setPort(Integer port) { this.port = port; }
+
+    public String getSnmpCommunity() { return snmpCommunity; }
+    public void setSnmpCommunity(String snmpCommunity) { this.snmpCommunity = snmpCommunity; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

@@ -13,5 +13,11 @@ public record InstallDeviceDTO(
         @Min(value = 1, message = "Start U must be at least 1")
         int startU,
 
-        Device.Face face
+        Device.Face face,
+
+        String ipAddress,
+
+        Integer port,
+
+        String snmpCommunity
 ) {}

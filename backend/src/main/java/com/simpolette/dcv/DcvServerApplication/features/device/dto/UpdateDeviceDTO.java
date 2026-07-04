@@ -11,5 +11,11 @@ public record UpdateDeviceDTO(
 
         Device.Face face,
 
-        Device.Status status
+        Device.Status status,
+
+        String ipAddress,
+
+        Integer port,
+
+        String snmpCommunity
 ) {}

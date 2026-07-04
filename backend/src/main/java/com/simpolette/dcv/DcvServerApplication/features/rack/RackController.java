@@ -22,6 +22,14 @@ public class RackController {
         return ResponseEntity.ok(rackService.listByRoom(roomId));
     }
 
+    @GetMapping("/api/v1/rooms/{roomId}/racks/search")
+    public ResponseEntity<List<RackSearchResultDTO>> searchInRoom(
+            @PathVariable Long roomId,
+            @RequestParam(name = "q", required = false, defaultValue = "") String query
+    ) {
+        return ResponseEntity.ok(rackService.searchInRoom(roomId, query));
+    }
+
     @PostMapping("/api/v1/rooms/{roomId}/racks")
     public ResponseEntity<Rack> create(@PathVariable Long roomId, @Valid @RequestBody CreateRackDTO dto) {
         Rack created = rackService.create(roomId, dto);

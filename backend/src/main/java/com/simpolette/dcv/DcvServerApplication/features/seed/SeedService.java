@@ -76,6 +76,11 @@ public class SeedService {
         dellR740.setLengthMm(715.0f);
         dellR740.setWeightKg(26.0f);
         dellR740.setImagePath("/images/dell-r740.png");
+        dellR740.setOidUptime("1.3.6.1.2.1.1.3.0");
+        dellR740.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        dellR740.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
+        dellR740.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
+        dellR740.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         InterfaceTemplate idrac = new InterfaceTemplate();
         idrac.setName("iDRAC");
@@ -118,6 +123,11 @@ public class SeedService {
         cisco9300.setLengthMm(445.0f);
         cisco9300.setWeightKg(7.0f);
         cisco9300.setImagePath("/images/cisco-9300.png");
+        cisco9300.setOidUptime("1.3.6.1.2.1.1.3.0");
+        cisco9300.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        cisco9300.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
+        cisco9300.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
+        cisco9300.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         for (int i = 1; i <= 4; i++) {
             InterfaceTemplate eth = new InterfaceTemplate();
@@ -151,6 +161,11 @@ public class SeedService {
         hpeMsa2060.setLengthMm(520.0f);
         hpeMsa2060.setWeightKg(28.0f);
         hpeMsa2060.setImagePath("/images/hpe-msa2060.png");
+        hpeMsa2060.setOidUptime("1.3.6.1.2.1.1.3.0");
+        hpeMsa2060.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        hpeMsa2060.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
+        hpeMsa2060.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
+        hpeMsa2060.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         deviceTypeRepository.saveAll(List.of(dellR740, cisco9300, hpeMsa2060));
 
@@ -233,6 +248,9 @@ public class SeedService {
         webServer.setStartU(1);
         webServer.setFace(Device.Face.FRONT);
         webServer.setStatus(Device.Status.ACTIVE);
+        webServer.setIpAddress("127.0.0.1");
+        webServer.setPort(1161);
+        webServer.setSnmpCommunity("public");
         deviceService.initializeComponents(webServer, dellR740);
 
         Device coreSwitch = new Device();
@@ -242,6 +260,9 @@ public class SeedService {
         coreSwitch.setStartU(10);
         coreSwitch.setFace(Device.Face.FRONT);
         coreSwitch.setStatus(Device.Status.ACTIVE);
+        coreSwitch.setIpAddress("127.0.0.1");
+        coreSwitch.setPort(1161);
+        coreSwitch.setSnmpCommunity("public");
         deviceService.initializeComponents(coreSwitch, cisco9300);
 
         Device sanStorage = new Device();
@@ -251,6 +272,9 @@ public class SeedService {
         sanStorage.setStartU(5);
         sanStorage.setFace(Device.Face.REAR);
         sanStorage.setStatus(Device.Status.ACTIVE);
+        sanStorage.setIpAddress("127.0.0.1");
+        sanStorage.setPort(1161);
+        sanStorage.setSnmpCommunity("public");
         deviceService.initializeComponents(sanStorage, hpeMsa2060);
 
         deviceRepository.saveAll(List.of(webServer, coreSwitch, sanStorage));

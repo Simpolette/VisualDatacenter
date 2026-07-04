@@ -34,6 +34,33 @@ public class RackService {
         return rackRepository.findByRoomId(roomId);
     }
 
+    @Transactional(readOnly = true)
+    public List<RackSearchResultDTO> searchInRoom(Long roomId, String query) {
+        if (!roomRepository.existsById(roomId)) {
+            throw new ResourceNotFoundException("Room", roomId);
+        }
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        String q = query.trim().toLowerCase();
+        List<Rack> matchingRacks = rackRepository.searchRacksInRoom(roomId, q);
+
+        return matchingRacks.stream().map(rack -> {
+            String matchedField = "RACK_NAME";
+            if (!rack.getName().toLowerCase().contains(q)) {
+                boolean matchedDeviceName = rack.getDevices().stream()
+                        .anyMatch(d -> (d.getName() != null && d.getName().toLowerCase().contains(q))
+                                || (d.getIpAddress() != null && d.getIpAddress().toLowerCase().contains(q)));
+                if (matchedDeviceName) {
+                    matchedField = "DEVICE_NAME";
+                } else {
+                    matchedField = "DEVICE_TYPE";
+                }
+            }
+            return new RackSearchResultDTO(rack.getId(), rack.getName(), matchedField);
+        }).toList();
+    }
+
     public Rack create(Long roomId, CreateRackDTO dto) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new ResourceNotFoundException("Room", roomId));
