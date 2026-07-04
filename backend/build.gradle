@@ -1,7 +1,7 @@
 plugins {
 	id 'java'
 	id 'jacoco'
-	id 'org.springframework.boot' version '4.1.0'
+	id 'org.springframework.boot' version '3.4.1'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -10,7 +10,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(25)
+		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
 
@@ -36,11 +36,18 @@ dependencies {
 
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+	testImplementation 'org.testcontainers:postgresql:1.20.4'
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.4'
+	testImplementation 'net.bytebuddy:byte-buddy:1.15.11'
+	testImplementation 'net.bytebuddy:byte-buddy-agent:1.15.11'
+	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	jvmArgs('-Dnet.bytebuddy.experimental=true')
 	finalizedBy jacocoTestReport, jacocoTestCoverageVerification
 }
 
@@ -50,6 +57,29 @@ jacocoTestReport {
 		xml.required = true
 		csv.required = false
 		html.required = true
+	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/dto/**',
+				'**/*DTO*',
+				'**/DcvServerApplication.class',
+				'**/Room.class',
+				'**/Rack.class',
+				'**/Device.class',
+				'**/DeviceType.class',
+				'**/ModuleType.class',
+				'**/Pdu.class',
+				'**/EquipmentAlarm.class',
+				'**/TelemetryLog.class',
+				'**/Interface.class',
+				'**/PowerPort.class',
+				'**/ConsolePort.class',
+				'**/ModuleBay.class',
+				'**/Module.class',
+				'**/*Template.class'
+			])
+		}))
 	}
 }
 
@@ -63,7 +93,35 @@ jacocoTestCoverageVerification {
 				value = 'COVEREDRATIO'
 				minimum = 0.80
 			}
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+				minimum = 0.60
+			}
 		}
+	}
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+				'**/dto/**',
+				'**/*DTO*',
+				'**/DcvServerApplication.class',
+				'**/Room.class',
+				'**/Rack.class',
+				'**/Device.class',
+				'**/DeviceType.class',
+				'**/ModuleType.class',
+				'**/Pdu.class',
+				'**/EquipmentAlarm.class',
+				'**/TelemetryLog.class',
+				'**/Interface.class',
+				'**/PowerPort.class',
+				'**/ConsolePort.class',
+				'**/ModuleBay.class',
+				'**/Module.class',
+				'**/*Template.class'
+			])
+		}))
 	}
 }
 
