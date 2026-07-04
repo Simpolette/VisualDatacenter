@@ -80,23 +80,19 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
+        working-directory: frontend
 
       - name: Run Linter
         run: npm run lint
+        working-directory: frontend
 
-      - name: Run SonarCloud Scanner
+      - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          args: >
-            -Dsonar.organization=simpolette
-            -Dsonar.projectKey=VisualDatacenter
-            -Dsonar.projectName="VisualDatacenter"
-            -Dsonar.sources=frontend/src
-            -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
-            -Dsonar.exclusions=**/node_modules/**,**/dist/**
-            -Dsonar.qualitygate.wait=true
+          projectBaseDir: frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
