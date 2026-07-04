@@ -85,15 +85,15 @@ jobs:
       - name: Run Linter
         run: npm run lint
 
-      - name: Run SonarCloud Scanner for Frontend
+      - name: Run SonarCloud Scanner
         uses: SonarSource/sonarcloud-github-action@v3.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.organization=simpolette
-            -Dsonar.projectKey=VisualDatacenter-Frontend
-            -Dsonar.projectName="Visual Datacenter Frontend"
+            -Dsonar.projectKey=VisualDatacenter
+            -Dsonar.projectName="VisualDatacenter"
             -Dsonar.sources=frontend/src
             -Dsonar.javascript.lcov.reportPaths=frontend/coverage/lcov.info
             -Dsonar.exclusions=**/node_modules/**,**/dist/**

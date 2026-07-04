@@ -97,15 +97,15 @@ jobs:
       - name: Run Unit Tests & Verify 80% Coverage (JaCoCo)
         run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --no-daemon
 
-      - name: Run SonarCloud Scanner for Backend
+      - name: Run SonarCloud Scanner
         uses: SonarSource/sonarcloud-github-action@v3.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
-            -Dsonar.projectKey=VisualDatacenter-Backend
-            -Dsonar.projectName="Visual Datacenter Backend"
+            -Dsonar.organization=simpolette
+            -Dsonar.projectKey=VisualDatacenter
+            -Dsonar.projectName="VisualDatacenter"
             -Dsonar.sources=backend/src/main/java
             -Dsonar.tests=backend/src/test/java
             -Dsonar.java.binaries=backend/build/classes
