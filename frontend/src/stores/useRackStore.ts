@@ -86,6 +86,11 @@ export interface DeviceType {
   lengthMm?: number;
   weightKg?: number;
   imagePath?: string;
+  oidUptime?: string;
+  oidCpu?: string;
+  oidRam?: string;
+  oidNetwork?: string;
+  oidTemp?: string;
   interfaces?: InterfaceTemplate[];
   powerPorts?: PowerPortTemplate[];
   consolePorts?: ConsolePortTemplate[];
@@ -95,19 +100,12 @@ export interface DeviceType {
 export interface DeviceSummary {
   id: number;
   name: string;
-  deviceTypeName: string;
-  heightU: number;
   startU: number;
   face: 'FRONT' | 'REAR';
-  status: 'ACTIVE' | 'MAINTENANCE' | 'OFFLINE';
-  imagePath?: string;
-  category?: 'COMPUTE' | 'NETWORK' | 'STORAGE';
-  widthMm?: number;
-  lengthMm?: number;
-  weightKg?: number;
-  interfaces?: Interface[];
-  powerPorts?: PowerPort[];
-  consolePorts?: ConsolePort[];
+  ipAddress?: string;
+  port?: number;
+  snmpCommunity?: string;
+  deviceType: DeviceType;
   moduleBays?: ModuleBay[];
   modules?: Module[];
 }
@@ -138,6 +136,12 @@ export interface RackDetails extends Rack {
   pdus: PduSummary[];
 }
 
+export interface RackSearchResult {
+  rackId: number;
+  rackName: string;
+  matchedField: string;
+}
+
 interface RackState {
   racks: Rack[];
   selectedRackDetails: RackDetails | null;
@@ -151,16 +155,23 @@ interface RackState {
   moduleTypes: ModuleType[];
   moduleTypesLoading: boolean;
   moduleTypesError: string | null;
+  searchQuery: string;
+  searchMatchedRackIds: number[] | null;
+  searchLoading: boolean;
   fetchRacksForRoom: (roomId: number) => Promise<void>;
   fetchRackDetails: (rackId: number) => Promise<RackDetails>;
   clearSelectedRack: () => void;
   createRack: (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => Promise<Rack>;
   fetchDeviceTypes: () => Promise<void>;
-  installDevice: (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string }) => Promise<void>;
+  installDevice: (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string; ipAddress?: string; port?: number; snmpCommunity?: string }) => Promise<void>;
   deleteDevice: (deviceId: number, rackId: number) => Promise<void>;
   fetchModuleTypes: () => Promise<void>;
   installModule: (deviceId: number, bayId: number, moduleTypeId: number, rackId: number) => Promise<void>;
   uninstallModule: (deviceId: number, moduleId: number, rackId: number) => Promise<void>;
+  createPdu: (rackId: number, dto: { name: string; position: 'LEFT' | 'RIGHT' | 'REAR'; outletCount: number }) => Promise<void>;
+  deletePdu: (pduId: number, rackId: number) => Promise<void>;
+  searchRacks: (roomId: number, query: string) => Promise<void>;
+  clearSearch: () => void;
 }
 
 export const useRackStore = create<RackState>((set, get) => ({
@@ -176,6 +187,9 @@ export const useRackStore = create<RackState>((set, get) => ({
   moduleTypes: [],
   moduleTypesLoading: false,
   moduleTypesError: null,
+  searchQuery: '',
+  searchMatchedRackIds: null,
+  searchLoading: false,
 
   fetchRacksForRoom: async (roomId: number) => {
     set({ loading: true, error: null });
@@ -201,24 +215,12 @@ export const useRackStore = create<RackState>((set, get) => ({
     }
   },
 
-  clearSelectedRack: () => {
-    set({ selectedRackDetails: null, detailsError: null });
-  },
+  clearSelectedRack: () => set({ selectedRackDetails: null, detailsError: null }),
 
   createRack: async (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await api.post<Rack>(`/rooms/${roomId}/racks`, rackData);
-      set((state) => ({
-        racks: [...state.racks, response.data],
-        loading: false
-      }));
-      return response.data;
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create rack';
-      set({ error: message, loading: false });
-      throw err;
-    }
+    const response = await api.post<Rack>(`/rooms/${roomId}/racks`, rackData);
+    await get().fetchRacksForRoom(roomId);
+    return response.data;
   },
 
   fetchDeviceTypes: async () => {
@@ -232,16 +234,14 @@ export const useRackStore = create<RackState>((set, get) => ({
     }
   },
 
-  installDevice: async (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string }) => {
+  installDevice: async (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string; ipAddress?: string; port?: number; snmpCommunity?: string }) => {
     const response = await api.post(`/racks/${rackId}/devices`, dto);
-    // Re-fetch rack details to update sidebar
     await get().fetchRackDetails(rackId);
     return response.data;
   },
 
   deleteDevice: async (deviceId: number, rackId: number) => {
     await api.delete(`/devices/${deviceId}`);
-    // Re-fetch rack details to update sidebar
     await get().fetchRackDetails(rackId);
   },
 
@@ -264,5 +264,39 @@ export const useRackStore = create<RackState>((set, get) => ({
   uninstallModule: async (deviceId: number, moduleId: number, rackId: number) => {
     await api.delete(`/devices/${deviceId}/modules/${moduleId}`);
     await get().fetchRackDetails(rackId);
+  },
+
+  createPdu: async (rackId: number, dto: { name: string; position: 'LEFT' | 'RIGHT' | 'REAR'; outletCount: number }) => {
+    await api.post(`/racks/${rackId}/pdus`, dto);
+    await get().fetchRackDetails(rackId);
+  },
+
+  deletePdu: async (pduId: number, rackId: number) => {
+    await api.delete(`/pdus/${pduId}`);
+    await get().fetchRackDetails(rackId);
+  },
+
+  searchRacks: async (roomId: number, query: string) => {
+    const trimmed = query.trim();
+    set({ searchQuery: query });
+    if (!trimmed) {
+      set({ searchMatchedRackIds: null, searchLoading: false });
+      return;
+    }
+    set({ searchLoading: true });
+    try {
+      const response = await api.get<RackSearchResult[]>(`/rooms/${roomId}/racks/search`, {
+        params: { q: trimmed }
+      });
+      const ids = response.data.map((res) => res.rackId);
+      set({ searchMatchedRackIds: ids, searchLoading: false });
+    } catch (error: unknown) {
+      console.error('Failed to search racks:', error);
+      set({ searchMatchedRackIds: [], searchLoading: false });
+    }
+  },
+
+  clearSearch: () => {
+    set({ searchQuery: '', searchMatchedRackIds: null, searchLoading: false });
   },
 }));

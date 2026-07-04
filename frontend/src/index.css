@@ -1,21 +1,67 @@
 @import "tailwindcss";
 
 /* ============================================
-   Tailwind v4 Theme — Design Tokens
+   Tailwind v4 Theme — Visual Datacenter Tokens
    ============================================ */
 @theme {
-  /* --- Font --- */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* --- Typography --- */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-  /* --- Accent Colors --- */
+  /* --- Primary Accent Palette (Warm Orange/Amber) --- */
   --color-primary: hsl(30, 90%, 55%);
   --color-primary-hover: hsl(30, 90%, 48%);
+  --color-primary-active: hsl(30, 90%, 42%);
   --color-primary-alpha-10: hsla(30, 90%, 55%, 0.10);
   --color-primary-alpha-20: hsla(30, 90%, 55%, 0.20);
-  --color-success: hsl(145, 55%, 45%);
-  --color-danger: hsl(350, 60%, 55%);
+  --color-primary-alpha-50: hsla(30, 90%, 55%, 0.50);
 
-  /* --- Neutral Palette (Charcoal Gray) --- */
+  /* --- Secondary Accent & Highlight (Cyan / Search Highlight) --- */
+  --color-cyan-glow: #00f0ff;
+  --color-cyan-bright: #38bdf8;
+  --color-cyan-mid: #0284c7;
+  --color-cyan-dark: #075985;
+  --color-cyan-surface: rgba(2, 132, 199, 0.15);
+
+  /* --- Viewport & Mode Themes --- */
+  /* Isolation Mode (Sky Blue) */
+  --color-sky-accent: #0ea5e9;
+  --color-sky-light: #38bdf8;
+  --color-sky-border: rgba(14, 165, 233, 0.3);
+  --color-sky-surface: rgba(12, 74, 110, 0.2);
+
+  /* Placement Mode (Orange Alert) */
+  --color-placement-accent: #e67e22;
+  --color-placement-highlight: #ffae19;
+  --color-placement-border: rgba(230, 126, 34, 0.3);
+  --color-placement-surface: rgba(124, 45, 18, 0.2);
+
+  /* UPS Cabinet Theme (Metallic Bright) */
+  --color-ups-metal: #e2e8f0;
+  --color-ups-accent: #3b82f6;
+  --color-ups-highlight: #60a5fa;
+
+  /* --- Semantic Status Colors --- */
+  /* Success / Healthy */
+  --color-success: hsl(145, 55%, 45%);
+  --color-success-hover: hsl(145, 55%, 38%);
+  --color-success-light: #34d399;
+  --color-success-alpha-10: rgba(16, 185, 129, 0.10);
+  --color-success-alpha-20: rgba(16, 185, 129, 0.20);
+
+  /* Warning */
+  --color-warning: #f59e0b;
+  --color-warning-light: #fbbf24;
+  --color-warning-alpha-10: rgba(245, 158, 11, 0.10);
+
+  /* Danger / Error / Alarm */
+  --color-danger: hsl(350, 60%, 55%);
+  --color-danger-hover: hsl(350, 60%, 48%);
+  --color-danger-light: #f87171;
+  --color-danger-alpha-10: rgba(239, 68, 68, 0.10);
+  --color-danger-alpha-20: rgba(239, 68, 68, 0.20);
+
+  /* --- Neutral Dark Palette (Charcoal Gray) --- */
   --color-canvas: hsl(220, 5%, 8%);
   --color-surface: hsl(220, 5%, 13%);
   --color-surface-hover: hsl(220, 5%, 18%);
@@ -24,15 +70,25 @@
   --color-border: hsl(220, 5%, 18%);
   --color-border-hover: hsl(220, 5%, 25%);
 
-  /* --- Text --- */
+  /* --- 3D Scene Viewport Neutral Grays --- */
+  --color-scene-bg: #282828;
+  --color-scene-floor: #222222;
+  --color-scene-grid: #757575;
+  --color-rack-slate: #334155;
+  --color-rack-dark: #1e293b;
+  --color-rack-light: #475569;
+
+  /* --- Text Tokens --- */
   --color-text-primary: hsl(210, 20%, 98%);
   --color-text-secondary: hsl(210, 12%, 75%);
   --color-text-muted: hsl(210, 8%, 50%);
 
-  /* --- Shadows --- */
+  /* --- Shadows & Glow Effects --- */
   --shadow-glow-primary: 0 0 15px hsla(30, 90%, 55%, 0.3);
+  --shadow-glow-cyan: 0 0 15px rgba(0, 240, 255, 0.35);
+  --shadow-glow-sky: 0 0 15px rgba(14, 165, 233, 0.35);
 
-  /* --- Sidebar --- */
+  /* --- Layout & Spacing --- */
   --spacing-sidebar: 260px;
 }
 
@@ -71,7 +127,7 @@
 }
 
 /* ============================================
-   Spinner Animation
+   Keyframe Animations
    ============================================ */
 @keyframes spin {
   to { transform: rotate(360deg); }

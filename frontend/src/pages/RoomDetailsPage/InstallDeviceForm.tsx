@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { AlertTriangle, Loader2, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Loader2, Network, RefreshCw } from 'lucide-react'
 import { useRackStore, type RackDetails } from '../../stores/useRackStore'
 import axios from 'axios'
 
@@ -12,6 +12,9 @@ const installDeviceSchema = z.object({
   name: z.string().trim().optional(),
   startU: z.number({ error: 'Start U is required' }).int().min(1, 'Start U must be at least 1'),
   face: z.enum(['FRONT', 'REAR']),
+  ipAddress: z.string().trim().optional(),
+  port: z.union([z.number().int().positive(), z.nan()]).optional(),
+  snmpCommunity: z.string().trim().optional(),
 })
 
 type InstallDeviceInputs = z.infer<typeof installDeviceSchema>
@@ -49,6 +52,9 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
       name: '',
       startU: undefined,
       face: 'FRONT',
+      ipAddress: '',
+      port: undefined,
+      snmpCommunity: 'public',
     },
   })
 
@@ -85,10 +91,12 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
         name: values.name?.trim() || undefined,
         startU: values.startU,
         face: values.face,
+        ipAddress: values.ipAddress?.trim() || undefined,
+        port: typeof values.port === 'number' && !isNaN(values.port) ? values.port : undefined,
+        snmpCommunity: values.snmpCommunity?.trim() || undefined,
       })
       onSuccess()
     } catch (err) {
-      // Extract server-side error message
       if (axios.isAxiosError(err) && err.response?.data) {
         const data = err.response.data
         const message = typeof data === 'string'
@@ -148,7 +156,7 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
         </div>
       )}
 
-      {/* Form Fields (only show when device types are loaded) */}
+      {/* Form Fields */}
       {!deviceTypesLoading && !deviceTypesError && hasDeviceTypes && (
         <>
           {/* Device Type Dropdown */}
@@ -191,7 +199,7 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
             />
           </div>
 
-          {/* Start U and Face (2-column grid) */}
+          {/* Start U and Face */}
           <div className="grid grid-cols-2 gap-3">
             {/* Start U */}
             <div className="flex flex-col gap-1.5">
@@ -230,6 +238,49 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
                 <option value="REAR">Rear</option>
               </select>
             </div>
+          </div>
+
+          {/* Network Polling Configuration (Optional) */}
+          <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
+              <Network className="w-3.5 h-3.5" />
+              <span>Network Polling (Optional)</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {/* IP Address */}
+              <div className="flex flex-col gap-1">
+                <label htmlFor="device-ip" className="text-[11px] text-text-secondary">
+                  IP Address
+                </label>
+                <input
+                  id="device-ip"
+                  type="text"
+                  placeholder="e.g. 10.0.0.45 (Default: .env)"
+                  disabled={submitting}
+                  {...register('ipAddress')}
+                  className="w-full px-3 py-1.5 text-xs bg-canvas border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+
+              {/* Port */}
+              <div className="flex flex-col gap-1">
+                <label htmlFor="device-port" className="text-[11px] text-text-secondary">
+                  Port
+                </label>
+                <input
+                  id="device-port"
+                  type="number"
+                  placeholder="e.g. 161 / 502"
+                  disabled={submitting}
+                  {...register('port', { valueAsNumber: true })}
+                  className="w-full px-3 py-1.5 text-xs bg-canvas border border-border rounded-lg text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-text-muted">
+              Leave blank to automatically connect to your default mock server environment.
+            </p>
           </div>
 
           {/* Buttons */}
