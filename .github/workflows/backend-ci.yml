@@ -14,7 +14,6 @@ on:
 
 jobs:
   gitleaks:
-    name: Gitleaks Secret Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -29,7 +28,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   security:
-    name: Snyk Security Scan
     runs-on: ubuntu-latest
 
     defaults:
@@ -49,7 +47,7 @@ jobs:
       - name: Setup Node.js for Snyk CLI
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install Snyk CLI
         run: npm install -g snyk
@@ -58,18 +56,18 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          chmod +x gradlew
-          if [ -n "$SNYK_TOKEN" ]; then
-            echo "Running Snyk Open Source test on backend..."
-            snyk test || true
-            echo "Running Snyk Code test on backend..."
-            snyk code test || true
-          else
-            echo "SNYK_TOKEN secret is not set. Skipping Snyk scan."
+          if [ -z "$SNYK_TOKEN" ]; then
+            echo "::error::SNYK_TOKEN secret is not set. Failing build to prevent insecure merge."
+            exit 1
           fi
 
-  backend-test:
-    name: Backend Test (JUnit, JaCoCo & SonarCloud)
+          echo "Running Snyk Open Source test..."
+          snyk test --severity-threshold=high
+
+          echo "Running Snyk Code test..."
+          snyk code test --severity-threshold=high
+
+  test:
     runs-on: ubuntu-latest
     needs: [gitleaks, security]
 
@@ -93,8 +91,8 @@ jobs:
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
 
-      - name: Run Unit Tests & Generate JaCoCo Coverage Report
-        run: ./gradlew test jacocoTestReport --no-daemon
+      - name: Run Unit Tests & Verify 80% Coverage (JaCoCo)
+        run: ./gradlew test jacocoTestReport jacocoTestCoverageVerification --no-daemon
 
       - name: Run SonarCloud Scanner for Backend
         uses: SonarSource/sonarcloud-github-action@v3.0.0
@@ -110,6 +108,7 @@ jobs:
             -Dsonar.java.binaries=backend/build/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=backend/build/reports/jacoco/test/jacocoTestReport.xml
             -Dsonar.exclusions=**/build/**,**/.gradle/**
+            -Dsonar.qualitygate.wait=true
 
       - name: Upload Build & Coverage Reports
         uses: actions/upload-artifact@v4
@@ -119,10 +118,9 @@ jobs:
           retention-days: 1
           if-no-files-found: ignore
 
-  backend-build:
-    name: Backend Build Artifact
+  build:
     runs-on: ubuntu-latest
-    needs: backend-test
+    needs: test
 
     defaults:
       run:
