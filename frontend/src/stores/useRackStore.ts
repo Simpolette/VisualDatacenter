@@ -138,6 +138,7 @@ export interface Rack {
   length: number;
   createdAt: string;
   updatedAt: string;
+  occupiedUnits?: number;
   devices?: (DeviceSummary & { heightU?: number })[];
 }
 

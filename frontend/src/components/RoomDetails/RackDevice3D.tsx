@@ -98,7 +98,7 @@ export function RackDevice3D({ device, totalUnits, rackLength }: RackDevice3DPro
 
   return (
     <group>
-      <mesh position={[0, y_pos, z_pos]} castShadow receiveShadow>
+      <mesh position={[0, y_pos, z_pos]}>
         <boxGeometry args={[meshWidth, meshHeight, meshLength]} />
         <meshStandardMaterial attach="material-0" color={bodyColor} roughness={0.3} metalness={0.8} />
         <meshStandardMaterial attach="material-1" color={bodyColor} roughness={0.3} metalness={0.8} />

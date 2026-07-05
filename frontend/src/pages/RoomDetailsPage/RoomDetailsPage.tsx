@@ -75,11 +75,15 @@ export default function RoomDetailsPage() {
 
   racks.forEach((rack) => {
     totalU += rack.totalUnits || 42
-    const devices = rack.devices || []
-    devices.forEach((dev) => {
-      const height = dev.heightU !== undefined ? dev.heightU : (dev.deviceType?.heightU || 1)
-      occupiedU += height
-    })
+    if (rack.occupiedUnits !== undefined) {
+      occupiedU += rack.occupiedUnits
+    } else {
+      const devices = rack.devices || []
+      devices.forEach((dev) => {
+        const height = dev.heightU !== undefined ? dev.heightU : (dev.deviceType?.heightU || 1)
+        occupiedU += height
+      })
+    }
   })
 
   const roomUtilization = totalU > 0 ? (occupiedU / totalU) * 100 : 0
