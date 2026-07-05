@@ -27,11 +27,11 @@ public class RackService {
     }
 
     @Transactional(readOnly = true)
-    public List<Rack> listByRoom(Long roomId) {
+    public List<RackResponseDTO> listByRoom(Long roomId) {
         if (!roomRepository.existsById(roomId)) {
             throw new ResourceNotFoundException("Room", roomId);
         }
-        return rackRepository.findByRoomId(roomId);
+        return rackRepository.findRackSummariesByRoomId(roomId);
     }
 
     @Transactional(readOnly = true)

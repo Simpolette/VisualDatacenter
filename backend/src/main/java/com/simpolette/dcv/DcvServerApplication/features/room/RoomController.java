@@ -2,6 +2,7 @@ package com.simpolette.dcv.DcvServerApplication.features.room;
 
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.CreateRoomDTO;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomDetailDTO;
+import com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.UpdateRoomDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -21,13 +22,13 @@ public class RoomController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Room>> list() {
+    public ResponseEntity<List<RoomResponseDTO>> list() {
         return ResponseEntity.ok(roomService.list());
     }
 
     @PostMapping
-    public ResponseEntity<Room> create(@Valid @RequestBody CreateRoomDTO dto) {
-        Room created = roomService.create(dto);
+    public ResponseEntity<RoomResponseDTO> create(@Valid @RequestBody CreateRoomDTO dto) {
+        RoomResponseDTO created = roomService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -37,7 +38,7 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> update(@PathVariable Long id, @Valid @RequestBody UpdateRoomDTO dto) {
+    public ResponseEntity<RoomResponseDTO> update(@PathVariable Long id, @Valid @RequestBody UpdateRoomDTO dto) {
         return ResponseEntity.ok(roomService.update(id, dto));
     }
 

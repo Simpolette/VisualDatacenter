@@ -34,10 +34,9 @@ class RackControllerTest {
     @Test
     @DisplayName("GET /api/v1/rooms/{roomId}/racks - returns racks in room")
     void listByRoom_ReturnsOk() throws Exception {
-        Rack rack = new Rack();
-        rack.setId(10L);
-        rack.setName("Rack-A1");
-        when(rackService.listByRoom(1L)).thenReturn(List.of(rack));
+        com.simpolette.dcv.DcvServerApplication.features.rack.dto.RackResponseDTO dto =
+                new com.simpolette.dcv.DcvServerApplication.features.rack.dto.RackResponseDTO(10L, "Rack-A1", 42, 1.0f, 2.0f, 0.0f, 1.0f, null, null, 0);
+        when(rackService.listByRoom(1L)).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/v1/rooms/1/racks"))
                 .andExpect(status().isOk())

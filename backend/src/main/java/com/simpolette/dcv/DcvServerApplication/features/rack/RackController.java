@@ -18,7 +18,7 @@ public class RackController {
     }
 
     @GetMapping("/api/v1/rooms/{roomId}/racks")
-    public ResponseEntity<List<Rack>> listByRoom(@PathVariable Long roomId) {
+    public ResponseEntity<List<RackResponseDTO>> listByRoom(@PathVariable Long roomId) {
         return ResponseEntity.ok(rackService.listByRoom(roomId));
     }
 
