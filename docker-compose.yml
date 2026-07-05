@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vdt-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: vdt_db
+      POSTGRES_USER: vdt_user
+      POSTGRES_PASSWORD: vdt_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vdt_user -d vdt_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_URL=jdbc:postgresql://postgres:5432/vdt_db?user=vdt_user&password=vdt_password
+      - TELEMETRY_SNMP_HOST=mock-snmp-server
+      - TELEMETRY_SNMP_PORT=161
+      - TELEMETRY_SNMP_COMMUNITY=public
+      - TELEMETRY_MODBUS_HOST=mock-modbus-ups
+      - TELEMETRY_MODBUS_PORT=502
+      - TELEMETRY_MODBUS_UNIT_ID=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mock-snmp-server:
+        condition: service_started
+      mock-modbus-ups:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=/api/v1
+    container_name: frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  mock-snmp-server:
+    build:
+      context: ./mock-hardware/snmp-server
+      dockerfile: Dockerfile
+    container_name: mock-snmp-server
+    ports:
+      - "1161:161/udp"
+
+  mock-modbus-ups:
+    build:
+      context: ./mock-hardware/modbus-ups
+      dockerfile: Dockerfile
+    container_name: mock-modbus-ups
+    ports:
+      - "5502:502"
+
+volumes:
+  postgres_data:

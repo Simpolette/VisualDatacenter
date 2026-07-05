@@ -35,6 +35,9 @@ public class DeviceTypeService {
         deviceType.setWidthMm(dto.widthMm());
         deviceType.setLengthMm(dto.lengthMm());
         deviceType.setWeightKg(dto.weightKg());
+        if (dto.frontImagePath() != null) deviceType.setFrontImagePath(dto.frontImagePath());
+        if (dto.rearImagePath() != null) deviceType.setRearImagePath(dto.rearImagePath());
+        if (dto.imagePath() != null) deviceType.setImagePath(dto.imagePath());
         deviceType.setOidUptime(dto.oidUptime());
         deviceType.setOidCpu(dto.oidCpu());
         deviceType.setOidRam(dto.oidRam());
@@ -89,6 +92,9 @@ public class DeviceTypeService {
         if (dto.widthMm() != null) deviceType.setWidthMm(dto.widthMm());
         if (dto.lengthMm() != null) deviceType.setLengthMm(dto.lengthMm());
         if (dto.weightKg() != null) deviceType.setWeightKg(dto.weightKg());
+        if (dto.frontImagePath() != null) deviceType.setFrontImagePath(dto.frontImagePath());
+        if (dto.rearImagePath() != null) deviceType.setRearImagePath(dto.rearImagePath());
+        if (dto.imagePath() != null) deviceType.setImagePath(dto.imagePath());
         if (dto.oidUptime() != null) deviceType.setOidUptime(dto.oidUptime());
         if (dto.oidCpu() != null) deviceType.setOidCpu(dto.oidCpu());
         if (dto.oidRam() != null) deviceType.setOidRam(dto.oidRam());

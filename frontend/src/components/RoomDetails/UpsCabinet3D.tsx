@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { Edges } from '@react-three/drei'
+import { getThemeColor, getUpsThemeColor } from '../../utils/themeColors'
 
 export interface UpsCabinet3DProps {
   position: [number, number, number]
@@ -42,6 +43,16 @@ export function UpsCabinet3D({
   const height = 2.0
   const depth = 1.0
 
+  const bodyColor = getThemeColor('upsCabinet', 'body', { isSelected })
+  const edgeColor = getThemeColor('upsCabinet', 'edge', { isSelected, hovered })
+  const glassDoorColor = getUpsThemeColor('glassDoor')
+  const displayBgColor = getUpsThemeColor('displayBg')
+  const displayEmissiveColor = getUpsThemeColor('displayEmissive')
+  const batteryLedColor = getThemeColor('upsCabinet', 'batteryLed', { batteryLevel })
+  const loadLedColor = getThemeColor('upsCabinet', 'loadLed', { upsLoad })
+  const alarmLedColor = getThemeColor('upsCabinet', 'alarmLed', { hasAlarm })
+  const ventGrillColor = getUpsThemeColor('ventGrill')
+
   return (
     <group
       ref={groupRef}
@@ -66,7 +77,7 @@ export function UpsCabinet3D({
         <mesh castShadow receiveShadow>
           <boxGeometry args={[width, height, depth]} />
           <meshStandardMaterial
-            color={isSelected ? '#38bdf8' : '#e2e8f0'}
+            color={bodyColor}
             metalness={0.75}
             roughness={0.2}
           />
@@ -78,7 +89,7 @@ export function UpsCabinet3D({
             <boxGeometry args={[width + 0.02, height + 0.02, depth + 0.02]} />
             <meshBasicMaterial visible={false} />
             <Edges
-              color={isSelected ? '#0ea5e9' : '#38bdf8'}
+              color={edgeColor}
               transparent
               opacity={isSelected ? 0.9 : 0.5}
             />
@@ -89,7 +100,7 @@ export function UpsCabinet3D({
         <mesh position={[0, 0, depth / 2 + 0.005]}>
           <planeGeometry args={[width * 0.85, height * 0.88]} />
           <meshStandardMaterial
-            color="#0f172a"
+            color={glassDoorColor}
             metalness={0.9}
             roughness={0.1}
             transparent
@@ -101,8 +112,8 @@ export function UpsCabinet3D({
         <mesh position={[0, height * 0.32, depth / 2 + 0.012]}>
           <planeGeometry args={[width * 0.5, 0.22]} />
           <meshStandardMaterial
-            color="#0369a1"
-            emissive="#0284c7"
+            color={displayBgColor}
+            emissive={displayEmissiveColor}
             emissiveIntensity={0.7}
           />
         </mesh>
@@ -111,8 +122,8 @@ export function UpsCabinet3D({
         <mesh position={[-width * 0.12 + (width * 0.24 * (batteryLevel / 100)) / 2, height * 0.32, depth / 2 + 0.015]}>
           <planeGeometry args={[(width * 0.24 * batteryLevel) / 100, 0.06]} />
           <meshStandardMaterial
-            color={batteryLevel < 20 ? '#ef4444' : '#10b981'}
-            emissive={batteryLevel < 20 ? '#ef4444' : '#10b981'}
+            color={batteryLedColor}
+            emissive={batteryLedColor}
             emissiveIntensity={0.9}
           />
         </mesh>
@@ -121,21 +132,21 @@ export function UpsCabinet3D({
         {/* 1. AC Power Input LED */}
         <mesh position={[-width * 0.22, height * 0.42, depth / 2 + 0.012]}>
           <circleGeometry args={[0.022, 16]} />
-          <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.9} />
+          <meshStandardMaterial color={getUpsThemeColor('batteryLed', { batteryLevel: 100 })} emissive={getUpsThemeColor('batteryLed', { batteryLevel: 100 })} emissiveIntensity={0.9} />
         </mesh>
 
         {/* 2. Modbus Communication Active LED */}
         <mesh position={[-width * 0.1, height * 0.42, depth / 2 + 0.012]}>
           <circleGeometry args={[0.022, 16]} />
-          <meshStandardMaterial color="#0ea5e9" emissive="#0ea5e9" emissiveIntensity={0.9} />
+          <meshStandardMaterial color={getUpsThemeColor('edge', { isSelected: true })} emissive={getUpsThemeColor('edge', { isSelected: true })} emissiveIntensity={0.9} />
         </mesh>
 
         {/* 3. Load Nominal LED */}
         <mesh position={[width * 0.02, height * 0.42, depth / 2 + 0.012]}>
           <circleGeometry args={[0.022, 16]} />
           <meshStandardMaterial
-            color={upsLoad > 85 ? '#f59e0b' : '#10b981'}
-            emissive={upsLoad > 85 ? '#f59e0b' : '#10b981'}
+            color={loadLedColor}
+            emissive={loadLedColor}
             emissiveIntensity={0.8}
           />
         </mesh>
@@ -144,8 +155,8 @@ export function UpsCabinet3D({
         <mesh position={[width * 0.14, height * 0.42, depth / 2 + 0.012]}>
           <circleGeometry args={[0.022, 16]} />
           <meshStandardMaterial
-            color={hasAlarm ? '#ef4444' : '#334155'}
-            emissive={hasAlarm ? '#ef4444' : '#000000'}
+            color={alarmLedColor}
+            emissive={hasAlarm ? alarmLedColor : '#000000'}
             emissiveIntensity={hasAlarm ? 1.0 : 0.0}
           />
         </mesh>
@@ -154,7 +165,7 @@ export function UpsCabinet3D({
         {Array.from({ length: 6 }).map((_, i) => (
           <mesh key={i} position={[0, -height * 0.2 - i * 0.08, depth / 2 + 0.01]}>
             <boxGeometry args={[width * 0.75, 0.03, 0.005]} />
-            <meshStandardMaterial color="#334155" metalness={0.5} roughness={0.5} />
+            <meshStandardMaterial color={ventGrillColor} metalness={0.5} roughness={0.5} />
           </mesh>
         ))}
       </group>

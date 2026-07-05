@@ -61,7 +61,7 @@ class DeviceTypeServiceTest {
         InterfaceTemplateDTO intDto = new InterfaceTemplateDTO("GigabitEthernet1/0/1", "1000base-t", false);
         CreateDeviceTypeDTO dto = new CreateDeviceTypeDTO(
                 "Dell PowerEdge R740", DeviceType.Category.COMPUTE, 2, 440.0f, 700.0f, 25.0f,
-                null, null, null, null, null,
+                null, null, null, null, null, null, null, null,
                 List.of(intDto), null, null, null
         );
 
@@ -90,7 +90,7 @@ class DeviceTypeServiceTest {
 
         CreateDeviceTypeDTO dto = new CreateDeviceTypeDTO(
                 "Switch 9300", DeviceType.Category.NETWORK, 1, 440.0f, 440.0f, 10.0f,
-                "oid1", "oid2", "oid3", "oid4", "oid5",
+                null, null, null, "oid1", "oid2", "oid3", "oid4", "oid5",
                 null, List.of(powerDto), List.of(consoleDto), List.of(bayDto)
         );
 
@@ -112,7 +112,7 @@ class DeviceTypeServiceTest {
         com.simpolette.dcv.DcvServerApplication.features.devicetype.dto.UpdateDeviceTypeDTO fullDto =
                 new com.simpolette.dcv.DcvServerApplication.features.devicetype.dto.UpdateDeviceTypeDTO(
                         "Updated-Name", DeviceType.Category.STORAGE, 4, 480.0f, 600.0f, 30.0f,
-                        "u1", "c1", "r1", "n1", "t1",
+                        null, null, null, "u1", "c1", "r1", "n1", "t1",
                         List.of(), List.of(), List.of(), List.of()
                 );
 
@@ -121,7 +121,7 @@ class DeviceTypeServiceTest {
 
         com.simpolette.dcv.DcvServerApplication.features.devicetype.dto.UpdateDeviceTypeDTO nullDto =
                 new com.simpolette.dcv.DcvServerApplication.features.devicetype.dto.UpdateDeviceTypeDTO(
-                        null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
+                        null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null
                 );
 
         deviceTypeService.update(100L, nullDto);

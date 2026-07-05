@@ -2,15 +2,8 @@ package com.simpolette.dcv.DcvServerApplication.features.seed;
 
 import com.simpolette.dcv.DcvServerApplication.features.device.Device;
 import com.simpolette.dcv.DcvServerApplication.features.device.DeviceRepository;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceTypeRepository;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.InterfaceTemplate;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.PowerPortTemplate;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.ConsolePortTemplate;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.ModuleBayTemplate;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.ModuleType;
-import com.simpolette.dcv.DcvServerApplication.features.devicetype.ModuleTypeRepository;
 import com.simpolette.dcv.DcvServerApplication.features.device.DeviceService;
+import com.simpolette.dcv.DcvServerApplication.features.devicetype.*;
 import com.simpolette.dcv.DcvServerApplication.features.pdu.Pdu;
 import com.simpolette.dcv.DcvServerApplication.features.pdu.PduRepository;
 import com.simpolette.dcv.DcvServerApplication.features.rack.Rack;
@@ -18,9 +11,12 @@ import com.simpolette.dcv.DcvServerApplication.features.rack.RackRepository;
 import com.simpolette.dcv.DcvServerApplication.features.room.Room;
 import com.simpolette.dcv.DcvServerApplication.features.room.RoomRepository;
 import com.simpolette.dcv.DcvServerApplication.features.seed.dto.SeedResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,6 +30,9 @@ public class SeedService {
     private final PduRepository pduRepository;
     private final ModuleTypeRepository moduleTypeRepository;
     private final DeviceService deviceService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public SeedService(
             RoomRepository roomRepository,
@@ -54,6 +53,10 @@ public class SeedService {
     }
 
     public SeedResponse seed() {
+        return seed(10000);
+    }
+
+    public SeedResponse seed(int targetDeviceCount) {
         // 1. Clear existing data in reverse dependency order
         pduRepository.deleteAll();
         deviceRepository.deleteAll();
@@ -62,12 +65,18 @@ public class SeedService {
         deviceTypeRepository.deleteAll();
         moduleTypeRepository.deleteAll();
 
-        // Flush deletes to database before inserting new data
+        pduRepository.flush();
+        deviceRepository.flush();
+        rackRepository.flush();
         roomRepository.flush();
         deviceTypeRepository.flush();
         moduleTypeRepository.flush();
 
-        // 2. Seed DeviceTypes
+        if (entityManager != null) {
+            entityManager.clear();
+        }
+
+        // 2. Seed Catalog: DeviceTypes
         DeviceType dellR740 = new DeviceType();
         dellR740.setName("Dell PowerEdge R740");
         dellR740.setCategory(DeviceType.Category.COMPUTE);
@@ -75,45 +84,9 @@ public class SeedService {
         dellR740.setWidthMm(482.0f);
         dellR740.setLengthMm(715.0f);
         dellR740.setWeightKg(26.0f);
-        dellR740.setImagePath("/images/dell-r740.png");
+        dellR740.setFrontImagePath("/images/Dell/dell-poweredge-r760.front.png");
+        dellR740.setRearImagePath("/images/Dell/dell-poweredge-r760.rear.png");
         dellR740.setOidUptime("1.3.6.1.2.1.1.3.0");
-        dellR740.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
-        dellR740.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
-        dellR740.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        dellR740.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
-
-        InterfaceTemplate idrac = new InterfaceTemplate();
-        idrac.setName("iDRAC");
-        idrac.setType("1000base-t");
-        idrac.setMgmtOnly(true);
-        dellR740.addInterfaceTemplate(idrac);
-
-        InterfaceTemplate nic1 = new InterfaceTemplate();
-        nic1.setName("NIC1");
-        nic1.setType("10gbase-t");
-        nic1.setMgmtOnly(false);
-        dellR740.addInterfaceTemplate(nic1);
-
-        InterfaceTemplate nic2 = new InterfaceTemplate();
-        nic2.setName("NIC2");
-        nic2.setType("10gbase-t");
-        nic2.setMgmtOnly(false);
-        dellR740.addInterfaceTemplate(nic2);
-
-        PowerPortTemplate dellPsu1 = new PowerPortTemplate();
-        dellPsu1.setName("PSU1");
-        dellPsu1.setType("iec-60320-c14");
-        dellR740.addPowerPortTemplate(dellPsu1);
-
-        PowerPortTemplate dellPsu2 = new PowerPortTemplate();
-        dellPsu2.setName("PSU2");
-        dellPsu2.setType("iec-60320-c14");
-        dellR740.addPowerPortTemplate(dellPsu2);
-
-        ConsolePortTemplate dellConsole = new ConsolePortTemplate();
-        dellConsole.setName("Console");
-        dellConsole.setType("rj-45");
-        dellR740.addConsolePortTemplate(dellConsole);
 
         DeviceType cisco9300 = new DeviceType();
         cisco9300.setName("Cisco Catalyst 9300");
@@ -122,36 +95,9 @@ public class SeedService {
         cisco9300.setWidthMm(445.0f);
         cisco9300.setLengthMm(445.0f);
         cisco9300.setWeightKg(7.0f);
-        cisco9300.setImagePath("/images/cisco-9300.png");
+        cisco9300.setFrontImagePath("/images/Cisco/cisco-c9300-48t.front.png");
+        cisco9300.setRearImagePath("/images/Cisco/cisco-c9300-48t.rear.png");
         cisco9300.setOidUptime("1.3.6.1.2.1.1.3.0");
-        cisco9300.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
-        cisco9300.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
-        cisco9300.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        cisco9300.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
-
-        for (int i = 1; i <= 4; i++) {
-            InterfaceTemplate eth = new InterfaceTemplate();
-            eth.setName("GigabitEthernet1/0/" + i);
-            eth.setType("1000base-t");
-            eth.setMgmtOnly(false);
-            cisco9300.addInterfaceTemplate(eth);
-        }
-
-        PowerPortTemplate ciscoPsu1 = new PowerPortTemplate();
-        ciscoPsu1.setName("PSU1");
-        ciscoPsu1.setType("iec-60320-c14");
-        cisco9300.addPowerPortTemplate(ciscoPsu1);
-
-        ConsolePortTemplate ciscoConsole = new ConsolePortTemplate();
-        ciscoConsole.setName("Console");
-        ciscoConsole.setType("rj-45");
-        cisco9300.addConsolePortTemplate(ciscoConsole);
-
-        ModuleBayTemplate uplinkBay = new ModuleBayTemplate();
-        uplinkBay.setName("Uplink Bay 1");
-        uplinkBay.setLabel("Uplink Bay 1");
-        uplinkBay.setPosition("1");
-        cisco9300.addModuleBayTemplate(uplinkBay);
 
         DeviceType hpeMsa2060 = new DeviceType();
         hpeMsa2060.setName("HPE MSA 2060");
@@ -160,161 +106,194 @@ public class SeedService {
         hpeMsa2060.setWidthMm(482.0f);
         hpeMsa2060.setLengthMm(520.0f);
         hpeMsa2060.setWeightKg(28.0f);
-        hpeMsa2060.setImagePath("/images/hpe-msa2060.png");
-        hpeMsa2060.setOidUptime("1.3.6.1.2.1.1.3.0");
-        hpeMsa2060.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
-        hpeMsa2060.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
-        hpeMsa2060.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        hpeMsa2060.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
+        hpeMsa2060.setFrontImagePath("/images/HPE/hpe-msa-2040-sff-chassis-ac.front.png");
+        hpeMsa2060.setRearImagePath("/images/HPE/hpe-msa-2040-sff-chassis-ac.rear.png");
 
-        deviceTypeRepository.saveAll(List.of(dellR740, cisco9300, hpeMsa2060));
+        DeviceType dellR640 = new DeviceType();
+        dellR640.setName("Dell PowerEdge R640");
+        dellR640.setCategory(DeviceType.Category.COMPUTE);
+        dellR640.setHeightU(1);
+        dellR640.setWidthMm(482.0f);
+        dellR640.setLengthMm(705.0f);
+        dellR640.setWeightKg(21.0f);
+        dellR640.setFrontImagePath("/images/Dell/dell-poweredge-r640.front.png");
+        dellR640.setRearImagePath("/images/Dell/dell-poweredge-r640.rear.png");
+
+        DeviceType ciscoNexus = new DeviceType();
+        ciscoNexus.setName("Cisco Nexus 93180YC-FX");
+        ciscoNexus.setCategory(DeviceType.Category.NETWORK);
+        ciscoNexus.setHeightU(1);
+        ciscoNexus.setWidthMm(445.0f);
+        ciscoNexus.setLengthMm(571.0f);
+        ciscoNexus.setWeightKg(9.5f);
+        ciscoNexus.setFrontImagePath("/images/Cisco/cisco-n9k-c93180yc-fx.front.png");
+        ciscoNexus.setRearImagePath("/images/Cisco/cisco-n9k-c93180yc-fx.rear.png");
+
+        DeviceType hpeDl380 = new DeviceType();
+        hpeDl380.setName("HPE ProLiant DL380 Gen10");
+        hpeDl380.setCategory(DeviceType.Category.COMPUTE);
+        hpeDl380.setHeightU(2);
+        hpeDl380.setWidthMm(445.4f);
+        hpeDl380.setLengthMm(730.0f);
+        hpeDl380.setWeightKg(24.5f);
+        hpeDl380.setFrontImagePath("/images/HPE/hpe-proliant-dl380-gen10.front.png");
+        hpeDl380.setRearImagePath("/images/HPE/hpe-proliant-dl380-gen10.rear.png");
+
+        List<DeviceType> catalog = List.of(dellR740, cisco9300, hpeMsa2060, dellR640, ciscoNexus, hpeDl380);
+        deviceTypeRepository.saveAll(catalog);
 
         // Seed ModuleTypes
         ModuleType nm4_10g = new ModuleType();
         nm4_10g.setManufacturer("Cisco");
         nm4_10g.setModel("C3850-NM-4-10G");
         nm4_10g.setPartNumber("C3850-NM-4-10G");
-
-        InterfaceTemplate t1 = new InterfaceTemplate();
-        t1.setName("TenGigabitEthernet1/1");
-        t1.setType("10gbase-x-sfpp");
-        nm4_10g.addInterfaceTemplate(t1);
-
-        InterfaceTemplate t2 = new InterfaceTemplate();
-        t2.setName("TenGigabitEthernet1/2");
-        t2.setType("10gbase-x-sfpp");
-        nm4_10g.addInterfaceTemplate(t2);
-
-        InterfaceTemplate t3 = new InterfaceTemplate();
-        t3.setName("TenGigabitEthernet1/3");
-        t3.setType("10gbase-x-sfpp");
-        nm4_10g.addInterfaceTemplate(t3);
-
-        InterfaceTemplate t4 = new InterfaceTemplate();
-        t4.setName("TenGigabitEthernet1/4");
-        t4.setType("10gbase-x-sfpp");
-        nm4_10g.addInterfaceTemplate(t4);
-
         moduleTypeRepository.save(nm4_10g);
 
-        // 3. Seed Room
-        Room mainDcv = new Room();
-        mainDcv.setName("Main Datacenter");
-        mainDcv.setLocation("Building A, Floor 3");
-        mainDcv.setWidthM(15.0f);
-        mainDcv.setLengthM(12.0f);
-        roomRepository.save(mainDcv);
+        // 3. Calculate Layout for Target Devices
+        int devicesPerRackTarget = 20;
+        int totalRacksNeeded = Math.max(1, (int) Math.ceil((double) targetDeviceCount / devicesPerRackTarget));
+        int racksPerRoom = 50;
+        int roomCountNeeded = Math.max(1, (int) Math.ceil((double) totalRacksNeeded / racksPerRoom));
 
-        // 4. Seed Racks
-        Rack rackA1 = new Rack();
-        rackA1.setName("Rack A1");
-        rackA1.setTotalUnits(42);
-        rackA1.setPosX(3.0f);
-        rackA1.setPosY(4.0f);
-        rackA1.setRotationDeg(0.0f);
-        rackA1.setRoom(mainDcv);
+        List<Room> rooms = new ArrayList<>();
+        for (int r = 1; r <= roomCountNeeded; r++) {
+            Room room = new Room();
+            room.setName("Datacenter Hall " + String.format("%02d", r));
+            room.setLocation("Building " + (char) ('A' + (r - 1) % 5) + ", Floor " + ((r % 4) + 1));
+            room.setWidthM(30.0f);
+            room.setLengthM(20.0f);
+            rooms.add(room);
+        }
+        roomRepository.saveAll(rooms);
 
-        Rack rackA2 = new Rack();
-        rackA2.setName("Rack A2");
-        rackA2.setTotalUnits(42);
-        rackA2.setPosX(4.5f);
-        rackA2.setPosY(4.0f);
-        rackA2.setRotationDeg(0.0f);
-        rackA2.setRoom(mainDcv);
+        // 4. Create Racks in Grid layout per room
+        List<Rack> allRacks = new ArrayList<>();
+        int rackCounter = 0;
+        for (Room room : rooms) {
+            int racksInThisRoom = Math.min(racksPerRoom, totalRacksNeeded - rackCounter);
+            int cols = 10;
+            for (int i = 0; i < racksInThisRoom; i++) {
+                int rowIdx = i / cols;
+                int colIdx = i % cols;
+                Rack rack = new Rack();
+                rack.setName("Rack " + (char) ('A' + rowIdx) + String.format("%02d", colIdx + 1));
+                rack.setTotalUnits(42);
+                rack.setPosX(3.0f + colIdx * 2.5f);
+                rack.setPosY(3.0f + rowIdx * 3.5f);
+                rack.setRotationDeg(rowIdx % 2 == 0 ? 0.0f : 180.0f);
+                rack.setRoom(room);
+                allRacks.add(rack);
+                rackCounter++;
+            }
+        }
+        rackRepository.saveAll(allRacks);
 
-        Rack rackB1 = new Rack();
-        rackB1.setName("Rack B1");
-        rackB1.setTotalUnits(44);
-        rackB1.setPosX(3.0f);
-        rackB1.setPosY(8.0f);
-        rackB1.setRotationDeg(180.0f);
-        rackB1.setRoom(mainDcv);
+        // 5. Create 10,000+ Devices with Utilization Distribution
+        List<Device> deviceBatch = new ArrayList<>();
+        List<Pdu> pduBatch = new ArrayList<>();
+        int totalCreatedDevices = 0;
+        int BATCH_SIZE = 1000;
 
-        Rack rackB2 = new Rack();
-        rackB2.setName("Rack B2");
-        rackB2.setTotalUnits(44);
-        rackB2.setPosX(4.5f);
-        rackB2.setPosY(8.0f);
-        rackB2.setRotationDeg(180.0f);
-        rackB2.setRoom(mainDcv);
+        Device.Status[] statuses = Device.Status.values();
+        Device.Face[] faces = Device.Face.values();
 
-        rackRepository.saveAll(List.of(rackA1, rackA2, rackB1, rackB2));
+        for (int rIdx = 0; rIdx < allRacks.size() && totalCreatedDevices < targetDeviceCount; rIdx++) {
+            Rack rack = allRacks.get(rIdx);
 
-        // 5. Seed Devices
-        Device webServer = new Device();
-        webServer.setRack(rackA1);
-        webServer.setDeviceType(dellR740);
-        webServer.setName("Web Server 01");
-        webServer.setStartU(1);
-        webServer.setFace(Device.Face.FRONT);
-        webServer.setStatus(Device.Status.ACTIVE);
-        webServer.setIpAddress("127.0.0.1");
-        webServer.setPort(1161);
-        webServer.setSnmpCommunity("public");
-        deviceService.initializeComponents(webServer, dellR740);
+            // Determine utilization tier for visual QA:
+            // 20% High (34U-41U), 30% Med (22U-31U), 50% Low (6U-17U)
+            int maxU;
+            if (rIdx % 10 < 2) {
+                maxU = 34 + (rIdx % 8);
+            } else if (rIdx % 10 < 5) {
+                maxU = 22 + (rIdx % 10);
+            } else {
+                maxU = 6 + (rIdx % 12);
+            }
 
-        Device coreSwitch = new Device();
-        coreSwitch.setRack(rackA1);
-        coreSwitch.setDeviceType(cisco9300);
-        coreSwitch.setName("Core Switch 01");
-        coreSwitch.setStartU(10);
-        coreSwitch.setFace(Device.Face.FRONT);
-        coreSwitch.setStatus(Device.Status.ACTIVE);
-        coreSwitch.setIpAddress("127.0.0.1");
-        coreSwitch.setPort(1161);
-        coreSwitch.setSnmpCommunity("public");
-        deviceService.initializeComponents(coreSwitch, cisco9300);
+            int currentU = 1;
+            int devInRackIdx = 1;
 
-        Device sanStorage = new Device();
-        sanStorage.setRack(rackA2);
-        sanStorage.setDeviceType(hpeMsa2060);
-        sanStorage.setName("SAN Storage 01");
-        sanStorage.setStartU(5);
-        sanStorage.setFace(Device.Face.REAR);
-        sanStorage.setStatus(Device.Status.ACTIVE);
-        sanStorage.setIpAddress("127.0.0.1");
-        sanStorage.setPort(1161);
-        sanStorage.setSnmpCommunity("public");
-        deviceService.initializeComponents(sanStorage, hpeMsa2060);
+            while (currentU <= maxU && currentU <= 41 && totalCreatedDevices < targetDeviceCount) {
+                DeviceType dt = catalog.get((rIdx + devInRackIdx) % catalog.size());
+                int devHeight = dt.getHeightU();
 
-        deviceRepository.saveAll(List.of(webServer, coreSwitch, sanStorage));
+                if (currentU + devHeight - 1 > 42) {
+                    break;
+                }
 
-        // Find the bay we created on coreSwitch
-        var bay = coreSwitch.getModuleBays().stream()
-                .filter(b -> b.getName().equals("Uplink Bay 1"))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Uplink Bay 1 not found on Cisco 9300"));
+                Device device = new Device();
+                device.setRack(rack);
+                device.setDeviceType(dt);
+                device.setName(dt.getName().replace(" ", "-") + "-" + String.format("%05d", totalCreatedDevices + 1));
+                device.setStartU(currentU);
+                device.setFace(faces[totalCreatedDevices % faces.length]);
+                device.setStatus(totalCreatedDevices % 15 == 0 ? Device.Status.MAINTENANCE : (totalCreatedDevices % 30 == 0 ? Device.Status.OFFLINE : Device.Status.ACTIVE));
 
-        deviceService.installModule(coreSwitch.getId(), bay.getId(), nm4_10g.getId());
+                int hallNum = (rIdx / racksPerRoom) + 1;
+                int subnet = (rIdx % 250) + 1;
+                device.setIpAddress("10." + hallNum + "." + subnet + "." + devInRackIdx);
+                device.setPort(1161);
+                device.setSnmpCommunity("public");
 
-        // 6. Seed PDUs
-        Pdu pduLeft = new Pdu();
-        pduLeft.setRack(rackA1);
-        pduLeft.setName("PDU A1-Left");
-        pduLeft.setPosition(Pdu.Position.LEFT);
-        pduLeft.setOutletCount(24);
+                deviceBatch.add(device);
+                totalCreatedDevices++;
+                currentU += devHeight;
+                devInRackIdx++;
 
-        Pdu pduRight = new Pdu();
-        pduRight.setRack(rackA1);
-        pduRight.setName("PDU A1-Right");
-        pduRight.setPosition(Pdu.Position.RIGHT);
-        pduRight.setOutletCount(24);
+                if (deviceBatch.size() >= BATCH_SIZE) {
+                    deviceRepository.saveAll(deviceBatch);
+                    deviceRepository.flush();
+                    deviceBatch.clear();
+                    if (entityManager != null) {
+                        entityManager.clear();
+                    }
+                }
+            }
 
-        Pdu pduRear = new Pdu();
-        pduRear.setRack(rackA2);
-        pduRear.setName("PDU A2-Rear");
-        pduRear.setPosition(Pdu.Position.REAR);
-        pduRear.setOutletCount(12);
+            // Create 2 PDUs per rack
+            Pdu pdu1 = new Pdu();
+            pdu1.setRack(rack);
+            pdu1.setName("PDU-" + rack.getName() + "-A");
+            pdu1.setPosition(Pdu.Position.LEFT);
+            pdu1.setOutletCount(24);
 
-        pduRepository.saveAll(List.of(pduLeft, pduRight, pduRear));
+            Pdu pdu2 = new Pdu();
+            pdu2.setRack(rack);
+            pdu2.setName("PDU-" + rack.getName() + "-B");
+            pdu2.setPosition(Pdu.Position.RIGHT);
+            pdu2.setOutletCount(24);
+
+            pduBatch.add(pdu1);
+            pduBatch.add(pdu2);
+
+            if (pduBatch.size() >= BATCH_SIZE) {
+                pduRepository.saveAll(pduBatch);
+                pduRepository.flush();
+                pduBatch.clear();
+            }
+        }
+
+        if (!deviceBatch.isEmpty()) {
+            deviceRepository.saveAll(deviceBatch);
+            deviceRepository.flush();
+            deviceBatch.clear();
+        }
+
+        if (!pduBatch.isEmpty()) {
+            pduRepository.saveAll(pduBatch);
+            pduRepository.flush();
+            pduBatch.clear();
+        }
 
         return new SeedResponse(
-                "Database seeded successfully",
-                1, // 1 Room
-                4, // 4 Racks
-                3, // 3 DeviceTypes
-                3, // 3 Devices
-                3  // 3 PDUs
+                "Database seeded successfully with " + totalCreatedDevices + " devices across " + allRacks.size() + " racks",
+                rooms.size(),
+                allRacks.size(),
+                catalog.size(),
+                totalCreatedDevices,
+                allRacks.size() * 2
         );
     }
 }
+

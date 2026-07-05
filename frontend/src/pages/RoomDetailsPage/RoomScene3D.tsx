@@ -10,6 +10,7 @@ import { usePlacementControls } from '../../hooks/usePlacementControls'
 import { useIsolationSelect } from '../../hooks/useIsolationSelect'
 
 import { UpsCabinet3D } from '../../components/RoomDetails/UpsCabinet3D'
+import { getSceneThemeColor } from '../../utils/themeColors'
 
 const RACK_WIDTH = 0.7
 const RACK_HEIGHT = 2.0
@@ -98,7 +99,7 @@ export default function RoomScene3D({
         camera={{ position: [0, 8, 10], fov: 45 }}
         gl={{ antialias: true }}
       >
-        <color attach="background" args={['#282828']} />
+        <color attach="background" args={[getSceneThemeColor('background')]} />
 
         <ambientLight intensity={0.4} />
         <hemisphereLight
@@ -154,7 +155,7 @@ export default function RoomScene3D({
               }}
             />
             <meshStandardMaterial
-              color="#222222"
+              color={getSceneThemeColor('floor')}
               roughness={1.0}
               metalness={0.0}
             />
@@ -168,10 +169,10 @@ export default function RoomScene3D({
               args={[room.widthM, room.lengthM]}
               cellSize={1.0}
               cellThickness={1.0}
-              cellColor="#757575"
+              cellColor={getSceneThemeColor('grid')}
               sectionSize={0}
               sectionThickness={0}
-              sectionColor="#757575"
+              sectionColor={getSceneThemeColor('grid')}
               fadeDistance={20}
               infiniteGrid={false}
               onUpdate={(self) => {
@@ -203,7 +204,7 @@ export default function RoomScene3D({
                 ]}
               />
               <meshBasicMaterial
-                color="#38bdf8"
+                color={getSceneThemeColor('isolationBox')}
                 transparent
                 opacity={0.2}
                 side={THREE.DoubleSide}
@@ -225,7 +226,7 @@ export default function RoomScene3D({
               />
               <meshBasicMaterial visible={false} />
               <Edges
-                color="#0ea5e9"
+                color={getSceneThemeColor('isolationEdge')}
                 transparent
                 opacity={0.8}
               />
@@ -241,21 +242,21 @@ export default function RoomScene3D({
             <mesh position={[0, RACK_HEIGHT / 2, 0]}>
               <boxGeometry args={[RACK_WIDTH, RACK_HEIGHT, ghostLength - 0.1]} />
               <meshStandardMaterial
-                color="#e67e22"
+                color={getSceneThemeColor('placementGhost')}
                 transparent
                 opacity={0.5}
-                emissive="#e67e22"
+                emissive={getSceneThemeColor('placementGhost')}
                 emissiveIntensity={0.25}
               />
             </mesh>
             <mesh position={[0, RACK_HEIGHT / 2, 0]}>
               <boxGeometry args={[RACK_WIDTH + 0.01, RACK_HEIGHT + 0.01, (ghostLength - 0.1) + 0.01]} />
               <meshBasicMaterial visible={false} />
-              <Edges color="#ffae19" transparent opacity={0.8} />
+              <Edges color={getSceneThemeColor('placementEdge')} transparent opacity={0.8} />
             </mesh>
             <mesh position={[0, 0.02, ghostLength / 2 + 0.2]} rotation={[-Math.PI / 2, 0, 0]}>
               <coneGeometry args={[0.15, 0.4, 4]} />
-              <meshBasicMaterial color="#ffae19" />
+              <meshBasicMaterial color={getSceneThemeColor('placementEdge')} />
             </mesh>
           </group>
         )}
@@ -274,7 +275,7 @@ export default function RoomScene3D({
             }}
           />
           <meshBasicMaterial visible={false} />
-          <Edges color="#555555" />
+          <Edges color={getSceneThemeColor('border')} />
         </mesh>
 
         {/* Standalone Floor UPS Power Cabinet */}

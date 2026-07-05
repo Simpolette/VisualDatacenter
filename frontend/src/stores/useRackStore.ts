@@ -86,6 +86,8 @@ export interface DeviceType {
   lengthMm?: number;
   weightKg?: number;
   imagePath?: string;
+  frontImagePath?: string;
+  rearImagePath?: string;
   oidUptime?: string;
   oidCpu?: string;
   oidRam?: string;
@@ -115,6 +117,8 @@ export interface DeviceSummary {
   status?: string;
   heightU?: number;
   imagePath?: string;
+  frontImagePath?: string;
+  rearImagePath?: string;
 }
 
 export interface PduSummary {

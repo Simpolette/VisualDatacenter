@@ -20,6 +20,10 @@ public record CreateDeviceTypeDTO(
         Float lengthMm,
         Float weightKg,
 
+        String imagePath,
+        String frontImagePath,
+        String rearImagePath,
+
         String oidUptime,
         String oidCpu,
         String oidRam,
