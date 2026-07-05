@@ -14,6 +14,8 @@ export interface Device3DItem {
   startU?: number
   face?: string
   imagePath?: string
+  frontImagePath?: string
+  rearImagePath?: string
   status?: string
 }
 
@@ -91,6 +93,9 @@ export function RackDevice3D({ device, totalUnits, rackLength }: RackDevice3DPro
   const bottomColor = getDeviceThemeColor('bottom')
   const defaultEdgeColor = getDeviceThemeColor('edge')
 
+  const frontPath = device.frontImagePath || device.imagePath
+  const rearPath = device.rearImagePath || device.imagePath
+
   return (
     <group>
       <mesh position={[0, y_pos, z_pos]} castShadow receiveShadow>
@@ -100,17 +105,17 @@ export function RackDevice3D({ device, totalUnits, rackLength }: RackDevice3DPro
         <meshStandardMaterial attach="material-2" color={topColor} roughness={0.3} metalness={0.8} />
         <meshStandardMaterial attach="material-3" color={bottomColor} roughness={0.4} metalness={0.8} />
         
-        {isFront ? (
-          <DeviceFaceMaterial path={device.imagePath} attach="material-4" status={alarmColor ? 'CRITICAL' : device.status} />
-        ) : (
-          <meshStandardMaterial attach="material-4" color={bodyColor} roughness={0.4} metalness={0.6} />
-        )}
+        <DeviceFaceMaterial
+          path={isFront ? frontPath : (device.frontImagePath || undefined)}
+          attach="material-4"
+          status={alarmColor ? 'CRITICAL' : device.status}
+        />
 
-        {isRear ? (
-          <DeviceFaceMaterial path={device.imagePath} attach="material-5" status={alarmColor ? 'CRITICAL' : device.status} />
-        ) : (
-          <meshStandardMaterial attach="material-5" color={bodyColor} roughness={0.4} metalness={0.6} />
-        )}
+        <DeviceFaceMaterial
+          path={isRear ? rearPath : (device.rearImagePath || undefined)}
+          attach="material-5"
+          status={alarmColor ? 'CRITICAL' : device.status}
+        />
       </mesh>
 
       <mesh position={[0, y_pos, z_pos]}>

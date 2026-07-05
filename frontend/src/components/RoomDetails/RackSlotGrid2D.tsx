@@ -61,7 +61,9 @@ export function RackSlotGrid2D({
         {devices?.map((device) => {
           const heightU = device.heightU || device.deviceType?.heightU || 1
           const deviceTypeName = device.deviceTypeName || device.deviceType?.name || 'Device'
-          const imagePath = device.imagePath || device.deviceType?.imagePath
+          const imagePath = device.face === 'REAR'
+            ? (device.rearImagePath || device.deviceType?.rearImagePath || device.frontImagePath || device.deviceType?.frontImagePath || device.imagePath || device.deviceType?.imagePath)
+            : (device.frontImagePath || device.deviceType?.frontImagePath || device.imagePath || device.deviceType?.imagePath)
 
           const gridStart = totalUnits - device.startU - heightU + 2
           const gridEnd = totalUnits - device.startU + 2

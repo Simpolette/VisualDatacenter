@@ -10,7 +10,7 @@ import { usePlacementControls } from '../../hooks/usePlacementControls'
 import { useIsolationSelect } from '../../hooks/useIsolationSelect'
 
 import { UpsCabinet3D } from '../../components/RoomDetails/UpsCabinet3D'
-import { getThemeColor, getSceneThemeColor } from '../../utils/themeColors'
+import { getSceneThemeColor } from '../../utils/themeColors'
 
 const RACK_WIDTH = 0.7
 const RACK_HEIGHT = 2.0

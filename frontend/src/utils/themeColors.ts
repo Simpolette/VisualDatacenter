@@ -1,3 +1,35 @@
+export type UtilizationBand = 'HIGH' | 'MEDIUM' | 'LOW'
+
+export function getUtilizationBand(percent: number): UtilizationBand {
+  if (percent >= 80) return 'HIGH'
+  if (percent >= 50) return 'MEDIUM'
+  return 'LOW'
+}
+
+export const UTILIZATION_COLORS = {
+  LOW: {
+    base: '#15803d',         // Sage / Forest Green for unselected solid (< 50%)
+    highlight: '#10b981',    // Luminous Emerald for selected solid
+    hover: '#16a34a',        // Hover state green
+    xrayPillars: '#6ee7b7',  // Mint Green frame pillars in X-ray
+    xrayEdge: '#34d399',     // Glowing Mint Green edges in X-ray
+  },
+  MEDIUM: {
+    base: '#b45309',         // Amber / Dark Gold for unselected solid (50% - 79.9%)
+    highlight: '#f59e0b',    // Luminous Bright Amber for selected solid
+    hover: '#d97706',        // Hover state amber
+    xrayPillars: '#fcd34d',  // Bright Gold frame pillars in X-ray
+    xrayEdge: '#fbbf24',     // Glowing Gold edges in X-ray
+  },
+  HIGH: {
+    base: '#be123c',         // Crimson / Terracotta Red for unselected solid (>= 80%)
+    highlight: '#f43f5e',    // Luminous Bright Red for selected solid
+    hover: '#e11d48',        // Hover state red
+    xrayPillars: '#fb7185',  // Vibrant Red frame pillars in X-ray
+    xrayEdge: '#ff4d6d',     // Glowing Crimson edges in X-ray
+  },
+} as const
+
 export const THEME_COLORS = {
   // Racks
   rack: {
@@ -66,6 +98,7 @@ export interface RackColorState {
   isSelected?: boolean
   hovered?: boolean
   isSearchMatched?: boolean
+  utilizationPercent?: number
 }
 
 export interface UpsColorState {
@@ -102,20 +135,33 @@ export function getThemeColor(category: 'scene', element: SceneElement): string
 export function getThemeColor(category: string, element: string, state: any = {}): string {
   switch (category) {
     case 'rack': {
+      const utilPercent = state.utilizationPercent ?? 0
+      const band = getUtilizationBand(utilPercent)
+      const colors = UTILIZATION_COLORS[band]
+
       if (element === 'body') {
-        if (state.isSelected) return THEME_COLORS.rack.dark
-        if (state.isSearchMatched) return THEME_COLORS.rack.searchMatch
-        if (state.hovered) return THEME_COLORS.rack.light
-        return THEME_COLORS.rack.slate
+        if (state.isSearchMatched && !state.isSelected) return THEME_COLORS.rack.searchMatch
+        if (state.isSelected) return colors.highlight
+        if (state.hovered) return colors.hover
+        return colors.base
       }
-      if (element === 'pillars') return THEME_COLORS.rack.pillars
-      if (element === 'xray') return THEME_COLORS.rack.slate
+
+      if (element === 'pillars') {
+        if (state.isSelected) return colors.xrayPillars
+        return THEME_COLORS.rack.pillars
+      }
+
+      if (element === 'xray') {
+        return colors.base
+      }
+
       if (element === 'edge') {
-        if (state.isSelected) return THEME_COLORS.rack.edgeSelected
+        if (state.isSelected) return colors.xrayEdge
         if (state.isSearchMatched) return THEME_COLORS.rack.edgeSearch
         return THEME_COLORS.rack.edgeDefault
       }
-      return THEME_COLORS.rack.slate
+
+      return colors.base
     }
 
     case 'upsCabinet': {

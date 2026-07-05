@@ -40,6 +40,12 @@ export function RackMesh({
   const devices = isSelected ? (isDetailsLoaded ? (selectedRackDetails.devices || []) : []) : []
   const pdus = isSelected ? (isDetailsLoaded ? (selectedRackDetails.pdus || []) : []) : []
 
+  const occupiedUnits = isDetailsLoaded && selectedRackDetails
+    ? selectedRackDetails.occupiedUnits
+    : (rack.devices || []).reduce((acc, d) => acc + (d.heightU || d.deviceType?.heightU || 1), 0)
+
+  const utilizationPercent = totalU > 0 ? (occupiedUnits / totalU) * 100 : 0
+
   const x = rack.posX
   const z = rack.posY
   const meshLength = rack.length || 1.0
@@ -70,11 +76,12 @@ export function RackMesh({
     }
   }, [])
 
-  const color = getThemeColor('rack', 'body', { isSelected, hovered, isSearchMatched })
-  const xrayColor = getRackThemeColor('xray')
-  const pillarColor = getRackThemeColor('pillars')
-  const selectedEdgeColor = getThemeColor('rack', 'edge', { isSelected: true })
-  const defaultEdgeColor = getThemeColor('rack', 'edge', { isSearchMatched })
+  const rackState = { isSelected, hovered, isSearchMatched, utilizationPercent }
+  const color = getThemeColor('rack', 'body', rackState)
+  const xrayColor = getRackThemeColor('xray', rackState)
+  const pillarColor = getRackThemeColor('pillars', rackState)
+  const selectedEdgeColor = getThemeColor('rack', 'edge', { isSelected: true, utilizationPercent })
+  const defaultEdgeColor = getThemeColor('rack', 'edge', { isSearchMatched, utilizationPercent })
 
   const rx_pillar = RACK_WIDTH / 2 - 0.02
   const rz_pillar = meshLength / 2 - 0.02
