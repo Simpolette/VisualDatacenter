@@ -36,6 +36,12 @@ public class DeviceType {
     @Column(name = "image_path")
     private String imagePath;
 
+    @Column(name = "front_image_path")
+    private String frontImagePath;
+
+    @Column(name = "rear_image_path")
+    private String rearImagePath;
+
     @Column(name = "oid_uptime")
     private String oidUptime;
 
@@ -158,11 +164,33 @@ public class DeviceType {
     }
 
     public String getImagePath() {
+        if (frontImagePath != null && !frontImagePath.isEmpty()) {
+            return frontImagePath;
+        }
         return imagePath;
     }
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+        if (this.frontImagePath == null) {
+            this.frontImagePath = imagePath;
+        }
+    }
+
+    public String getFrontImagePath() {
+        return frontImagePath != null ? frontImagePath : imagePath;
+    }
+
+    public void setFrontImagePath(String frontImagePath) {
+        this.frontImagePath = frontImagePath;
+    }
+
+    public String getRearImagePath() {
+        return rearImagePath;
+    }
+
+    public void setRearImagePath(String rearImagePath) {
+        this.rearImagePath = rearImagePath;
     }
 
     public String getOidUptime() {

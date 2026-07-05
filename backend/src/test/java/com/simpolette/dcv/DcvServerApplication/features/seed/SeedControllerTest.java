@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+
 @WebMvcTest(SeedController.class)
 class SeedControllerTest {
 
@@ -26,7 +28,7 @@ class SeedControllerTest {
     @DisplayName("POST /api/v1/seed - triggers database seed operation")
     void seed_ReturnsOk() throws Exception {
         SeedResponse res = new SeedResponse("Seeded successfully", 1, 4, 3, 3, 3);
-        when(seedService.seed()).thenReturn(res);
+        when(seedService.seed(anyInt())).thenReturn(res);
 
         mockMvc.perform(post("/api/v1/seed"))
                 .andExpect(status().isOk())

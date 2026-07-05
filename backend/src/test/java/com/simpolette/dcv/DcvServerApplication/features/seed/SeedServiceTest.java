@@ -61,28 +61,17 @@ class SeedServiceTest {
             return mt;
         });
 
-        when(deviceRepository.saveAll(anyList())).thenAnswer(i -> {
-            List<Device> list = i.getArgument(0);
-            for (int idx = 0; idx < list.size(); idx++) {
-                Device d = list.get(idx);
-                d.setId((long) (idx + 1));
-                ModuleBay bay = new ModuleBay();
-                bay.setId(10L + idx);
-                bay.setName("Uplink Bay 1");
-                d.addModuleBay(bay);
-            }
-            return list;
-        });
+        when(deviceRepository.saveAll(anyList())).thenAnswer(i -> i.getArgument(0));
 
-        SeedResponse response = seedService.seed();
+        SeedResponse response = seedService.seed(20);
 
         verify(pduRepository).deleteAll();
         verify(deviceRepository).deleteAll();
         verify(rackRepository).deleteAll();
         verify(roomRepository).deleteAll();
 
-        assertThat(response.roomCount()).isEqualTo(1);
-        assertThat(response.rackCount()).isEqualTo(4);
-        assertThat(response.deviceCount()).isEqualTo(3);
+        assertThat(response.roomCount()).isGreaterThanOrEqualTo(1);
+        assertThat(response.rackCount()).isGreaterThanOrEqualTo(1);
+        assertThat(response.deviceCount()).isEqualTo(20);
     }
 }

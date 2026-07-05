@@ -45,7 +45,7 @@ class DeviceTypeControllerTest {
     @Test
     @DisplayName("POST /api/v1/device-types - creates device type")
     void create_ReturnsCreated() throws Exception {
-        CreateDeviceTypeDTO dto = new CreateDeviceTypeDTO("Dell PowerEdge R740", DeviceType.Category.COMPUTE, 2, 440.0f, 700.0f, 25.0f, null, null, null, null, null, null, null, null, null);
+        CreateDeviceTypeDTO dto = new CreateDeviceTypeDTO("Dell PowerEdge R740", DeviceType.Category.COMPUTE, 2, 440.0f, 700.0f, 25.0f, null, null, null, null, null, null, null, null, null, null, null, null);
         DeviceType dt = new DeviceType();
         dt.setId(101L);
         dt.setName("Dell PowerEdge R740");
