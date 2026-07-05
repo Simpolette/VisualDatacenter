@@ -132,7 +132,11 @@ export function getThemeColor(category: 'upsCabinet', element: UpsElement, state
 export function getThemeColor(category: 'device', element: DeviceElement, state?: DeviceColorState): string
 export function getThemeColor(category: 'pdu', element: PduElement, state?: PduColorState): string
 export function getThemeColor(category: 'scene', element: SceneElement): string
-export function getThemeColor(category: string, element: string, state: any = {}): string {
+export function getThemeColor(
+  category: string,
+  element: string,
+  state: RackColorState & UpsColorState & DeviceColorState & PduColorState = {}
+): string {
   switch (category) {
     case 'rack': {
       const utilPercent = state.utilizationPercent ?? 0
