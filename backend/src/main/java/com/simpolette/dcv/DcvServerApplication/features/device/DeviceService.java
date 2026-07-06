@@ -2,6 +2,7 @@ package com.simpolette.dcv.DcvServerApplication.features.device;
 
 import com.simpolette.dcv.DcvServerApplication.common.exception.ResourceNotFoundException;
 import com.simpolette.dcv.DcvServerApplication.common.validation.SlotValidator;
+import com.simpolette.dcv.DcvServerApplication.features.device.dto.DeviceDetailDTO;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.InstallDeviceDTO;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.UpdateDeviceDTO;
 import com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType;
@@ -31,6 +32,13 @@ public class DeviceService {
         this.deviceTypeRepository = deviceTypeRepository;
         this.moduleTypeRepository = moduleTypeRepository;
         this.slotValidator = slotValidator;
+    }
+
+    @Transactional(readOnly = true)
+    public DeviceDetailDTO getDetail(Long id) {
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Device", id));
+        return DeviceDetailDTO.from(device);
     }
 
     public Device install(Long rackId, InstallDeviceDTO dto) {

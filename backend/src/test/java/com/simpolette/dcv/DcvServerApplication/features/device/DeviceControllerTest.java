@@ -31,6 +31,23 @@ class DeviceControllerTest {
     private DeviceService deviceService;
 
     @Test
+    @DisplayName("GET /api/v1/devices/{id} - returns device details")
+    void getDetail_ReturnsOk() throws Exception {
+        com.simpolette.dcv.DcvServerApplication.features.device.dto.DeviceDetailDTO detail =
+                new com.simpolette.dcv.DcvServerApplication.features.device.dto.DeviceDetailDTO(
+                        500L, 10L, "Server-01", 100L, "PowerEdge", 1, 10, "FRONT", "ACTIVE",
+                        "192.168.1.10", 22, "public", null, null, null, "SERVER", 482.6f, 800f, 15f,
+                        java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of()
+                );
+        when(deviceService.getDetail(500L)).thenReturn(detail);
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/api/v1/devices/500"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(500))
+                .andExpect(jsonPath("$.name").value("Server-01"));
+    }
+
+    @Test
     @DisplayName("POST /api/v1/racks/{rackId}/devices - installs device and returns HTTP 201 CREATED")
     void install_ReturnsCreated() throws Exception {
         InstallDeviceDTO dto = new InstallDeviceDTO(100L, "Server-01", 10, Device.Face.FRONT, "192.168.1.10", 22, "public");

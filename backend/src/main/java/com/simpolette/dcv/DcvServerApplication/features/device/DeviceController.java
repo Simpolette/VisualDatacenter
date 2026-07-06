@@ -1,5 +1,6 @@
 package com.simpolette.dcv.DcvServerApplication.features.device;
 
+import com.simpolette.dcv.DcvServerApplication.features.device.dto.DeviceDetailDTO;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.InstallDeviceDTO;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.UpdateDeviceDTO;
 import com.simpolette.dcv.DcvServerApplication.features.device.dto.InstallModuleDTO;
@@ -15,6 +16,11 @@ public class DeviceController {
 
     public DeviceController(DeviceService deviceService) {
         this.deviceService = deviceService;
+    }
+
+    @GetMapping("/api/v1/devices/{id}")
+    public ResponseEntity<DeviceDetailDTO> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(deviceService.getDetail(id));
     }
 
     @PostMapping("/api/v1/racks/{rackId}/devices")

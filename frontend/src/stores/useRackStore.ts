@@ -104,21 +104,30 @@ export interface DeviceSummary {
   name: string;
   startU: number;
   face: 'FRONT' | 'REAR';
-  ipAddress?: string;
-  port?: number;
-  snmpCommunity?: string;
-  deviceType: DeviceType;
-  moduleBays?: ModuleBay[];
-  modules?: Module[];
-  consolePorts?: ConsolePort[];
-  powerPorts?: PowerPort[];
-  interfaces?: Interface[];
   deviceTypeName?: string;
   status?: string;
   heightU?: number;
   imagePath?: string;
   frontImagePath?: string;
   rearImagePath?: string;
+  category?: string;
+  widthMm?: number;
+  lengthMm?: number;
+  weightKg?: number;
+  deviceType?: DeviceType;
+}
+
+export interface DeviceDetails extends DeviceSummary {
+  rackId?: number;
+  deviceTypeId?: number;
+  ipAddress?: string;
+  port?: number;
+  snmpCommunity?: string;
+  moduleBays?: ModuleBay[];
+  modules?: Module[];
+  consolePorts?: ConsolePort[];
+  powerPorts?: PowerPort[];
+  interfaces?: Interface[];
 }
 
 export interface PduSummary {
@@ -162,6 +171,9 @@ interface RackState {
   detailsLoading: boolean;
   error: string | null;
   detailsError: string | null;
+  selectedDeviceDetails: DeviceDetails | null;
+  deviceDetailsLoading: boolean;
+  deviceDetailsError: string | null;
   deviceTypes: DeviceType[];
   deviceTypesLoading: boolean;
   deviceTypesError: string | null;
@@ -174,6 +186,8 @@ interface RackState {
   fetchRacksForRoom: (roomId: number) => Promise<void>;
   fetchRackDetails: (rackId: number) => Promise<RackDetails>;
   clearSelectedRack: () => void;
+  fetchDeviceDetails: (deviceId: number) => Promise<DeviceDetails>;
+  clearSelectedDeviceDetails: () => void;
   createRack: (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => Promise<Rack>;
   fetchDeviceTypes: () => Promise<void>;
   installDevice: (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string; ipAddress?: string; port?: number; snmpCommunity?: string }) => Promise<void>;
@@ -194,6 +208,9 @@ export const useRackStore = create<RackState>((set, get) => ({
   detailsLoading: false,
   error: null,
   detailsError: null,
+  selectedDeviceDetails: null,
+  deviceDetailsLoading: false,
+  deviceDetailsError: null,
   deviceTypes: [],
   deviceTypesLoading: false,
   deviceTypesError: null,
@@ -228,7 +245,22 @@ export const useRackStore = create<RackState>((set, get) => ({
     }
   },
 
-  clearSelectedRack: () => set({ selectedRackDetails: null, detailsError: null }),
+  clearSelectedRack: () => set({ selectedRackDetails: null, detailsError: null, selectedDeviceDetails: null, deviceDetailsError: null }),
+
+  fetchDeviceDetails: async (deviceId: number) => {
+    set({ deviceDetailsLoading: true, deviceDetailsError: null });
+    try {
+      const response = await api.get<DeviceDetails>(`/devices/${deviceId}`);
+      set({ selectedDeviceDetails: response.data, deviceDetailsLoading: false });
+      return response.data;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch device details';
+      set({ deviceDetailsError: message, deviceDetailsLoading: false });
+      throw err;
+    }
+  },
+
+  clearSelectedDeviceDetails: () => set({ selectedDeviceDetails: null, deviceDetailsError: null }),
 
   createRack: async (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => {
     const response = await api.post<Rack>(`/rooms/${roomId}/racks`, rackData);
@@ -255,6 +287,9 @@ export const useRackStore = create<RackState>((set, get) => ({
 
   deleteDevice: async (deviceId: number, rackId: number) => {
     await api.delete(`/devices/${deviceId}`);
+    set((state) => ({
+      selectedDeviceDetails: state.selectedDeviceDetails?.id === deviceId ? null : state.selectedDeviceDetails
+    }));
     await get().fetchRackDetails(rackId);
   },
 
@@ -271,12 +306,18 @@ export const useRackStore = create<RackState>((set, get) => ({
 
   installModule: async (deviceId: number, bayId: number, moduleTypeId: number, rackId: number) => {
     await api.post(`/devices/${deviceId}/bays/${bayId}/install`, { moduleTypeId });
-    await get().fetchRackDetails(rackId);
+    await Promise.all([
+      get().fetchDeviceDetails(deviceId),
+      get().fetchRackDetails(rackId),
+    ]);
   },
 
   uninstallModule: async (deviceId: number, moduleId: number, rackId: number) => {
     await api.delete(`/devices/${deviceId}/modules/${moduleId}`);
-    await get().fetchRackDetails(rackId);
+    await Promise.all([
+      get().fetchDeviceDetails(deviceId),
+      get().fetchRackDetails(rackId),
+    ]);
   },
 
   createPdu: async (rackId: number, dto: { name: string; position: 'LEFT' | 'RIGHT' | 'REAR'; outletCount: number }) => {
