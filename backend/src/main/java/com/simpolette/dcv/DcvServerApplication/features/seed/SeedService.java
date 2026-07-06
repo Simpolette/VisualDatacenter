@@ -35,8 +35,7 @@ public class SeedService {
             RoomRepository roomRepository,
             DeviceTypeRepository deviceTypeRepository,
             ModuleTypeRepository moduleTypeRepository,
-            JdbcTemplate jdbcTemplate
-    ) {
+            JdbcTemplate jdbcTemplate) {
         this.roomRepository = roomRepository;
         this.deviceTypeRepository = deviceTypeRepository;
         this.moduleTypeRepository = moduleTypeRepository;
@@ -71,10 +70,10 @@ public class SeedService {
         dellR740.setFrontImagePath("/images/Dell/dell-poweredge-r760.front.png");
         dellR740.setRearImagePath("/images/Dell/dell-poweredge-r760.rear.png");
         dellR740.setOidUptime("1.3.6.1.2.1.1.3.0");
-        dellR740.setOidCpu("1.3.6.1.4.1.674.10892.5.4.600.12.1.6.1.1");
-        dellR740.setOidRam("1.3.6.1.4.1.674.10892.5.4.1100.50.1.5.1.1");
+        dellR740.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        dellR740.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         dellR740.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        dellR740.setOidTemp("1.3.6.1.4.1.674.10892.5.4.700.20.1.6.1.1");
+        dellR740.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         DeviceType cisco9300 = new DeviceType();
         cisco9300.setName("Cisco Catalyst 9300");
@@ -86,10 +85,10 @@ public class SeedService {
         cisco9300.setFrontImagePath("/images/Cisco/cisco-c9300-48t.front.png");
         cisco9300.setRearImagePath("/images/Cisco/cisco-c9300-48t.rear.png");
         cisco9300.setOidUptime("1.3.6.1.2.1.1.3.0");
-        cisco9300.setOidCpu("1.3.6.1.4.1.9.9.109.1.1.1.1.5.1");
-        cisco9300.setOidRam("1.3.6.1.4.1.9.9.48.1.1.1.5.1");
+        cisco9300.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        cisco9300.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         cisco9300.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        cisco9300.setOidTemp("1.3.6.1.4.1.9.9.13.1.3.1.3.1");
+        cisco9300.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         DeviceType hpeMsa2060 = new DeviceType();
         hpeMsa2060.setName("HPE MSA 2060");
@@ -101,10 +100,10 @@ public class SeedService {
         hpeMsa2060.setFrontImagePath("/images/HPE/hpe-msa-2040-sff-chassis-ac.front.png");
         hpeMsa2060.setRearImagePath("/images/HPE/hpe-msa-2040-sff-chassis-ac.rear.png");
         hpeMsa2060.setOidUptime("1.3.6.1.2.1.1.3.0");
-        hpeMsa2060.setOidCpu("1.3.6.1.4.1.11.2.3.9.4.2.1.41.1");
-        hpeMsa2060.setOidRam("1.3.6.1.4.1.11.2.3.9.4.2.1.41.2");
+        hpeMsa2060.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        hpeMsa2060.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         hpeMsa2060.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        hpeMsa2060.setOidTemp("1.3.6.1.4.1.11.2.3.9.4.2.1.41.3");
+        hpeMsa2060.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         DeviceType dellR640 = new DeviceType();
         dellR640.setName("Dell PowerEdge R640");
@@ -116,10 +115,10 @@ public class SeedService {
         dellR640.setFrontImagePath("/images/Dell/dell-poweredge-r640.front.png");
         dellR640.setRearImagePath("/images/Dell/dell-poweredge-r640.rear.png");
         dellR640.setOidUptime("1.3.6.1.2.1.1.3.0");
-        dellR640.setOidCpu("1.3.6.1.4.1.674.10892.5.4.600.12.1.6.1.1");
-        dellR640.setOidRam("1.3.6.1.4.1.674.10892.5.4.1100.50.1.5.1.1");
+        dellR640.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        dellR640.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         dellR640.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        dellR640.setOidTemp("1.3.6.1.4.1.674.10892.5.4.700.20.1.6.1.1");
+        dellR640.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         DeviceType ciscoNexus = new DeviceType();
         ciscoNexus.setName("Cisco Nexus 93180YC-FX");
@@ -131,10 +130,10 @@ public class SeedService {
         ciscoNexus.setFrontImagePath("/images/Cisco/cisco-n9k-c93180yc-fx.front.png");
         ciscoNexus.setRearImagePath("/images/Cisco/cisco-n9k-c93180yc-fx.rear.png");
         ciscoNexus.setOidUptime("1.3.6.1.2.1.1.3.0");
-        ciscoNexus.setOidCpu("1.3.6.1.4.1.9.9.109.1.1.1.1.5.1");
-        ciscoNexus.setOidRam("1.3.6.1.4.1.9.9.48.1.1.1.5.1");
+        ciscoNexus.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        ciscoNexus.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         ciscoNexus.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        ciscoNexus.setOidTemp("1.3.6.1.4.1.9.9.13.1.3.1.3.1");
+        ciscoNexus.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         DeviceType hpeDl380 = new DeviceType();
         hpeDl380.setName("HPE ProLiant DL380 Gen10");
@@ -146,10 +145,10 @@ public class SeedService {
         hpeDl380.setFrontImagePath("/images/HPE/hpe-proliant-dl380-gen10.front.png");
         hpeDl380.setRearImagePath("/images/HPE/hpe-proliant-dl380-gen10.rear.png");
         hpeDl380.setOidUptime("1.3.6.1.2.1.1.3.0");
-        hpeDl380.setOidCpu("1.3.6.1.4.1.232.6.2.2.1.0");
-        hpeDl380.setOidRam("1.3.6.1.4.1.232.6.2.3.1.0");
+        hpeDl380.setOidCpu("1.3.6.1.2.1.25.3.3.1.2.1");
+        hpeDl380.setOidRam("1.3.6.1.2.1.25.2.3.1.6.1");
         hpeDl380.setOidNetwork("1.3.6.1.2.1.2.2.1.10.1");
-        hpeDl380.setOidTemp("1.3.6.1.4.1.232.6.2.6.8.1.4.0.1");
+        hpeDl380.setOidTemp("1.3.6.1.4.1.2021.11.11.0");
 
         List<DeviceType> catalog = List.of(dellR740, cisco9300, hpeMsa2060, dellR640, ciscoNexus, hpeDl380);
         List<DeviceType> savedCatalog = deviceTypeRepository.saveAll(catalog);
@@ -165,7 +164,7 @@ public class SeedService {
         int devicesPerRackTarget = 20;
         int totalRacksNeeded = Math.max(1, (int) Math.ceil((double) targetDeviceCount / devicesPerRackTarget));
         int cols = Math.max(5, Math.min(35, (int) Math.ceil(Math.sqrt(totalRacksNeeded * 1.5))));
-        
+
         float stepX = 1.0f;
         float stepY = 3.0f;
 
@@ -188,7 +187,7 @@ public class SeedService {
         // 4. Create Racks via JdbcTemplate batching
         List<RackRecord> rackRecords = new ArrayList<>();
         String insertRackSql = "INSERT INTO rack (name, total_units, pos_x, pos_y, rotation_deg, length, room_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        
+
         Timestamp now = Timestamp.from(Instant.now());
 
         for (int i = 0; i < totalRacksNeeded; i++) {
@@ -202,24 +201,24 @@ public class SeedService {
             rackRecords.add(new RackRecord(name, 42, posX, posY, rot, 1.0f, savedRoom.getId()));
         }
 
-        jdbcTemplate.batchUpdate(insertRackSql, rackRecords, rackRecords.size(), (PreparedStatement ps, RackRecord r) -> {
-            ps.setString(1, r.name);
-            ps.setInt(2, r.totalUnits);
-            ps.setFloat(3, r.posX);
-            ps.setFloat(4, r.posY);
-            ps.setFloat(5, r.rotationDeg);
-            ps.setFloat(6, r.length);
-            ps.setLong(7, r.roomId);
-            ps.setTimestamp(8, now);
-            ps.setTimestamp(9, now);
-        });
+        jdbcTemplate.batchUpdate(insertRackSql, rackRecords, rackRecords.size(),
+                (PreparedStatement ps, RackRecord r) -> {
+                    ps.setString(1, r.name);
+                    ps.setInt(2, r.totalUnits);
+                    ps.setFloat(3, r.posX);
+                    ps.setFloat(4, r.posY);
+                    ps.setFloat(5, r.rotationDeg);
+                    ps.setFloat(6, r.length);
+                    ps.setLong(7, r.roomId);
+                    ps.setTimestamp(8, now);
+                    ps.setTimestamp(9, now);
+                });
 
         // Retrieve created rack IDs from database
         List<Long> rackIds = jdbcTemplate.query(
                 "SELECT id FROM rack WHERE room_id = ? ORDER BY id ASC",
                 (rs, rowNum) -> rs.getLong("id"),
-                savedRoom.getId()
-        );
+                savedRoom.getId());
 
         // 5. Prepare Device and PDU batches for JdbcTemplate
         List<DeviceRecord> deviceBatch = new ArrayList<>();
@@ -248,13 +247,14 @@ public class SeedService {
                 }
 
                 String devName = dt.getName().replace(" ", "-") + "-" + String.format("%05d", totalCreatedDevices + 1);
-                String status = totalCreatedDevices % 15 == 0 ? "MAINTENANCE" : (totalCreatedDevices % 30 == 0 ? "OFFLINE" : "ACTIVE");
-                int subnet = (rIdx % 250) + 1;
-                String ipAddress = "10.1." + subnet + "." + devInRackIdx;
+                String status = totalCreatedDevices % 15 == 0 ? "MAINTENANCE"
+                        : (totalCreatedDevices % 30 == 0 ? "OFFLINE" : "ACTIVE");
+                // int subnet = (rIdx % 250) + 1;
+                // String ipAddress = "10.1." + subnet + "." + devInRackIdx;
+                String ipAddress = "127.0.0.1";
 
                 deviceBatch.add(new DeviceRecord(
-                        devName, rackId, dt.getId(), currentU, "FRONT", status, ipAddress, 1161, "public"
-                ));
+                        devName, rackId, dt.getId(), currentU, "FRONT", status, ipAddress, 1161, "public"));
 
                 totalCreatedDevices++;
                 currentU += devHeight;
@@ -268,19 +268,20 @@ public class SeedService {
 
         // Execute batch insert for Devices
         String insertDeviceSql = "INSERT INTO device (name, rack_id, device_type_id, start_u, face, status, ip_address, port, snmp_community, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        jdbcTemplate.batchUpdate(insertDeviceSql, deviceBatch, deviceBatch.size(), (PreparedStatement ps, DeviceRecord d) -> {
-            ps.setString(1, d.name);
-            ps.setLong(2, d.rackId);
-            ps.setLong(3, d.deviceTypeId);
-            ps.setInt(4, d.startU);
-            ps.setString(5, d.face);
-            ps.setString(6, d.status);
-            ps.setString(7, d.ipAddress);
-            ps.setInt(8, d.port);
-            ps.setString(9, d.snmpCommunity);
-            ps.setTimestamp(10, now);
-            ps.setTimestamp(11, now);
-        });
+        jdbcTemplate.batchUpdate(insertDeviceSql, deviceBatch, deviceBatch.size(),
+                (PreparedStatement ps, DeviceRecord d) -> {
+                    ps.setString(1, d.name);
+                    ps.setLong(2, d.rackId);
+                    ps.setLong(3, d.deviceTypeId);
+                    ps.setInt(4, d.startU);
+                    ps.setString(5, d.face);
+                    ps.setString(6, d.status);
+                    ps.setString(7, d.ipAddress);
+                    ps.setInt(8, d.port);
+                    ps.setString(9, d.snmpCommunity);
+                    ps.setTimestamp(10, now);
+                    ps.setTimestamp(11, now);
+                });
 
         // Execute batch insert for PDUs
         String insertPduSql = "INSERT INTO pdu (name, rack_id, position, outlet_count, created_at) VALUES (?, ?, ?, ?, ?)";
@@ -293,18 +294,24 @@ public class SeedService {
         });
 
         return new SeedResponse(
-                "Database seeded successfully with " + totalCreatedDevices + " devices across " + rackIds.size() + " racks",
+                "Database seeded successfully with " + totalCreatedDevices + " devices across " + rackIds.size()
+                        + " racks",
                 1,
                 rackIds.size(),
                 savedCatalog.size(),
                 totalCreatedDevices,
-                pduBatch.size()
-        );
+                pduBatch.size());
     }
 
     // Helper records for JDBC batching
-    private record RackRecord(String name, int totalUnits, float posX, float posY, float rotationDeg, float length, Long roomId) {}
-    private record DeviceRecord(String name, Long rackId, Long deviceTypeId, int startU, String face, String status, String ipAddress, int port, String snmpCommunity) {}
-    private record PduRecord(String name, Long rackId, String position, int outletCount) {}
-}
+    private record RackRecord(String name, int totalUnits, float posX, float posY, float rotationDeg, float length,
+            Long roomId) {
+    }
 
+    private record DeviceRecord(String name, Long rackId, Long deviceTypeId, int startU, String face, String status,
+            String ipAddress, int port, String snmpCommunity) {
+    }
+
+    private record PduRecord(String name, Long rackId, String position, int outletCount) {
+    }
+}
