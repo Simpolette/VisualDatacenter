@@ -81,14 +81,14 @@ docker-compose up --build
 ```
 
 - **Frontend App**: `http://localhost:5173`
-- **Backend API**: `http://localhost:8080`
+- **Backend API**: `http://localhost:3000`
 
 ### Database Seeding via API
 
 To seed 10,000+ devices into a single main datacenter hall using the high-speed `JdbcTemplate` batch pipeline (~500ms execution time), run the following `curl` command:
 
 ```bash
-curl -X POST "http://localhost:8080/api/v1/seed?count=10000"
+curl -X POST "http://localhost:3000/api/v1/seed?count=10000"
 ```
 
 ---
