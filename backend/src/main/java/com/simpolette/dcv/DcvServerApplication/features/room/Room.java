@@ -1,7 +1,7 @@
 package com.simpolette.dcv.DcvServerApplication.features.room;
 
 import com.simpolette.dcv.DcvServerApplication.features.rack.Rack;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ public class Room {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonIgnore
     private List<Rack> racks = new ArrayList<>();
 
     @PrePersist

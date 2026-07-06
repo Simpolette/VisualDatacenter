@@ -49,10 +49,10 @@ class RoomServiceTest {
     void list_ReturnsRooms() {
         when(roomRepository.findAll()).thenReturn(List.of(sampleRoom));
 
-        List<Room> result = roomService.list();
+        List<com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO> result = roomService.list();
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("DC-Main");
+        assertThat(result.get(0).name()).isEqualTo("DC-Main");
     }
 
     @Test
@@ -66,10 +66,10 @@ class RoomServiceTest {
             return r;
         });
 
-        Room created = roomService.create(dto);
+        com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO created = roomService.create(dto);
 
-        assertThat(created.getId()).isEqualTo(2L);
-        assertThat(created.getName()).isEqualTo("DC-New");
+        assertThat(created.id()).isEqualTo(2L);
+        assertThat(created.name()).isEqualTo("DC-New");
     }
 
     @Test
@@ -87,6 +87,9 @@ class RoomServiceTest {
     @DisplayName("Should return RoomDetailDTO when getting room details by ID")
     void getDetail_Success() {
         when(roomRepository.findById(1L)).thenReturn(Optional.of(sampleRoom));
+        when(roomRepository.countRacksByRoomId(1L)).thenReturn(0);
+        when(roomRepository.sumTotalCapacityUByRoomId(1L)).thenReturn(0);
+        when(roomRepository.sumUsedUByRoomId(1L)).thenReturn(0);
 
         RoomDetailDTO detail = roomService.getDetail(1L);
 
@@ -113,10 +116,10 @@ class RoomServiceTest {
         when(roomRepository.existsByNameAndIdNot("DC-Main-Updated", 1L)).thenReturn(false);
         when(roomRepository.save(any(Room.class))).thenReturn(sampleRoom);
 
-        Room updated = roomService.update(1L, dto);
+        com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO updated = roomService.update(1L, dto);
 
         verify(roomRepository).save(sampleRoom);
-        assertThat(updated.getName()).isEqualTo("DC-Main-Updated");
+        assertThat(updated.name()).isEqualTo("DC-Main-Updated");
     }
 
     @Test

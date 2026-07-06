@@ -134,12 +134,7 @@ public record RackDetailDTO(
             String category,
             Float widthMm,
             Float lengthMm,
-            Float weightKg,
-            List<InterfaceSummary> interfaces,
-            List<PowerPortSummary> powerPorts,
-            List<ConsolePortSummary> consolePorts,
-            List<ModuleBaySummary> moduleBays,
-            List<ModuleSummary> modules
+            Float weightKg
     ) {
         public static DeviceSummary from(Device device) {
             return new DeviceSummary(
@@ -156,12 +151,7 @@ public record RackDetailDTO(
                     device.getDeviceType().getCategory().name(),
                     device.getDeviceType().getWidthMm(),
                     device.getDeviceType().getLengthMm(),
-                    device.getDeviceType().getWeightKg(),
-                    device.getInterfaces() != null ? device.getInterfaces().stream().map(InterfaceSummary::from).toList() : List.of(),
-                    device.getPowerPorts() != null ? device.getPowerPorts().stream().map(PowerPortSummary::from).toList() : List.of(),
-                    device.getConsolePorts() != null ? device.getConsolePorts().stream().map(ConsolePortSummary::from).toList() : List.of(),
-                    device.getModuleBays() != null ? device.getModuleBays().stream().map(ModuleBaySummary::from).toList() : List.of(),
-                    device.getModules() != null ? device.getModules().stream().map(ModuleSummary::from).toList() : List.of()
+                    device.getDeviceType().getWeightKg()
             );
         }
     }

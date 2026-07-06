@@ -6,6 +6,8 @@ import type { Rack } from '../../stores/useRackStore'
 import type { Room } from '../../stores/useRoomStore'
 import { SceneControls } from '../../components/RoomDetails/SceneControls'
 import { RackMesh } from '../../components/RoomDetails/RackMesh'
+import { RackInstances } from '../../components/RoomDetails/RackInstances'
+import { useRackStore } from '../../stores/useRackStore'
 import { usePlacementControls } from '../../hooks/usePlacementControls'
 import { useIsolationSelect } from '../../hooks/useIsolationSelect'
 
@@ -91,12 +93,13 @@ export default function RoomScene3D({
     handleIsolationMove(rx, ry)
   }
 
+  const searchMatchedRackIds = useRackStore((s) => s.searchMatchedRackIds)
+
   return (
     <div ref={containerRef} className="w-full h-full relative" id="room-canvas-container">
       <Canvas
         eventSource={containerRef as React.RefObject<HTMLElement>}
-        shadows
-        camera={{ position: [0, 8, 10], fov: 45 }}
+        camera={{ position: [0, 8, 10], fov: 45, far: 2000 }}
         gl={{ antialias: true }}
       >
         <color attach="background" args={[getSceneThemeColor('background')]} />
@@ -110,10 +113,6 @@ export default function RoomScene3D({
         <directionalLight
           position={[5, 15, 5]}
           intensity={0.6}
-          castShadow
-          shadow-mapSize-width={2048}
-          shadow-mapSize-height={2048}
-          shadow-bias={-0.0001}
         />
         <pointLight position={[-6, 8, -6]} intensity={0.2} />
 
@@ -121,7 +120,6 @@ export default function RoomScene3D({
           <mesh 
             position={[0, 0, 0]}
             rotation={[-Math.PI / 2, 0, 0]} 
-            receiveShadow
             onPointerMove={workspaceMode !== 'NORMAL' ? handlePointerMove : undefined}
             onPointerDown={(e) => {
               if (workspaceMode === 'PLACEMENT_PENDING') {
@@ -293,25 +291,33 @@ export default function RoomScene3D({
           hasAlarm={false}
         />
 
-        {racks.map((rack) => (
+        {/* Bulk InstancedMesh for unselected racks */}
+        <RackInstances
+          racks={racks}
+          selectedRackId={selectedRackId}
+          onSelectRack={onSelectRack}
+          showLabels={showLabels}
+          workspaceMode={workspaceMode}
+          isolatedRackIds={isolatedRackIds}
+          searchMatchedRackIds={searchMatchedRackIds}
+        />
+
+        {/* Standalone detailed RackMesh ONLY for selected rack */}
+        {selectedRack && (
           <RackMesh
-            key={rack.id}
-            rack={rack}
-            isSelected={rack.id === selectedRackId}
+            key={selectedRack.id}
+            rack={selectedRack}
+            isSelected={true}
             onClick={() => {
               if (workspaceMode === 'NORMAL' || workspaceMode === 'ISOLATION_VIEW') {
-                if (selectedRackId === rack.id) {
-                  setRefocusKey((prev) => prev + 1)
-                } else {
-                  onSelectRack(rack.id)
-                }
+                setRefocusKey((prev) => prev + 1)
               }
             }}
             showLabel={showLabels}
             workspaceMode={workspaceMode}
             isolatedRackIds={isolatedRackIds}
           />
-        ))}
+        )}
 
         <SceneControls 
           selectedRack={selectedRack} 

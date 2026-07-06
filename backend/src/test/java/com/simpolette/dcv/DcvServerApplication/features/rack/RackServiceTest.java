@@ -61,12 +61,14 @@ class RackServiceTest {
     @DisplayName("Should list racks in a room")
     void listByRoom_Success() {
         when(roomRepository.existsById(1L)).thenReturn(true);
-        when(rackRepository.findByRoomId(1L)).thenReturn(List.of(rack));
+        com.simpolette.dcv.DcvServerApplication.features.rack.dto.RackResponseDTO dto =
+                new com.simpolette.dcv.DcvServerApplication.features.rack.dto.RackResponseDTO(10L, "Rack-A1", 42, 1.0f, 2.0f, 0.0f, 1.0f, null, null, 0);
+        when(rackRepository.findRackSummariesByRoomId(1L)).thenReturn(List.of(dto));
 
-        List<Rack> racks = rackService.listByRoom(1L);
+        List<com.simpolette.dcv.DcvServerApplication.features.rack.dto.RackResponseDTO> racks = rackService.listByRoom(1L);
 
         assertThat(racks).hasSize(1);
-        assertThat(racks.get(0).getName()).isEqualTo("Rack-A1");
+        assertThat(racks.get(0).name()).isEqualTo("Rack-A1");
     }
 
     @Test

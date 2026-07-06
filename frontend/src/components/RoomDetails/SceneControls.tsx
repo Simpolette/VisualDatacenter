@@ -115,11 +115,13 @@ export function SceneControls({
         ? { left: 1, middle: 0, right: 0, wheel: 16 }
         : { left: 1, middle: 8, right: 2, wheel: 16 }
 
+  const maxCamDistance = Math.max(150, Math.max(room.widthM || 50, room.lengthM || 50) * 3)
+
   return (
     <CameraControls
       ref={controlsRef}
       minDistance={1}
-      maxDistance={25}
+      maxDistance={maxCamDistance}
       mouseButtons={mouseConfig as unknown as React.ComponentProps<typeof CameraControls>['mouseButtons']}
     />
   )

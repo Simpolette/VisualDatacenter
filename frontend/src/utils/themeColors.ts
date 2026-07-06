@@ -15,11 +15,11 @@ export const UTILIZATION_COLORS = {
     xrayEdge: '#34d399',     // Glowing Mint Green edges in X-ray
   },
   MEDIUM: {
-    base: '#b45309',         // Amber / Dark Gold for unselected solid (50% - 79.9%)
-    highlight: '#f59e0b',    // Luminous Bright Amber for selected solid
-    hover: '#d97706',        // Hover state amber
-    xrayPillars: '#fcd34d',  // Bright Gold frame pillars in X-ray
-    xrayEdge: '#fbbf24',     // Glowing Gold edges in X-ray
+    base: '#0284c7',         // Vibrant Ocean Blue for unselected solid (50% - 79.9%)
+    highlight: '#38bdf8',    // Luminous Sky Blue for selected solid
+    hover: '#0ea5e9',        // Hover state vivid blue
+    xrayPillars: '#7dd3fc',  // Light Blue frame pillars in X-ray
+    xrayEdge: '#38bdf8',     // Glowing Blue edges in X-ray
   },
   HIGH: {
     base: '#be123c',         // Crimson / Terracotta Red for unselected solid (>= 80%)

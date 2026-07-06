@@ -27,6 +27,11 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     detailsError: error,
     fetchRackDetails,
     clearSelectedRack,
+    selectedDeviceDetails,
+    deviceDetailsLoading,
+    deviceDetailsError,
+    fetchDeviceDetails,
+    clearSelectedDeviceDetails,
     deleteDevice,
     moduleTypes,
     fetchModuleTypes,
@@ -83,14 +88,20 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
   }, [rackId, fetchRackDetails, clearSelectedRack])
 
   useEffect(() => {
+    if (selectedDevice) {
+      fetchDeviceDetails(selectedDevice.id)
+    } else {
+      clearSelectedDeviceDetails()
+    }
+  }, [selectedDevice, fetchDeviceDetails, clearSelectedDeviceDetails])
+
+  useEffect(() => {
     if (moduleTypes.length === 0) {
       fetchModuleTypes()
     }
   }, [fetchModuleTypes, moduleTypes.length])
 
-  const activeDevice = selectedDevice && rack?.devices
-    ? rack.devices.find((d: DeviceSummary) => d.id === selectedDevice.id) || null
-    : null
+  const activeDevice = selectedDevice ? selectedDeviceDetails : null
 
   const isOpen = rackId !== null
 
@@ -252,8 +263,44 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
       )}
 
       {!loading && !error && rack && (
-        activeDevice ? (
-          <div className="space-y-5">
+        selectedDevice ? (
+          deviceDetailsLoading ? (
+            <div className="space-y-4">
+              <button
+                onClick={() => {
+                  setSelectedDevice(null)
+                  setActionError(null)
+                }}
+                className="px-2.5 py-1 text-xs border border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+              >
+                ← Back to Rack
+              </button>
+              <div className="h-48 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-7 h-7 text-primary animate-spin" />
+                <p className="text-xs text-slate-400">Loading device components...</p>
+              </div>
+            </div>
+          ) : deviceDetailsError ? (
+            <div className="space-y-4">
+              <button
+                onClick={() => {
+                  setSelectedDevice(null)
+                  setActionError(null)
+                }}
+                className="px-2.5 py-1 text-xs border border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
+              >
+                ← Back to Rack
+              </button>
+              <div className="p-4 bg-rose-950/20 border border-rose-800/30 rounded-xl flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-semibold text-rose-400">Failed to load device details</h4>
+                  <p className="text-xs text-rose-300/80 mt-1">{deviceDetailsError}</p>
+                </div>
+              </div>
+            </div>
+          ) : activeDevice ? (
+            <div className="space-y-5">
             <div className="flex items-center gap-2 pb-1">
               <button
                 onClick={() => {
@@ -476,7 +523,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
               </div>
             </div>
           </div>
-        ) : (
+        ) : null) : (
           <div className="space-y-6">
             <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-xl space-y-3">
               <div className="flex justify-between items-center text-xs">

@@ -1,5 +1,6 @@
 package com.simpolette.dcv.DcvServerApplication.features.room;
 
+import com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO;
 import tools.jackson.databind.json.JsonMapper;
 import com.simpolette.dcv.DcvServerApplication.common.exception.ResourceNotFoundException;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.CreateRoomDTO;
@@ -35,10 +36,8 @@ class RoomControllerTest {
     @Test
     @DisplayName("GET /api/v1/rooms - returns list of rooms")
     void list_ReturnsOk() throws Exception {
-        Room room = new Room();
-        room.setId(1L);
-        room.setName("DC-01");
-        when(roomService.list()).thenReturn(List.of(room));
+        RoomResponseDTO dto = new RoomResponseDTO(1L, "DC-01", "Building A", 20.0f, 30.0f, null, Instant.now(), Instant.now());
+        when(roomService.list()).thenReturn(List.of(dto));
 
         mockMvc.perform(get("/api/v1/rooms"))
                 .andExpect(status().isOk())
@@ -49,9 +48,7 @@ class RoomControllerTest {
     @DisplayName("POST /api/v1/rooms - creates room and returns HTTP 201 CREATED")
     void create_ReturnsCreated() throws Exception {
         CreateRoomDTO dto = new CreateRoomDTO("DC-02", "Building B", 10.0f, 15.0f);
-        Room created = new Room();
-        created.setId(2L);
-        created.setName("DC-02");
+        RoomResponseDTO created = new RoomResponseDTO(2L, "DC-02", "Building B", 10.0f, 15.0f, null, Instant.now(), Instant.now());
         when(roomService.create(any(CreateRoomDTO.class))).thenReturn(created);
 
         mockMvc.perform(post("/api/v1/rooms")

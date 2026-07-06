@@ -2,9 +2,9 @@ package com.simpolette.dcv.DcvServerApplication.features.room;
 
 import com.simpolette.dcv.DcvServerApplication.common.exception.ResourceNotFoundException;
 import com.simpolette.dcv.DcvServerApplication.common.exception.SlotConflictException;
-import com.simpolette.dcv.DcvServerApplication.features.rack.Rack;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.CreateRoomDTO;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomDetailDTO;
+import com.simpolette.dcv.DcvServerApplication.features.room.dto.RoomResponseDTO;
 import com.simpolette.dcv.DcvServerApplication.features.room.dto.UpdateRoomDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +22,13 @@ public class RoomService {
     }
 
     @Transactional(readOnly = true)
-    public List<Room> list() {
-        return roomRepository.findAll();
+    public List<RoomResponseDTO> list() {
+        return roomRepository.findAll().stream()
+                .map(RoomResponseDTO::from)
+                .toList();
     }
 
-    public Room create(CreateRoomDTO dto) {
+    public RoomResponseDTO create(CreateRoomDTO dto) {
         if (roomRepository.existsByName(dto.name())) {
             throw new SlotConflictException("Room with name '" + dto.name() + "' already exists");
         }
@@ -36,7 +38,7 @@ public class RoomService {
         room.setLocation(dto.location());
         room.setWidthM(dto.widthM());
         room.setLengthM(dto.lengthM());
-        return roomRepository.save(room);
+        return RoomResponseDTO.from(roomRepository.save(room));
     }
 
     @Transactional(readOnly = true)
@@ -44,17 +46,9 @@ public class RoomService {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room", id));
 
-        List<Rack> racks = room.getRacks();
-
-        int totalCapacityU = racks.stream().mapToInt(Rack::getTotalUnits).sum();
-        int usedU = racks.stream()
-                .flatMap(r -> r.getDevices().stream())
-                .mapToInt(d -> d.getDeviceType().getHeightU())
-                .sum();
-
-        List<RoomDetailDTO.RackSummary> rackSummaries = racks.stream()
-                .map(RoomDetailDTO.RackSummary::from)
-                .toList();
+        int rackCount = roomRepository.countRacksByRoomId(id);
+        int totalCapacityU = roomRepository.sumTotalCapacityUByRoomId(id);
+        int usedU = roomRepository.sumUsedUByRoomId(id);
 
         return new RoomDetailDTO(
                 room.getId(),
@@ -65,14 +59,13 @@ public class RoomService {
                 room.getFloorPlanImage(),
                 room.getCreatedAt(),
                 room.getUpdatedAt(),
-                rackSummaries,
-                racks.size(),
+                rackCount,
                 totalCapacityU,
                 usedU
         );
     }
 
-    public Room update(Long id, UpdateRoomDTO dto) {
+    public RoomResponseDTO update(Long id, UpdateRoomDTO dto) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room", id));
 
@@ -86,7 +79,7 @@ public class RoomService {
         if (dto.widthM() != null) room.setWidthM(dto.widthM());
         if (dto.lengthM() != null) room.setLengthM(dto.lengthM());
 
-        return roomRepository.save(room);
+        return RoomResponseDTO.from(roomRepository.save(room));
     }
 
     public void delete(Long id) {
