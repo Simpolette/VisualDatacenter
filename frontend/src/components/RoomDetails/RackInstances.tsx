@@ -85,10 +85,15 @@ export function RackInstances({
     }
 
     // Ensure InstancedMesh raycaster checks all instances across the room
-    const infiniteSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Infinity)
-    meshRef.current.geometry.boundingSphere = infiniteSphere
-    meshRef.current.geometry.computeBoundingSphere = () => {}
-    meshRef.current.computeBoundingSphere = () => {}
+    if (meshRef.current.geometry) {
+      if (!meshRef.current.geometry.boundingSphere) {
+        meshRef.current.geometry.computeBoundingSphere()
+      }
+      if (meshRef.current.geometry.boundingSphere) {
+        meshRef.current.geometry.boundingSphere.center.set(0, 0, 0)
+        meshRef.current.geometry.boundingSphere.radius = 1000
+      }
+    }
 
     racks.forEach((rack, i) => {
       const x = rack.posX
@@ -266,8 +271,11 @@ export function RackInstances({
         <boxGeometry
           args={[RACK_WIDTH, RACK_HEIGHT, 1.0]}
           onUpdate={(self) => {
-            self.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Infinity)
-            self.computeBoundingSphere = () => {}
+            self.computeBoundingSphere()
+            if (self.boundingSphere) {
+              self.boundingSphere.center.set(0, 0, 0)
+              self.boundingSphere.radius = 1000
+            }
           }}
         />
         <meshStandardMaterial
