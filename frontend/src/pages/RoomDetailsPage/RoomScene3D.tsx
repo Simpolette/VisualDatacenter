@@ -99,7 +99,7 @@ export default function RoomScene3D({
     <div ref={containerRef} className="w-full h-full relative" id="room-canvas-container">
       <Canvas
         eventSource={containerRef as React.RefObject<HTMLElement>}
-        camera={{ position: [0, 8, 10], fov: 45 }}
+        camera={{ position: [0, 8, 10], fov: 45, far: 2000 }}
         gl={{ antialias: true }}
       >
         <color attach="background" args={[getSceneThemeColor('background')]} />

@@ -85,7 +85,10 @@ export function RackInstances({
     }
 
     // Ensure InstancedMesh raycaster checks all instances across the room
-    meshRef.current.geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Infinity)
+    const infiniteSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Infinity)
+    meshRef.current.geometry.boundingSphere = infiniteSphere
+    meshRef.current.geometry.computeBoundingSphere = () => {}
+    meshRef.current.computeBoundingSphere = () => {}
 
     racks.forEach((rack, i) => {
       const x = rack.posX
@@ -133,13 +136,15 @@ export function RackInstances({
 
       const isElevated =
         isSelected ||
-        (isSearchActive
-          ? isSearchMatched
-          : inIsolation
-          ? isolatedRackIds.includes(rack.id)
-          : !hasAnySelection)
+        (hasAnySelection
+          ? (isSearchActive ? isSearchMatched : false)
+          : (isSearchActive
+              ? isSearchMatched
+              : inIsolation
+              ? isolatedRackIds.includes(rack.id)
+              : true))
 
-      const targetScaleY = isSelected ? 0.0 : isElevated ? 1.0 : 0.01
+      const targetScaleY = isSelected ? 0.01 : isElevated ? 1.0 : 0.01
       const currentScaleY = currentScaleYRef.current[i]
 
       if (Math.abs(currentScaleY - targetScaleY) > 0.001) {
@@ -233,7 +238,7 @@ export function RackInstances({
     if (pointerDownPosRef.current) {
       const dx = e.clientX - pointerDownPosRef.current.x
       const dy = e.clientY - pointerDownPosRef.current.y
-      if (Math.sqrt(dx * dx + dy * dy) > 8) return
+      if (Math.sqrt(dx * dx + dy * dy) > 12) return
     }
 
     e.stopPropagation()
@@ -252,12 +257,19 @@ export function RackInstances({
       <instancedMesh
         ref={meshRef}
         args={[undefined, undefined, racks.length]}
+        frustumCulled={false}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerOut={handlePointerOut}
         onClick={handleClick}
       >
-        <boxGeometry args={[RACK_WIDTH, RACK_HEIGHT, 1.0]} />
+        <boxGeometry
+          args={[RACK_WIDTH, RACK_HEIGHT, 1.0]}
+          onUpdate={(self) => {
+            self.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), Infinity)
+            self.computeBoundingSphere = () => {}
+          }}
+        />
         <meshStandardMaterial
           roughness={0.5}
           metalness={0.1}
