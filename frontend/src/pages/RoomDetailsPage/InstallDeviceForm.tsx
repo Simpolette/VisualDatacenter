@@ -244,7 +244,7 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
           <div className="mt-2 pt-3 border-t border-border/50 flex flex-col gap-3">
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-cyan-400">
               <Network className="w-3.5 h-3.5" />
-              <span>Network Polling (Optional)</span>
+              <span>Device IP</span>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -278,9 +278,6 @@ export default function InstallDeviceForm({ rackId, rack, onSuccess, onCancel }:
                 />
               </div>
             </div>
-            <p className="text-[11px] text-text-muted">
-              Leave blank to automatically connect to your default mock server environment.
-            </p>
           </div>
 
           {/* Buttons */}

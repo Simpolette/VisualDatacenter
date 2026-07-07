@@ -26,7 +26,7 @@ interface TelemetryState {
   alarms: EquipmentAlarm[];
   connected: boolean;
   eventSource: EventSource | null;
-  connectStream: () => void;
+  connectStream: (rackId: number) => void;
   disconnectStream: () => void;
   fetchActiveAlarms: () => Promise<void>;
   acknowledgeAlarm: (alarmId: number, acknowledgedBy: string, note?: string) => Promise<void>;
@@ -50,17 +50,18 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
     }
   },
 
-  connectStream: () => {
-    if (get().eventSource) {
-      if (get().eventSource?.readyState === EventSource.OPEN) return;
-      if (get().eventSource?.readyState === EventSource.CONNECTING) return;
+  connectStream: (rackId: number) => {
+    // Clean up any existing stream before connecting to new rack
+    const existing = get().eventSource;
+    if (existing) {
+      existing.close();
     }
 
-    console.log('[SSE] Connecting to Telemetry Stream /api/v1/telemetry/stream...');
-    const eventSource = new EventSource('/api/v1/telemetry/stream');
+    console.log(`[SSE] Connecting to Rack Telemetry Stream /api/v1/telemetry/rack/${rackId}/stream...`);
+    const eventSource = new EventSource(`/api/v1/telemetry/rack/${rackId}/stream`);
 
     eventSource.onopen = () => {
-      console.log('[SSE] Telemetry Stream Connection Opened');
+      console.log(`[SSE] Rack ${rackId} Telemetry Stream Connection Opened`);
       set({ connected: true });
     };
 
@@ -71,7 +72,6 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
     eventSource.addEventListener('METRICS_UPDATE', (e: MessageEvent) => {
       try {
         const data: TelemetryMetric[] = JSON.parse(e.data);
-        // console.log(`[SSE] Received ${data.length} telemetry metric updates`, data);
         set((state) => {
           const newMetrics = { ...state.metrics };
           data.forEach((metric) => {
@@ -86,7 +86,6 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
           });
           return { metrics: newMetrics, connected: true };
         });
-        // refresh alarms when metrics update
         get().fetchActiveAlarms();
       } catch (err) {
         console.error('Failed to parse SSE telemetry metrics', err);
@@ -105,13 +104,15 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
     });
 
     eventSource.onerror = (err) => {
-      console.warn('[SSE] Telemetry Stream Connection Error / Reconnecting...', err);
+      console.warn(`[SSE] Rack ${rackId} Telemetry Stream Connection Error`, err);
       set({ connected: false });
     };
 
-    set({ eventSource });
+    // Clear previous metrics when switching racks
+    set({ eventSource, metrics: {}, connected: false });
     get().fetchActiveAlarms();
   },
+
 
   disconnectStream: () => {
     const { eventSource } = get();

@@ -1,5 +1,6 @@
 import { Zap, Activity, BatteryCharging, ShieldAlert, Radio, Server, CheckCircle2 } from 'lucide-react'
 import { useTelemetryStore } from '../../stores/useTelemetryStore'
+import { useUpsTelemetryStore } from '../../stores/useUpsTelemetryStore'
 import RightSidebar from '../Sidebar/RightSidebar'
 
 export interface UpsTelemetryOverlayProps {
@@ -13,10 +14,12 @@ export function UpsTelemetryOverlay({
   onClose,
   upsDeviceId = 999,
 }: UpsTelemetryOverlayProps) {
-  const { metrics, alarms } = useTelemetryStore()
+  const { alarms } = useTelemetryStore()
+  const { metrics } = useUpsTelemetryStore()
 
   // Extract Modbus metrics for the UPS device or fallback to realistic default telemetry
   const deviceMetrics = metrics[upsDeviceId] || []
+
 
   const findMetric = (key: string, fallback: number) => {
     const item = deviceMetrics.find((m) => m.metricKey.toUpperCase() === key.toUpperCase())

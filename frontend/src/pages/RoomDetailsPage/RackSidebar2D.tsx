@@ -3,13 +3,11 @@ import { ShieldAlert, Plus, Trash2, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import {
   useRackStore,
-  type DeviceSummary,
   type ModuleBay,
   type ConsolePort,
   type PowerPort,
   type Interface,
 } from '../../stores/useRackStore'
-import { useTelemetryStore } from '../../stores/useTelemetryStore'
 import RightSidebar from '../../components/Sidebar/RightSidebar'
 import InstallDeviceForm from './InstallDeviceForm'
 import { RackTelemetryCard } from '../../components/RoomDetails/RackTelemetryCard'
@@ -30,8 +28,6 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     selectedDeviceDetails,
     deviceDetailsLoading,
     deviceDetailsError,
-    fetchDeviceDetails,
-    clearSelectedDeviceDetails,
     deleteDevice,
     moduleTypes,
     fetchModuleTypes,
@@ -39,9 +35,11 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     uninstallModule,
     createPdu,
     deletePdu,
+    selectedDeviceId,
+    selectDevice,
   } = useRackStore()
 
-  const [selectedDevice, setSelectedDevice] = useState<DeviceSummary | null>(null)
+  const selectedDevice = rack?.devices?.find((d) => d.id === selectedDeviceId) || null
   const [showInstallForm, setShowInstallForm] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
@@ -67,17 +65,11 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     setShowInstallForm(false)
     setConfirmDeleteId(null)
     setDeleteError(null)
-    setSelectedDevice(null)
+    selectDevice(null)
     setInstallingBayId(null)
     setSelectedModuleTypeId('')
     setActionError(null)
   }
-
-  const { connectStream } = useTelemetryStore()
-
-  useEffect(() => {
-    connectStream()
-  }, [connectStream])
 
   useEffect(() => {
     if (rackId) {
@@ -86,14 +78,6 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
       clearSelectedRack()
     }
   }, [rackId, fetchRackDetails, clearSelectedRack])
-
-  useEffect(() => {
-    if (selectedDevice) {
-      fetchDeviceDetails(selectedDevice.id)
-    } else {
-      clearSelectedDeviceDetails()
-    }
-  }, [selectedDevice, fetchDeviceDetails, clearSelectedDeviceDetails])
 
   useEffect(() => {
     if (moduleTypes.length === 0) {
@@ -268,7 +252,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
             <div className="space-y-4">
               <button
                 onClick={() => {
-                  setSelectedDevice(null)
+                  selectDevice(null)
                   setActionError(null)
                 }}
                 className="px-2.5 py-1 text-xs border border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
@@ -284,7 +268,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
             <div className="space-y-4">
               <button
                 onClick={() => {
-                  setSelectedDevice(null)
+                  selectDevice(null)
                   setActionError(null)
                 }}
                 className="px-2.5 py-1 text-xs border border-slate-700 bg-slate-900 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
@@ -304,7 +288,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
             <div className="flex items-center gap-2 pb-1">
               <button
                 onClick={() => {
-                  setSelectedDevice(null)
+                  selectDevice(null)
                   setActionError(null)
                 }}
                 className="px-2.5 py-1 text-xs border border-slate-700 bg-slate-905/90 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer"
@@ -735,7 +719,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
               setConfirmDeleteId={setConfirmDeleteId}
               deleteLoading={deleteLoading}
               handleDeleteConfirm={handleDeleteConfirm}
-              onSelectDevice={setSelectedDevice}
+              onSelectDevice={(device) => selectDevice(device.id)}
             />
           </div>
         )

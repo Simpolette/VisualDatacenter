@@ -85,6 +85,7 @@ export function RackMesh({
           e.stopPropagation()
           onClick()
         }}
+        raycast={isSelected ? () => null : undefined}
       >
         <boxGeometry args={[RACK_WIDTH, RACK_HEIGHT, meshLength]} />
         <meshStandardMaterial attach="material-0" color={xrayColor} roughness={0.15} metalness={0.9} transparent opacity={0.15} depthWrite={false} />
@@ -112,7 +113,7 @@ export function RackMesh({
         <meshStandardMaterial color={pillarColor} roughness={0.6} metalness={0.8} />
       </mesh>
 
-      <mesh position={[0, y, 0]}>
+      <mesh position={[0, y, 0]} raycast={() => null}>
         <boxGeometry args={[RACK_WIDTH + 0.01, RACK_HEIGHT + 0.01, meshLength + 0.01]} />
         <meshBasicMaterial visible={false} />
         <Edges color={selectedEdgeColor} transparent opacity={0.8} />
