@@ -2,7 +2,9 @@ package com.simpolette.dcv.DcvServerApplication.features.alert;
 
 import com.simpolette.dcv.DcvServerApplication.features.alert.dto.AcknowledgeAlarmRequest;
 import com.simpolette.dcv.DcvServerApplication.features.alert.dto.EquipmentAlarmDto;
-import com.simpolette.dcv.DcvServerApplication.features.telemetry.TelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.telemetry.RackTelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.telemetry.UpsTelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.device.DeviceRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +18,21 @@ import java.util.List;
 public class EquipmentAlarmController {
 
     private final EquipmentAlarmRepository alarmRepository;
-    private final TelemetrySseController sseController;
+    private final DeviceRepository deviceRepository;
+    private final RackTelemetrySseController rackTelemetrySseController;
+    private final UpsTelemetrySseController upsTelemetrySseController;
 
-    public EquipmentAlarmController(EquipmentAlarmRepository alarmRepository, TelemetrySseController sseController) {
+    public EquipmentAlarmController(
+            EquipmentAlarmRepository alarmRepository,
+            DeviceRepository deviceRepository,
+            RackTelemetrySseController rackTelemetrySseController,
+            UpsTelemetrySseController upsTelemetrySseController) {
         this.alarmRepository = alarmRepository;
-        this.sseController = sseController;
+        this.deviceRepository = deviceRepository;
+        this.rackTelemetrySseController = rackTelemetrySseController;
+        this.upsTelemetrySseController = upsTelemetrySseController;
     }
+
 
     @GetMapping("/active")
     public ResponseEntity<List<EquipmentAlarmDto>> getActiveAlarms() {
@@ -48,11 +59,19 @@ public class EquipmentAlarmController {
         EquipmentAlarm saved = alarmRepository.save(alarm);
         EquipmentAlarmDto dto = toDto(saved);
 
-        // Broadcast alert acknowledgment to connected SSE clients
-        sseController.broadcastEvent("ALARM_ACKNOWLEDGED", dto);
+        // Broadcast alert acknowledgment to connected SSE clients (Rack or UPS)
+        deviceRepository.findById(saved.getDeviceId()).ifPresent(device -> {
+            String category = device.getDeviceType() != null ? device.getDeviceType().getCategory().name() : "SERVER";
+            if ("UPS".equalsIgnoreCase(category) || "PDU".equalsIgnoreCase(category)) {
+                upsTelemetrySseController.broadcastEvent("ALARM_ACKNOWLEDGED", dto);
+            } else if (device.getRack() != null) {
+                rackTelemetrySseController.broadcastEvent(device.getRack().getId(), "ALARM_ACKNOWLEDGED", dto);
+            }
+        });
 
         return ResponseEntity.ok(dto);
     }
+
 
     private EquipmentAlarmDto toDto(EquipmentAlarm entity) {
         return new EquipmentAlarmDto(
