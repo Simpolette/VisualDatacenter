@@ -1,84 +1,91 @@
 # Visual Datacenter — Project Proposal
 
-## Problem
+## 1. Problem Statement
 
-Datacenter operators and infrastructure teams today manage server rooms using static spreadsheets, disconnected asset databases, or physical walk-throughs. This approach creates several pain points:
+Datacenter operators and infrastructure teams today manage server rooms using static spreadsheets, disconnected asset databases, or physical walk-throughs. This approach creates several critical pain points:
 
-- **No spatial awareness** — administrators cannot visualize how racks are physically arranged on the server room floor, making capacity planning and equipment placement guesswork.
-- **No rack-level visibility** — there is no interactive view showing which U-slots in a rack are occupied, by what device, and how much free space remains. Teams rely on manual documentation that quickly becomes stale.
-- **Blind spot on capacity** — without a clear visual indicator of rack utilization (e.g., how many U-slots are free vs. a threshold), it is difficult to identify over-provisioned or under-utilized racks at a glance.
-- **Costly on-site inspections** — verifying device placement, checking power distribution unit (PDU) positions, or planning new installations requires physical presence in the server room—an expensive and time-consuming process.
+*   **No Spatial Awareness**: Administrators cannot visualize how racks are physically arranged on the server room floor, making capacity planning and equipment placement a guessing game.
+*   **No Rack-Level Visibility**: There is no interactive view showing which U-slots in a rack are occupied, by what device, and how much free space remains. Teams rely on manual documentation that quickly becomes stale.
+*   **Capacity Blind Spots**: Without clear visual indicators of rack utilization (e.g., how many U-slots are free compared to a warning threshold), it is difficult to identify over-provisioned or under-utilized racks at a glance.
+*   **Costly On-site Inspections**: Verifying device placement, checking power distribution unit (PDU) positions, or planning new installations requires physical presence in the server room, which is both expensive and time-consuming.
 
-Visual Datacenter replaces this with an interactive simulation system that provides both a 2D rack view for detailed equipment management and a full 3D server room visualization powered by Three.js, enabling remote spatial awareness, drag-and-drop device operations, and real-time capacity monitoring from any browser.
+**Visual Datacenter** addresses these issues by providing an interactive simulation system that combines a detailed 2D rack layout editor with a full 3D server room visualization powered by Three.js. This enables remote spatial awareness, rack-level capacity monitoring, and safe sandbox operations from any browser.
 
-## Goals
+---
 
+## 2. Project Goals
 
-| Goal                        | Target / success signal                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **Server room management**  | Full CRUD for server rooms including floor area, room layout/floor plan, and metadata                                     |
-| **Equipment inventory**     | Manage racks (42U/44U), PDUs, servers, blades, and other devices with dimensions and images                               |
-| **2D rack simulation**      | Interactive front-view of a rack showing occupied/free U-slots; drag-and-drop to install or remove devices                |
-| **3D room visualization**   | Three.js-powered 3D floor plan with racks placed on it; orbit, zoom-in/out controls for full spatial navigation           |
-| **Capacity at a glance**    | Color-coded racks in the 3D view based on free-U count vs. configurable thresholds (e.g., green/yellow/red)               |
-| **Search and isolate**      | Locate a specific rack in the 3D scene, isolate it visually, and switch to its 2D detail view                             |
-| **Device inspection**       | Hover or click any device in the 3D scene to view its specifications (name, dimensions, position, status)                 |
+The primary goal of the Visual Datacenter project is to deliver a lightweight, web-based simulation environment that assists infrastructure teams in room management, device placement, and capacity visualization.
 
+| Goal | Success Criteria / Target |
+| :--- | :--- |
+| **Server Room Management** | Full CRUD capabilities for rooms, including metadata, area sizing (`widthM`, `lengthM`), and grid layout coordinates. |
+| **Equipment Inventory** | Manage racks (42U/44U heights), PDUs, servers, blades, and catalog device templates (height, width, length, weight, dual-face front/rear image assets). |
+| **2D Rack Simulation** | Interactive 2D view of a rack allowing users to insert, view, and remove devices from U-slots with backend collision validation and orientation rendering. |
+| **3D Room Visualization** | Three.js-powered 3D floor plan representing racks and internal devices visually at their physical coordinates with dual-face texture mapping. |
+| **Capacity at a Glance** | Dynamic color-coding of racks in 3D (normal mode and X-ray mode frame tinting) representing utilization thresholds (High ≥80% Red, Medium ≥50% Yellow, Low <50% Green). |
+| **Search & Isolate** | Ability to search for specific racks by name, visually isolate selected racks by dimming others (opacity `0.15`), and transition seamlessly to 2D view. |
+| **Device Inspection** | Interactive hover/select in 3D to show device-specific specifications (dimensions, slots, status). |
 
-## Users and Needs
+---
 
-The system operates as a **sandbox** — a single user type with full access to all features. There is no authentication or role separation in the MVP; any user who opens the application can:
+## 3. Users and Needs
 
-- Create and configure server rooms (floor area, layout)
-- Manage racks (create, position on floor plan, configure 42U/44U)
-- Manage devices (servers, blades, PDUs, etc.) with dimensions and images
-- Install or remove devices in racks via the interactive 2D rack view
-- Explore the 3D server room visualization — orbit, zoom, search, isolate racks
-- Inspect device details by hovering or clicking in both 2D and 3D views
-- Monitor rack capacity via color-coded utilization indicators
+The system operates as a single-user **sandbox model** in the MVP phase. It focuses on functional visualization without authentication overhead.
 
-Role-based access control (e.g., read-only viewer vs. editor) can be layered on top in a future phase without architectural changes.
+### Target User Role
+*   **Datacenter Operations Manager / Systems Engineer**: A user responsible for planning rack layout, capacity allocation, equipment orientation, and monitoring server room utilization.
 
+### Key User Needs
+*   **Room Layout Planning**: Needs to drag and position racks onto a grid layout representing the physical room floor.
+*   **Device Placement Safety & Orientation**: Needs validation to prevent overlapping devices (U-slot collisions), physical dimension checks.
+*   **Visual Capacity Monitoring**: Needs a quick way to identify which racks are nearing capacity limits (utilization heatmaps) without opening each one individually.
+*   **Remote Inspection**: Needs to hover over 3D models to retrieve device catalog parameters (name, category, size, dual faceplate visuals) instantly.
 
-## Scope
+---
 
-### In scope (MVP)
+## 4. Scope
 
-- **Server room management**: CRUD operations for server rooms — name, location, floor area, floor-plan image/dimensions, and general metadata
-- **Rack management**: Create and configure racks (42U or 44U height); assign racks to a room with x/y/rotation coordinates on the floor plan
-- **Device catalog**: Manage device types (server, blade, PDU, switch, etc.) with height (in U), width, depth, weight, and representative image
-- **Device-to-rack assignment**: Install a device into a specific U-slot in a rack; validate fit (height in U, no overlap); remove/relocate devices
-- **PDU management**: Attach power distribution units to the rear or sides of a rack
-- **2D rack visualization**: Interactive front-face diagram of a single rack; shows occupied and free U-slots; supports drag-and-drop to add or remove devices; displays device images scaled to their U-height
-- **3D room visualization (Three.js)**: Render the server room floor as a 3D plane; place rack models on the floor at their assigned coordinates; orbit controls (rotate, zoom, pan)
-- **3D interaction**: Click a rack to select it; hover a device to show an info tooltip; search a rack by name and fly the camera to it; isolate a rack (dim all others); transition from 3D rack to its 2D detail view
-- **Capacity color coding**: Racks in the 3D view are colored based on free-U percentage against configurable thresholds (e.g., >50% free → green, 20–50% → yellow, <20% → red)
-- **Backend API**: RESTful API (Spring Boot) for all CRUD and query operations; serves data to the frontend
-- **Frontend SPA**: Single-page application consuming the API; hosts both the 2D and 3D views
+### In Scope (MVP)
 
-### Out of scope (non-goals)
+*   **Server Room Management**: Create, update, list, inspect, and delete server rooms (name, floor area, dimensions `widthM`, `lengthM`).
+*   **Rack Management**: Configure racks with standard heights of 42U or 44U. Place racks dynamically in the room using X/Y coordinates (1.0m grid snapping) and rotation angles (90-degree steps).
+*   **Device Type Catalog**: Maintain templates for devices (Servers, Blades, PDUs, Switches) containing physical dimensions (height in U, width, length, weight) and distinct front and rear faceplate image paths (`frontImagePath`, `rearImagePath`).
+*   **Device & PDU Installation**:
+    *   Install devices into specific U-slots (validation: `startU >= 1`, slot height check, overlap/collision prevention on mounting face).
+    *   Attach PDUs per rack on `LEFT`, `RIGHT`, or `REAR` positions (maximum 1 PDU per position, max 3 PDUs per rack).
+*   **2D Rack View**: Interactive visual list of U-slots in a single rack. Support operations to install new devices, remove existing ones.
+*   **3D Room View (Three.js)**:
+    *   Interactive floor grid with physical rack models positioned dynamically.
+    *   Orbit, pan, and zoom camera controls with vertical polar angle bounds (`maxPolarAngle <= 85°`) and reset view animation.
+    *   Interactive rack selection, search by name, visual isolation (dimming non-selected racks to `0.15` opacity), and camera focus transition.
+    *   Hover tooltips showing detailed device specs.
+    *   Dynamic rack color-coding (High ≥80% Red, Medium ≥50% Yellow, Low <50% Green) active across normal rendering, selected highlight state, and X-ray mode outer-frame tinting.
+    *   Dual-face material mapping rendering front textures on front face and rear textures on rear face.
+*   **Telemetry & Live Telemetry Streams**:
+    *   Query standard OID metrics from mock SNMP server (CPU, RAM, Temp, Network, uptime) and holding register data from Modbus UPS server (Battery %, Volts, Load, Temp).
+    *   Establish real-time, sub-second Server-Sent Events (SSE) streams for UI updates (`/ups/stream`, `/rack/{id}/stream`) utilizing in-memory cache to ensure latency < 1 second.
+*   **Observability Infrastructure**:
+    *   Full metrics, logs, and distributed traces collection via Prometheus, Grafana, Loki, Tempo, and Promtail.
+*   **Decoupled Architecture**: Separate frontend and backend structures to allow independent development, building, and serving.
+*   **Containerized Environment**: Package both frontend, backend, mock hardware components, and the full observability stack within Docker images, supporting local orchestration via Docker Compose.
 
-- **Authentication and role separation** — no login, no RBAC; the app is a sandbox where any user has full access. Roles can be layered later
-- Real-time environmental monitoring (temperature, humidity, power draw sensors)
-- Network topology mapping and cable management visualization
-- Multi-floor or multi-building datacenter support — single room per view in MVP
-- Automated device discovery (SNMP, IPMI, or similar protocols)
-- Production deployment to cloud infrastructure (Docker, Kubernetes, CI/CD)
-- Real-time collaboration (multi-user editing of the same room simultaneously)
-- Detailed power and cooling capacity planning calculations
-- Integration with third-party DCIM (Data Center Infrastructure Management) tools
+### Out of Scope (Non-Goals)
 
-## Risks and Constraints
+*   **User Authentication & Authorization**: No user login, registration, or Role-Based Access Control (RBAC) in the sandbox model.
+*   **Cabling & Network Topology**: Visualization of network connections and cable paths is deferred.
+*   **Multi-Room/Multi-Floor Synchronization**: The 3D view focuses on a single room environment at a time.
+*   **Collaboration Features**: Multi-user editing of the same room simultaneously is not supported.
 
+---
 
-| Risk                                          | Mitigation                                                                                                              |
-| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Three.js performance with large rack counts   | Use instanced meshes and LOD (Level of Detail); limit initial MVP to a reasonable room size (e.g., ≤200 racks)          |
-| Complex 3D interaction on low-end hardware    | Provide graceful degradation; fallback to simplified geometry; test on integrated GPUs                                  |
-| Accurate U-slot collision detection           | Enforce server-side validation of slot occupancy before persisting; frontend is optimistic but API is authoritative      |
-| Device image diversity                        | Provide a default placeholder model/image; allow admins to upload custom images per device type                         |
-| 2D ↔ 3D state synchronization                | Single source of truth in the backend; both views query the same API; optimistic UI with refetch on mutation            |
-| Scope creep into full DCIM                    | Explicit non-goals above; strict MVP boundary; environmental monitoring and network topology deferred to future phases  |
-| Small team and tight timeline                 | Monorepo structure (Spring Boot + SPA); no microservices; reuse Three.js ecosystem libraries where possible             |
-| Browser compatibility for WebGL / Three.js    | Target modern evergreen browsers (Chrome, Edge, Firefox); document minimum GPU requirements                             |
+## 5. Risks and Constraints
 
+| Identified Risk | Impact | Mitigation Strategy |
+| :--- | :--- | :--- |
+| **Three.js rendering lag / crash with 10k+ devices** | High | Use instanced meshes (InstancedMesh), deferred component loading, frustum culling. Verified memory management and FPS > 40 on 10,000+ devices. |
+| **U-Slot Collision validation errors** | High | Enforce server-side transactional validation on device placement; treat the backend as the authoritative source of truth. |
+| **WebGL browser support limitations** | Low | Target modern evergreen browsers (Chrome, Edge, Firefox, Safari) and display a graceful fallback notice if WebGL is unavailable. |
+| **Design / Image Asset Scarcity** | Medium | Integrated comprehensive brand image library in public static assets with fallback textures for unassigned devices. |
+| **Loose/Optimistic State Sync** | Medium | Build standard REST endpoints for state queries; both 2D and 3D UI panels pull data from a unified React state store. |
+| **Scope Creep into full DCIM systems** | High | Strictly adhere to the out-of-scope boundaries specified in this document. |
