@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: vdt-postgres
+    container_name: postgres
     restart: always
     environment:
       POSTGRES_DB: vdt_db
@@ -33,12 +33,15 @@ services:
       - TELEMETRY_MODBUS_HOST=mock-modbus-ups
       - TELEMETRY_MODBUS_PORT=502
       - TELEMETRY_MODBUS_UNIT_ID=1
+      - OTLP_TRACING_ENDPOINT=http://tempo:4318/v1/traces
     depends_on:
       postgres:
         condition: service_healthy
       mock-snmp-server:
         condition: service_started
       mock-modbus-ups:
+        condition: service_started
+      tempo:
         condition: service_started
 
   frontend:
@@ -69,6 +72,65 @@ services:
     container_name: mock-modbus-ups
     ports:
       - "5502:502"
+
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - backend
+
+  grafana:
+    image: grafana/grafana:10.4.1
+    container_name: grafana
+    restart: always
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - loki
+      - tempo
+
+  loki:
+    image: grafana/loki:2.9.4
+    container_name: loki
+    restart: always
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    container_name: promtail
+    restart: always
+    volumes:
+      - ./observability/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  tempo:
+    image: grafana/tempo:2.4.0
+    container_name: tempo
+    restart: always
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml
+    command: -config.file=/etc/tempo/tempo.yaml
+    ports:
+      - "3200:3200"   # Tempo API
+      - "4317:4317"   # OTel gRPC receiver
+      - "4318:4318"   # OTel HTTP receiver
 
 volumes:
   postgres_data:
