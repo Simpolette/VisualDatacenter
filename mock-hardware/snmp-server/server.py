@@ -7,7 +7,7 @@ import time
 state = {
     "uptime_start": time.time(),
     "cpu": 45.0,
-    "ram": 62.0,
+    "ram": 60.0,
     "network": 350.0,
     "temp": 38.0
 }
