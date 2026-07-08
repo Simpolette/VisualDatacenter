@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Canvas, type ThreeEvent } from '@react-three/fiber'
+import { Canvas, useFrame, type ThreeEvent } from '@react-three/fiber'
 import { Grid, Edges } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Rack } from '../../stores/useRackStore'
@@ -103,6 +103,7 @@ export default function RoomScene3D({
         gl={{ antialias: true }}
       >
         <color attach="background" args={[getSceneThemeColor('background')]} />
+        <FpsTracker roomId={room.id} rackId={selectedRackId} />
 
         <ambientLight intensity={0.4} />
         <hemisphereLight
@@ -343,4 +344,58 @@ export default function RoomScene3D({
       )}
     </div>
   )
+}
+
+function FpsTracker({ roomId, rackId }: { roomId: number; rackId: number | null }) {
+  const lastTimeRef = useRef(0)
+  const frameCountRef = useRef(0)
+  const lastReportedTimeRef = useRef(0)
+
+  useFrame(() => {
+    const now = performance.now()
+    if (lastTimeRef.current === 0) {
+      lastTimeRef.current = now
+    }
+    frameCountRef.current++
+
+    const elapsed = now - lastTimeRef.current
+    if (elapsed >= 1000) {
+      const fps = (frameCountRef.current * 1000) / elapsed
+      frameCountRef.current = 0
+      lastTimeRef.current = now
+
+      if (fps < 30) {
+        if (now - lastReportedTimeRef.current >= 60000) {
+          lastReportedTimeRef.current = now
+
+          const payload = {
+            fps: Math.round(fps * 100) / 100,
+            roomId: roomId,
+            rackId: rackId,
+            browserInfo: navigator.userAgent
+          }
+
+          const apiUrl = import.meta.env.VITE_API_URL || '/api/v1'
+
+          fetch(`${apiUrl}/metrics/ui-lag`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          })
+            .then((res) => {
+              if (!res.ok) {
+                console.error('Failed to report UI lag:', res.statusText)
+              }
+            })
+            .catch((err) => {
+              console.error('Error reporting UI lag:', err)
+            })
+        }
+      }
+    }
+  })
+
+  return null
 }

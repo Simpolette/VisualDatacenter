@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { ShieldAlert, Plus, Trash2, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import {
@@ -29,6 +30,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     deviceDetailsLoading,
     deviceDetailsError,
     deleteDevice,
+    deleteRack,
     moduleTypes,
     fetchModuleTypes,
     installModule,
@@ -39,11 +41,33 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
     selectDevice,
   } = useRackStore()
 
+  const { id } = useParams<{ id: string }>()
+  const roomId = Number(id)
+
   const selectedDevice = rack?.devices?.find((d) => d.id === selectedDeviceId) || null
   const [showInstallForm, setShowInstallForm] = useState(false)
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const [confirmDeleteRack, setConfirmDeleteRack] = useState(false)
+  const [deleteRackLoading, setDeleteRackLoading] = useState(false)
+  const [deleteRackError, setDeleteRackError] = useState<string | null>(null)
+
+  const handleDeleteRackConfirm = async () => {
+    if (!rackId || !roomId) return
+    setDeleteRackLoading(true)
+    setDeleteRackError(null)
+    try {
+      await deleteRack(roomId, rackId)
+      onClose()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete rack'
+      setDeleteRackError(message)
+    } finally {
+      setDeleteRackLoading(false)
+    }
+  }
 
   const [showAddPduForm, setShowAddPduForm] = useState(false)
   const [pduName, setPduName] = useState('PDU A')
@@ -540,6 +564,50 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 <Plus className={`w-3.5 h-3.5 transition-transform ${showInstallForm ? 'rotate-45' : ''}`} />
                 {showInstallForm ? 'Close Form' : 'Add Device'}
               </button>
+
+              {confirmDeleteRack ? (
+                <div className="pt-3 border-t border-slate-800/60 space-y-2">
+                  <p className="text-[11px] text-rose-300 leading-normal font-semibold">
+                    Are you sure you want to delete this rack? This will also delete all devices and PDUs installed in it.
+                  </p>
+                  {deleteRackError && (
+                    <p className="text-[10px] text-rose-400 font-medium">{deleteRackError}</p>
+                  )}
+                  <div className="flex items-center gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmDeleteRack(false)}
+                      disabled={deleteRackLoading}
+                      className="px-2.5 py-1.5 text-[10px] font-bold border border-slate-700 bg-slate-950 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteRackConfirm}
+                      disabled={deleteRackLoading}
+                      className="px-2.5 py-1.5 text-[10px] font-bold bg-rose-600 hover:bg-rose-500 text-white rounded transition-colors cursor-pointer flex items-center gap-1 shadow-sm disabled:opacity-50"
+                      id="confirm-delete-rack-btn"
+                    >
+                      {deleteRackLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        'Confirm Delete'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  id="delete-rack-btn"
+                  onClick={() => setConfirmDeleteRack(true)}
+                  className="w-full mt-1.5 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-rose-450 bg-rose-500/10 border border-rose-500/20 hover:bg-rose-500/20 rounded-lg transition-all cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Rack
+                </button>
+              )}
             </div>
 
             {showInstallForm && rackId && (

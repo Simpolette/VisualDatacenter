@@ -194,6 +194,7 @@ interface RackState {
   fetchDeviceTypes: () => Promise<void>;
   installDevice: (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string; ipAddress?: string; port?: number; snmpCommunity?: string }) => Promise<void>;
   deleteDevice: (deviceId: number, rackId: number) => Promise<void>;
+  deleteRack: (roomId: number, rackId: number) => Promise<void>;
   fetchModuleTypes: () => Promise<void>;
   installModule: (deviceId: number, bayId: number, moduleTypeId: number, rackId: number) => Promise<void>;
   uninstallModule: (deviceId: number, moduleId: number, rackId: number) => Promise<void>;
@@ -303,6 +304,14 @@ export const useRackStore = create<RackState>((set, get) => ({
       selectedDeviceDetails: state.selectedDeviceDetails?.id === deviceId ? null : state.selectedDeviceDetails
     }));
     await get().fetchRackDetails(rackId);
+  },
+
+  deleteRack: async (roomId: number, rackId: number) => {
+    await api.delete(`/racks/${rackId}`);
+    if (get().selectedRackDetails?.id === rackId) {
+      get().clearSelectedRack();
+    }
+    await get().fetchRacksForRoom(roomId);
   },
 
   fetchModuleTypes: async () => {
