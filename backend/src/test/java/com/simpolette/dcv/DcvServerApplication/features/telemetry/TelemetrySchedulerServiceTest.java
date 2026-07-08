@@ -23,31 +23,51 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TelemetrySchedulerServiceTest {
 
-    @Mock
     private DeviceRepository deviceRepository;
-
-    @Mock
     private SnmpPollerService snmpPollerService;
-
-    @Mock
     private ModbusPollerService modbusPollerService;
-
-    @Mock
     private TelemetryLogRepository telemetryLogRepository;
-
-    @Mock
     private AlertEvaluationService alertEvaluationService;
-
-    @Mock
-    private TelemetrySseController sseController;
-
-    @InjectMocks
+    private RackTelemetrySseController rackTelemetrySseController;
+    private UpsTelemetrySseController upsTelemetrySseController;
+    private io.micrometer.core.instrument.MeterRegistry meterRegistry;
+    private io.opentelemetry.api.OpenTelemetry openTelemetry;
     private TelemetrySchedulerService telemetrySchedulerService;
 
     private Device serverDevice;
 
     @BeforeEach
     void setUp() {
+        deviceRepository = mock(DeviceRepository.class);
+        snmpPollerService = mock(SnmpPollerService.class);
+        modbusPollerService = mock(ModbusPollerService.class);
+        telemetryLogRepository = mock(TelemetryLogRepository.class);
+        alertEvaluationService = mock(AlertEvaluationService.class);
+        rackTelemetrySseController = mock(RackTelemetrySseController.class);
+        upsTelemetrySseController = mock(UpsTelemetrySseController.class);
+        meterRegistry = new io.micrometer.core.instrument.simple.SimpleMeterRegistry();
+        openTelemetry = mock(io.opentelemetry.api.OpenTelemetry.class);
+
+        io.opentelemetry.api.trace.Tracer mockTracer = mock(io.opentelemetry.api.trace.Tracer.class);
+        io.opentelemetry.api.trace.SpanBuilder mockSpanBuilder = mock(io.opentelemetry.api.trace.SpanBuilder.class);
+        io.opentelemetry.api.trace.Span mockSpan = mock(io.opentelemetry.api.trace.Span.class);
+        when(openTelemetry.getTracer(anyString(), anyString())).thenReturn(mockTracer);
+        when(mockTracer.spanBuilder(anyString())).thenReturn(mockSpanBuilder);
+        when(mockSpanBuilder.startSpan()).thenReturn(mockSpan);
+        when(mockSpan.makeCurrent()).thenReturn(mock(io.opentelemetry.context.Scope.class));
+
+        telemetrySchedulerService = new TelemetrySchedulerService(
+                deviceRepository,
+                snmpPollerService,
+                modbusPollerService,
+                telemetryLogRepository,
+                alertEvaluationService,
+                rackTelemetrySseController,
+                upsTelemetrySseController,
+                meterRegistry,
+                openTelemetry
+        );
+
         DeviceType dt = new DeviceType();
         dt.setCategory(DeviceType.Category.COMPUTE);
 
@@ -57,12 +77,16 @@ class TelemetrySchedulerServiceTest {
         serverDevice.setIpAddress("192.168.1.50");
         serverDevice.setPort(161);
         serverDevice.setSnmpCommunity("public");
+
+        com.simpolette.dcv.DcvServerApplication.features.rack.Rack rack = new com.simpolette.dcv.DcvServerApplication.features.rack.Rack();
+        rack.setId(2L);
+        serverDevice.setRack(rack);
     }
 
     @Test
     @DisplayName("Should execute polling collection cycle and broadcast SSE events")
     void runTelemetryCollectionCycle_Success() {
-        when(deviceRepository.findAll()).thenReturn(List.of(serverDevice));
+        when(deviceRepository.findAllWithRackAndDeviceType()).thenReturn(List.of(serverDevice));
 
         TelemetryMetricDto metric = new TelemetryMetricDto(1L, "CPU_USAGE", 45.0, "%", Instant.now());
         when(snmpPollerService.pollServerDevice(eq(1L), any(), anyInt(), any(), any(), any(), any(), any(), any()))
@@ -70,9 +94,9 @@ class TelemetrySchedulerServiceTest {
 
         telemetrySchedulerService.runTelemetryCollectionCycle();
 
-        verify(telemetryLogRepository).save(any(TelemetryLog.class));
+        verify(telemetryLogRepository).saveAll(anyList());
         verify(alertEvaluationService).evaluateMetrics(List.of(metric));
-        verify(sseController).broadcastEvent(eq("METRICS_UPDATE"), eq(List.of(metric)));
+        verify(rackTelemetrySseController).broadcastEvent(eq(2L), eq("METRICS_UPDATE"), eq(List.of(metric)));
     }
 
     @Test
@@ -81,7 +105,7 @@ class TelemetrySchedulerServiceTest {
         Device noTypeDevice = new Device();
         noTypeDevice.setId(3L);
 
-        when(deviceRepository.findAll()).thenReturn(List.of(noTypeDevice));
+        when(deviceRepository.findAllWithRackAndDeviceType()).thenReturn(List.of(noTypeDevice));
 
         TelemetryMetricDto metric = new TelemetryMetricDto(3L, "CPU_USAGE", 12.0, "%", Instant.now());
         when(snmpPollerService.pollServerDevice(eq(3L), any(), anyInt(), any(), any(), any(), any(), any(), any()))
@@ -90,6 +114,5 @@ class TelemetrySchedulerServiceTest {
         telemetrySchedulerService.runTelemetryCollectionCycle();
 
         verify(snmpPollerService).pollServerDevice(eq(3L), any(), anyInt(), any(), any(), any(), any(), any(), any());
-        verify(sseController).broadcastEvent(eq("METRICS_UPDATE"), eq(List.of(metric)));
     }
 }

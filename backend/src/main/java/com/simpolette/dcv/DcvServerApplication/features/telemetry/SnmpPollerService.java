@@ -1,6 +1,7 @@
 package com.simpolette.dcv.DcvServerApplication.features.telemetry;
 
 import com.simpolette.dcv.DcvServerApplication.features.telemetry.dto.TelemetryMetricDto;
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,14 @@ public class SnmpPollerService {
 
     private final DefaultUdpTransportMapping transport;
     private final Snmp snmp;
+    private final MeterRegistry meterRegistry;
 
     public SnmpPollerService() {
+        this(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+    }
+
+    public SnmpPollerService(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
         try {
             this.transport = new DefaultUdpTransportMapping();
             this.snmp = new Snmp(transport);
@@ -55,6 +62,7 @@ public class SnmpPollerService {
             Long deviceId, String host, int port, String community,
             String customUptime, String customCpu, String customRam, String customNetwork, String customTemp) {
         
+        io.micrometer.core.instrument.Timer.Sample sample = io.micrometer.core.instrument.Timer.start(meterRegistry);
         List<TelemetryMetricDto> metrics = new ArrayList<>();
         Instant now = Instant.now();
 
@@ -119,6 +127,11 @@ public class SnmpPollerService {
             }
         } catch (Exception e) {
             log.error("Failed to poll SNMP device {} at {}:{}: {}", deviceId, ipHost, port, e.getMessage());
+        } finally {
+            sample.stop(io.micrometer.core.instrument.Timer.builder("telemetry.device.poll.time")
+                    .description("SNMP device poll latency")
+                    .tag("protocol", "SNMP")
+                    .register(meterRegistry));
         }
 
         return metrics;

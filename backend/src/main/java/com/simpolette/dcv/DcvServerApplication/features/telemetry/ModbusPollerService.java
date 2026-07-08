@@ -1,6 +1,8 @@
 package com.simpolette.dcv.DcvServerApplication.features.telemetry;
 
 import com.simpolette.dcv.DcvServerApplication.features.telemetry.dto.TelemetryMetricDto;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,8 +18,18 @@ import java.util.List;
 public class ModbusPollerService {
 
     private static final Logger log = LoggerFactory.getLogger(ModbusPollerService.class);
+    private final MeterRegistry meterRegistry;
+
+    public ModbusPollerService() {
+        this(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+    }
+
+    public ModbusPollerService(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
 
     public List<TelemetryMetricDto> pollUpsDevice(Long deviceId, String host, int port, int unitId) {
+        Timer.Sample sample = Timer.start(meterRegistry);
         List<TelemetryMetricDto> metrics = new ArrayList<>();
         Instant now = Instant.now();
 
@@ -67,6 +79,11 @@ public class ModbusPollerService {
             }
         } catch (Exception e) {
             log.error("Failed to poll Modbus TCP device {} at {}:{}: {}", deviceId, targetHost, port, e.getMessage());
+        } finally {
+            sample.stop(Timer.builder("telemetry.device.poll.time")
+                    .description("Modbus TCP device poll latency")
+                    .tag("protocol", "MODBUS")
+                    .register(meterRegistry));
         }
 
         return metrics;

@@ -2,7 +2,9 @@ package com.simpolette.dcv.DcvServerApplication.features.alert;
 
 import tools.jackson.databind.json.JsonMapper;
 import com.simpolette.dcv.DcvServerApplication.features.alert.dto.AcknowledgeAlarmRequest;
-import com.simpolette.dcv.DcvServerApplication.features.telemetry.TelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.telemetry.RackTelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.telemetry.UpsTelemetrySseController;
+import com.simpolette.dcv.DcvServerApplication.features.device.DeviceRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,13 @@ class EquipmentAlarmControllerTest {
     private EquipmentAlarmRepository alarmRepository;
 
     @MockitoBean
-    private TelemetrySseController sseController;
+    private DeviceRepository deviceRepository;
+
+    @MockitoBean
+    private RackTelemetrySseController rackTelemetrySseController;
+
+    @MockitoBean
+    private UpsTelemetrySseController upsTelemetrySseController;
 
     @Test
     @DisplayName("GET /api/v1/alarms/active - returns active equipment alarms")
@@ -55,12 +63,24 @@ class EquipmentAlarmControllerTest {
     @DisplayName("POST /api/v1/alarms/{id}/acknowledge - acknowledges alarm and broadcasts SSE event")
     void acknowledgeAlarm_ReturnsOk() throws Exception {
         EquipmentAlarm alarm = new EquipmentAlarm(1L, "CPU_USAGE", AlarmSeverity.CRITICAL, AlarmStatus.TRIGGERED, "High CPU", Instant.now());
+        alarm.setDeviceId(1L);
         when(alarmRepository.findById(10L)).thenReturn(Optional.of(alarm));
         when(alarmRepository.save(any(EquipmentAlarm.class))).thenAnswer(i -> {
             EquipmentAlarm a = i.getArgument(0);
             a.setAcknowledgedBy("admin");
             return a;
         });
+
+        com.simpolette.dcv.DcvServerApplication.features.device.Device device = new com.simpolette.dcv.DcvServerApplication.features.device.Device();
+        device.setId(1L);
+        com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType dt = new com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType();
+        dt.setCategory(com.simpolette.dcv.DcvServerApplication.features.devicetype.DeviceType.Category.COMPUTE);
+        device.setDeviceType(dt);
+        com.simpolette.dcv.DcvServerApplication.features.rack.Rack rack = new com.simpolette.dcv.DcvServerApplication.features.rack.Rack();
+        rack.setId(5L);
+        device.setRack(rack);
+
+        when(deviceRepository.findById(1L)).thenReturn(Optional.of(device));
 
         AcknowledgeAlarmRequest request = new AcknowledgeAlarmRequest("admin", "Investigating issue");
 
@@ -70,6 +90,6 @@ class EquipmentAlarmControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.acknowledgedBy").value("admin"));
 
-        verify(sseController).broadcastEvent(eq("ALARM_ACKNOWLEDGED"), any());
+        verify(rackTelemetrySseController).broadcastEvent(eq(5L), eq("ALARM_ACKNOWLEDGED"), any());
     }
 }

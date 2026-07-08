@@ -26,4 +26,11 @@ class ModbusPollerServiceTest {
 
         assertThat(metrics).isEmpty();
     }
+
+    @Test
+    @DisplayName("Should initialize with custom MeterRegistry constructor")
+    void testCustomConstructor() {
+        ModbusPollerService service = new ModbusPollerService(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
+        assertThat(service).isNotNull();
+    }
 }
