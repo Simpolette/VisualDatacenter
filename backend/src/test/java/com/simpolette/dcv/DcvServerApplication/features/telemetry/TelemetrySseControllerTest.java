@@ -26,7 +26,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should create SSE emitter upon rack client subscription and track gauge")
     void subscribe_Rack_CreatesEmitterAndTracksGauge() {
-        SseEmitter emitter = rackController.subscribe(10L);
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = rackController.subscribe(10L, response);
 
         assertThat(emitter).isNotNull();
         assertThat(gauge.get()).isEqualTo(1);
@@ -35,7 +36,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should create SSE emitter upon UPS client subscription and track gauge")
     void subscribe_Ups_CreatesEmitterAndTracksGauge() {
-        SseEmitter emitter = upsController.subscribe();
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = upsController.subscribe(response);
 
         assertThat(emitter).isNotNull();
         assertThat(gauge.get()).isEqualTo(1);
@@ -44,7 +46,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should remove rack emitter and decrement gauge on completion callback")
     void testRackControllerCompletionCallback() throws Exception {
-        SseEmitter emitter = rackController.subscribe(1L);
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = rackController.subscribe(1L, response);
         assertThat(gauge.get()).isEqualTo(1);
 
         java.lang.reflect.Field completionField = org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.class
@@ -59,7 +62,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should remove rack emitter and decrement gauge on timeout callback")
     void testRackControllerTimeoutCallback() throws Exception {
-        SseEmitter emitter = rackController.subscribe(1L);
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = rackController.subscribe(1L, response);
         assertThat(gauge.get()).isEqualTo(1);
 
         java.lang.reflect.Field timeoutField = org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.class
@@ -74,7 +78,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should remove rack emitter and decrement gauge on error callback")
     void testRackControllerErrorCallback() throws Exception {
-        SseEmitter emitter = rackController.subscribe(1L);
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = rackController.subscribe(1L, response);
         assertThat(gauge.get()).isEqualTo(1);
 
         java.lang.reflect.Field errorField = org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.class
@@ -89,7 +94,8 @@ class TelemetrySseControllerTest {
     @Test
     @DisplayName("Should remove ups emitter and decrement gauge on completion callback")
     void testUpsControllerCompletionCallback() throws Exception {
-        SseEmitter emitter = upsController.subscribe();
+        jakarta.servlet.http.HttpServletResponse response = mock(jakarta.servlet.http.HttpServletResponse.class);
+        SseEmitter emitter = upsController.subscribe(response);
         assertThat(gauge.get()).isEqualTo(1);
 
         java.lang.reflect.Field completionField = org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter.class

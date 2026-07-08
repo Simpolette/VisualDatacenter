@@ -17,7 +17,7 @@ export default function RoomDetailsPage() {
   const roomId = Number(id)
 
   const { rooms, loading: roomsLoading, fetchRooms } = useRoomStore()
-  const { racks, loading: racksLoading, fetchRacksForRoom } = useRackStore()
+  const { racks, loading: racksLoading, fetchRacksForRoom, searchQuery, clearSearch } = useRackStore()
   const { connectStream: connectRackStream, disconnectStream: disconnectRackStream } = useTelemetryStore()
   const { connectStream: connectUpsStream, disconnectStream: disconnectUpsStream } = useUpsTelemetryStore()
 
@@ -30,6 +30,13 @@ export default function RoomDetailsPage() {
   const [workspaceMode, setWorkspaceMode] = useState<'NORMAL' | 'PLACEMENT_PENDING' | 'PLACEMENT_DRAGGING' | 'CREATION_FORM' | 'ISOLATION_SELECT' | 'ISOLATION_VIEW'>('NORMAL')
   const [isolatedRackIds, setIsolatedRackIds] = useState<number[]>([])
   const [newRackCoords, setNewRackCoords] = useState<{ posX: number; posY: number; rotationDeg: number; length: number } | null>(null)
+
+  // Clear search query when a rack is selected (search mode auto clear)
+  useEffect(() => {
+    if (selectedRackId !== null && searchQuery) {
+      clearSearch()
+    }
+  }, [selectedRackId, searchQuery, clearSearch])
 
   // Manage Rack telemetry stream based on active selection
   useEffect(() => {

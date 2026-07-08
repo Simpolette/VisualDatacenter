@@ -66,6 +66,12 @@ export function RoomDetailsHeader({
     return () => clearTimeout(timer)
   }, [localQuery, room.id, searchRacks, searchQuery])
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalQuery(searchQuery)
+  }, [searchQuery])
+
+
   if (workspaceMode === 'PLACEMENT_PENDING' || workspaceMode === 'PLACEMENT_DRAGGING' || workspaceMode === 'CREATION_FORM') {
     return (
       <div className="flex items-center justify-between px-6 py-3.5 bg-placement-surface border-b border-placement-border shrink-0 z-20 transition-all">
