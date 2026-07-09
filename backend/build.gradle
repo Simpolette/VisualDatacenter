@@ -40,6 +40,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.snmp4j:snmp4j:3.7.7'
 
+	// Observability
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+
 	implementation 'tools.jackson.core:jackson-core:3.1.4'
 	implementation 'tools.jackson.core:jackson-databind:3.1.4'
 
@@ -48,7 +53,7 @@ dependencies {
 	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.23'
 	implementation 'org.apache.tomcat.embed:tomcat-embed-websocket:11.0.23'
 
-	runtimeOnly 'org.postgresql:postgresql:42.7.11'
+	runtimeOnly 'org.postgresql:postgresql:42.7.12'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-testcontainers'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'

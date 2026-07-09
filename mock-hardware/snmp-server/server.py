@@ -1,5 +1,23 @@
 import socket
 import sys
+import random
+import time
+
+# Global state dictionary for device metrics
+state = {
+    "uptime_start": time.time(),
+    "cpu": 45.0,
+    "ram": 60.0,
+    "network": 350.0,
+    "temp": 38.0
+}
+
+def update_snmp_state():
+    # Minor random walk changes
+    state["cpu"] = max(5, min(95, state["cpu"] + random.choice([-2, -1, 0, 1, 2])))
+    state["ram"] = max(10, min(90, state["ram"] + random.choice([-1, 0, 1])))
+    state["network"] = max(50, min(900, state["network"] + random.choice([-10, -5, 0, 5, 10])))
+    state["temp"] = max(20, min(75, state["temp"] + random.choice([-1, 0, 1])))
 
 def build_ber_length(length):
     if length < 128:
@@ -76,12 +94,21 @@ def handle_snmp_get(data):
     req_id_len = data[req_id_start + 1]
     req_id_bytes = data[req_id_start: req_id_start + 2 + req_id_len]
 
+    # Update states randomly on every poll
+    update_snmp_state()
+
+    uptime_ticks = int((time.time() - state["uptime_start"]) * 100)
+    cpu_val = int(state["cpu"])
+    ram_val = int(state["ram"])
+    network_val = int(state["network"])
+    temp_val = int(state["temp"])
+
     # Build VarBinds for metrics:
-    vb1 = build_varbind("1.3.6.1.2.1.1.3.0", 8640000, tag=0x43) # TimeTicks tag=0x43 (sysUpTime)
-    vb2 = build_varbind("1.3.6.1.2.1.25.3.3.1.2.1", 45)         # CPU Usage %
-    vb3 = build_varbind("1.3.6.1.2.1.25.2.3.1.6.1", 62)         # RAM Usage %
-    vb4 = build_varbind("1.3.6.1.2.1.2.2.1.10.1", 350)        # Network Mbps
-    vb5 = build_varbind("1.3.6.1.4.1.2021.11.11.0", 38)        # Temp °C
+    vb1 = build_varbind("1.3.6.1.2.1.1.3.0", uptime_ticks, tag=0x43) # TimeTicks tag=0x43 (sysUpTime)
+    vb2 = build_varbind("1.3.6.1.2.1.25.3.3.1.2.1", cpu_val)         # CPU Usage %
+    vb3 = build_varbind("1.3.6.1.2.1.25.2.3.1.6.1", ram_val)         # RAM Usage %
+    vb4 = build_varbind("1.3.6.1.2.1.2.2.1.10.1", network_val)       # Network Mbps
+    vb5 = build_varbind("1.3.6.1.4.1.2021.11.11.0", temp_val)        # Temp °C
 
     varbind_list_bytes = vb1 + vb2 + vb3 + vb4 + vb5
     varbind_seq = bytes([0x30]) + build_ber_length(len(varbind_list_bytes)) + varbind_list_bytes

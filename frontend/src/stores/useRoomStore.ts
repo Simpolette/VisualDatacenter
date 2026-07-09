@@ -27,6 +27,7 @@ interface RoomState {
   createError: string | null;
   fetchRooms: () => Promise<void>;
   createRoom: (data: CreateRoomPayload) => Promise<Room>;
+  deleteRoom: (roomId: number) => Promise<void>;
 }
 
 export const useRoomStore = create<RoomState>((set, get) => ({
@@ -63,6 +64,21 @@ export const useRoomStore = create<RoomState>((set, get) => ({
     } catch (err) {
       const message = err instanceof Error ? err.message : 'An unexpected error occurred';
       set({ createError: message, creating: false });
+      throw err;
+    }
+  },
+
+  deleteRoom: async (roomId: number) => {
+    set({ loading: true, error: null });
+    try {
+      await api.delete(`/rooms/${roomId}`);
+      set((state) => ({
+        rooms: state.rooms.filter((r) => r.id !== roomId),
+        loading: false,
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      set({ error: message, loading: false });
       throw err;
     }
   },

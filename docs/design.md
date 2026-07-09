@@ -1,114 +1,145 @@
 # Visual Datacenter — Technical Design
 
-## Architectural Style
+## 1. Architectural Styles
 
-**Classic client-server** — a Spring Boot REST API serving a React SPA with Three.js for 3D rendering.
+The system is designed around a **decoupled Client-Server (REST API)** architectural style. 
 
-| Choice                            | Rationale                                                                                           |
-| --------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Spring Boot 4.1 (Java 25)        | Backend already initialized; mature ecosystem for REST APIs and JPA                                 |
-| PostgreSQL + JPA/Hibernate        | Relational integrity for rooms, racks, devices, and slot assignments; spatial queries if needed later |
-| React + Vite SPA                  | Fast dev experience; component model fits the 2D rack editor and 3D viewer well                     |
-| Three.js                          | Industry-standard WebGL library; large ecosystem of controls, loaders, and helpers                  |
-| No auth / single-user sandbox     | MVP simplicity — no login, no roles; every user has full access                                     |
-| Local file storage (images)       | Device/room images stored on server filesystem; S3 deferred to production phase                     |
+*   **Frontend SPA**: A single-page React application built with TypeScript, Vite, and TailwindCSS, utilizing Three.js (via React Three Fiber) for 3D room rendering and canvas/DOM elements for 2D rack inspection.
+*   **Backend API**: A Spring Boot API (Java 25) acting as a stateless REST service that exposes resources under `/api/v1`.
+*   **Stateless REST Communication**: Data transfer occurs via JSON payloads. The backend is the authoritative source of validation and state management.
+*   **Sandbox Model**: The initial system operates as a single-user sandbox without authentication or role-based access control, allowing rapid iteration of visual tools.
 
+---
 
-## C4 Diagrams
+## 2. C4 Diagrams
 
 ### Level 1 — System Context
 
-*The system is self-contained with no external integrations in the MVP. A single user interacts with the web application.*
-
-```mermaid
+The system context diagram shows the user (Datacenter Operations Manager/Systems Engineer) interacting with the Visual Datacenter platform and external physical equipment.
+![System Context](./SystemContext.png)
+<!-- ```mermaid
 C4Context
-    title System Context — Visual Datacenter
+    title System Context (Level 1) — Visual Datacenter
 
-    Person(user, "User", "Manages server rooms, racks, and devices via 2D/3D views.")
+    Person(user, "Datacenter Operator", "Manages rooms, racks, and devices via web interface.")
+    System(vdc, "Visual Datacenter Platform", "Simulates server rooms in 3D and server racks in 2D with asset search and live telemetry.")
+    System_Ext(hw, "Physical Datacenter Hardware", "Servers, Switches, Routers, PDUs, and UPS units.")
 
-    System(vdc, "Visual Datacenter", "Web-based datacenter simulation with 2D rack editor and 3D room visualization.")
-
-    Rel(user, vdc, "Uses web app", "HTTPS")
-```
+    Rel(user, vdc, "Configures layouts, inspects capacity, and searches assets", "HTTPS")
+    Rel(vdc, hw, "Polls device telemetry and battery status", "SNMP v2c/v3 & Modbus TCP")
+``` -->
 
 ### Level 2 — Containers
 
-*The platform consists of a React SPA, a Spring Boot API, a PostgreSQL database, and local file storage.*
-
-```mermaid
+The container diagram outlines the division between the React Frontend SPA, the Spring Boot Backend API, the PostgreSQL database, frontend static assets, the mock hardware servers, and the local observability stack.
+![Container Diagram](./ContainerView.png)
+<!-- ```mermaid
 C4Container
-    title Container Diagram — Visual Datacenter
+    title Container Diagram (Level 2) — Visual Datacenter
 
-    Person(user, "User", "Manages server rooms, racks, and devices.")
+    Person(user, "Datacenter Operator", "Configures layouts, inspects capacity, and performs asset lookup.")
 
-    System_Boundary(vdc_boundary, "Visual Datacenter Platform") {
-        Container(web, "Web Application", "React, Vite, Three.js", "2D rack editor, 3D room viewer, device management UI.")
-        Container(api, "REST API", "Spring Boot 4.1, Java 17", "CRUD endpoints for rooms, racks, devices; image upload; slot validation.")
-        ContainerDb(db, "Database", "PostgreSQL", "Rooms, racks, devices, slot assignments, device types.")
-        Container(fs, "File Storage", "Local filesystem", "Device images and room layout images.")
+    System_Boundary(vdc_boundary, "Visual Datacenter Boundary") {
+        Container(web_app, "Frontend SPA", "React, Vite, Three.js", "Renders the 3D room floor, 2D rack elevations, debounced search bar, and sidebars.")
+        Container(api_server, "REST API Server", "Spring Boot, Java 21", "Handles business logic, DTO validation, collision checks, SNMP/Modbus telemetry collectors, and trigram search endpoints.")
+        ContainerDb(database, "Database", "PostgreSQL", "Stores persistent states of Rooms, Racks, Device Types, Devices, and PDUs with pg_trgm GIN trigram indexes.")
+        Container(static_assets, "Public Static Assets", "React Public Folder", "Bundles device faceplate images, textures, and floor plans directly in frontend/public.")
+        
+        Container(prom, "Prometheus", "Prometheus TSDB", "Scrapes metrics from spring actuator /api/metrics and system endpoints.")
+        Container(loki, "Grafana Loki", "Loki Log Store", "Aggregates logs forwarded by Promtail from docker container logs.")
+        Container(tempo, "Grafana Tempo", "Tempo Trace Store", "Ingests OTLP traces from the backend JVM for request tracing.")
+        Container(promtail, "Promtail", "Loki Agent", "Shipper reading docker log files and pushing them to Loki.")
+        Container(grafana, "Grafana", "Data Visualization Dashboard", "Queries Prometheus, Loki, and Tempo to render observability dashboards.")
     }
 
-    Rel(user, web, "Uses", "HTTPS")
-    Rel(web, api, "REST API calls", "JSON/HTTPS")
-    Rel(api, db, "Reads/Writes", "JPA/JDBC")
-    Rel(api, fs, "Stores/Serves images", "Filesystem")
-```
+    System_Ext(snmp_devices, "Network & Server Hardware (Mock)", "Python SNMP server simulating dynamic metrics on UDP 161")
+    System_Ext(modbus_ups, "UPS Power Systems (Mock)", "Python Modbus TCP server simulating battery telemetry on Port 502")
 
+    Rel(user, web_app, "Interacts with", "HTTPS")
+    Rel(web_app, api_server, "Sends commands, queries & search requests", "HTTPS/JSON")
+    Rel(web_app, static_assets, "Loads faceplate images & textures", "HTTP Static Asset Serving")
+    Rel(api_server, database, "Queries, searches & updates schema", "JPA/Hibernate")
+    Rel(api_server, snmp_devices, "Polls system OID metrics & status", "SNMP v2c/v3 (UDP 161)")
+    Rel(api_server, modbus_ups, "Reads register states & power telemetry", "Modbus TCP (Port 502)")
+    
+    Rel(promtail, loki, "Pushes aggregated container logs", "HTTP")
+    Rel(api_server, tempo, "Exports application traces", "OTLP/gRPC 4317")
+    Rel(prom, api_server, "Scrapes metrics from /actuator/prometheus", "HTTP")
+    Rel(grafana, prom, "Queries metrics", "HTTP")
+    Rel(grafana, loki, "Queries logs", "HTTP")
+    Rel(grafana, tempo, "Queries traces", "HTTP")
+``` -->
 
-## High-Level Architecture
+---
+
+## 3. High-Level Architecture
+
+The components flow from the browser interfaces to the Spring Boot feature packages, the database, and physical hardware equipment:
 
 ```mermaid
 flowchart TB
-    subgraph Client["Browser"]
+    subgraph Browser ["Web Browser Client"]
         spa["React SPA"]
-        rack2d["2D Rack Editor<br/>(Canvas/SVG)"]
-        room3d["3D Room Viewer<br/>(Three.js)"]
+        rack2d["2D Rack View Component"]
+        room3d["3D Three.js Room Scene"]
+        searchBar["Search & Filter Toolbar"]
+        assets["Public Static Assets (frontend/public/)"]
     end
 
-    subgraph Server["Spring Boot API"]
-        ctrl["REST Controllers"]
-        svc["Service Layer"]
+    subgraph Backend ["Spring Boot REST API"]
+        ctrl["REST Controllers (/api/v1)"]
+        svc["Service Packages (features/)"]
+        telemetry["SNMP & Modbus Telemetry Engine"]
+        valid["U-Slot Collision Validator"]
         repo["JPA Repositories"]
-        valid["Slot Validation"]
-        imgSvc["Image Service"]
     end
 
-    subgraph Storage["Data"]
-        db[("PostgreSQL")]
-        fs["File Storage<br/>(images)"]
+    subgraph Storage ["Persistent Storage"]
+        db[("PostgreSQL Database with pg_trgm GIN Indexes")]
+    end
+
+    subgraph Hardware ["Physical Datacenter Infrastructure"]
+        snmpDev["Servers, Switches & PDUs"]
+        modbusUps["UPS Power Units"]
     end
 
     spa --> rack2d
     spa --> room3d
-    spa -- "REST (JSON)" --> ctrl
+    spa --> searchBar
+    rack2d --> assets
+    room3d --> assets
+    searchBar -- "Debounced Search Query" --> ctrl
+    spa -- "RESTful API Calls" --> ctrl
     ctrl --> svc
-    svc --> repo
+    svc --> telemetry
     svc --> valid
-    svc --> imgSvc
+    svc --> repo
     repo --> db
-    imgSvc --> fs
+    telemetry -- "SNMP v2c/v3 (UDP 161)" --> snmpDev
+    telemetry -- "Modbus TCP (Port 502)" --> modbusUps
 ```
 
+---
 
-## Database Schema Logic
+## 4. Database Schema Logic
 
-PostgreSQL via JPA/Hibernate. Naming: `snake_case` columns, auto-generated `BIGINT` primary keys.
+### Entity Relationship Diagram (ERD)
 
-### Entity Relationship Diagram
+The database schema defines the relationships between rooms, racks, devices, PDUs, and device types.
 
 ```mermaid
 erDiagram
     ROOM ||--o{ RACK : contains
-    RACK ||--o{ DEVICE : "has installed"
-    RACK ||--o{ PDU : "has attached"
-    DEVICE_TYPE ||--o{ DEVICE : "is type of"
+    RACK ||--o{ DEVICE : "hosts"
+    RACK ||--o{ PDU : "mounts"
+    DEVICE_TYPE ||--o{ DEVICE : "defines template for"
 
     ROOM {
         bigint id PK
-        string name
+        string name "Unique"
         string location
         float width_m
-        float depth_m
+        float length_m
         float height_m
         string floor_plan_image
         timestamp created_at
@@ -118,23 +149,26 @@ erDiagram
     RACK {
         bigint id PK
         bigint room_id FK
-        string name
+        string name "Unique within Room"
         int total_units "42 or 44"
-        float pos_x "position on floor plan"
-        float pos_y "position on floor plan"
-        float rotation_deg "rotation angle"
+        float pos_x
+        float pos_y
+        float rotation_deg
+        float length "default 1.0"
         timestamp created_at
         timestamp updated_at
     }
 
     DEVICE_TYPE {
         bigint id PK
-        string name "Server, Blade, Switch..."
+        string name "Template model name"
         string category "COMPUTE, NETWORK, STORAGE"
-        int height_u "height in rack units"
+        int height_u "Size in U-slots"
         float width_mm
-        float depth_mm
+        float length_mm
         float weight_kg
+        string front_image_path
+        string rear_image_path
         string image_path
         timestamp created_at
     }
@@ -143,10 +177,11 @@ erDiagram
         bigint id PK
         bigint rack_id FK
         bigint device_type_id FK
-        string name "instance label"
-        int start_u "bottom U-slot position"
+        string name "Instance label"
+        int start_u
         string face "FRONT or REAR"
         string status "ACTIVE, MAINTENANCE, OFFLINE"
+        string ip_address "Sub-string search target"
         timestamp created_at
         timestamp updated_at
     }
@@ -163,250 +198,72 @@ erDiagram
 
 ### Core Invariants
 
-| Entity          | Invariant                                                                                                          |
-| --------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Room**        | `width_m > 0`, `depth_m > 0`; name unique within the system                                                       |
-| **Rack**        | `total_units` ∈ {42, 44}; `pos_x` and `pos_y` within room bounds; name unique within a room                       |
-| **Device**      | `start_u >= 1`; `start_u + device_type.height_u - 1 <= rack.total_units`; no overlap with other devices in same rack on same face |
-| **PDU**         | Position ∈ {LEFT, RIGHT, REAR}; max 2 PDUs per rack (one per side or rear)                                         |
-| **DeviceType**  | `height_u >= 1`; image_path nullable (falls back to default placeholder)                                           |
+| Entity | Core Validation Rules & Invariants |
+| :--- | :--- |
+| **Room** | `width_m > 0`, `length_m > 0`; System-wide unique name. |
+| **Rack** | `total_units` ∈ {42, 44}; Coordinates `pos_x` and `pos_y` must be within Room boundaries; Unique name within Room. Color-coded in 3D based on U-slot utilization (High ≥80% Red, Medium ≥50% Yellow, Low <50% Green) across standard, selected highlight, and X-ray mode outer-frame states. |
+| **Device** | `start_u >= 1` and `start_u + device_type.height_u - 1 <= rack.total_units`. Overlap validation (U-slot collision detection). |
+| **PDU** | `position` ∈ {LEFT, RIGHT, REAR}; maximum 3 PDUs attached to a single rack (one per position). |
+| **Device Type** | `height_u >= 1`, width and length positive; deletion blocked if referenced by active device instances. |
 
-### U-Slot Collision Detection
+### U-Slot Collision Detection Logic
 
-The most critical validation — ensuring no two devices in the same rack overlap on the same face:
+Before persisting any device installation, the service layer enforces the following transactional logic:
 
-```text
-Install device D (height_u = H) at start_u = S in rack R on face F:
-  1. Occupied range = [S, S + H - 1]
-  2. Query all existing devices in R on face F
-  3. For each existing device E (start_u = Es, height_u = Eh):
-     - Existing range = [Es, Es + Eh - 1]
-     - If ranges overlap → reject with 409 Conflict
-  4. Validate S >= 1 AND S + H - 1 <= rack.total_units → reject with 400 if out of bounds
-  5. Persist the device
-```
+1.  **Define Target Interval**: A device of height $H$ installed at start unit $S$ occupies slots:
+    $$I_{target} = [S, S + H - 1]$$
+2.  **Fetch Existing Intervals**: Query all devices currently installed in the same rack ID where `face` matches the target installation face (e.g. `FRONT` or `REAR`).
+3.  **Conflict Check**: For each existing device with interval $I_{existing} = [E_{start}, E_{start} + E_{height} - 1]$:
+    $$\text{Conflict} \iff I_{target} \cap I_{existing} \neq \emptyset$$
+    $$\text{Conflict} \iff \max(S, E_{start}) \le \min(S + H - 1, E_{start} + E_{height} - 1)$$
+4.  **Action**: If a conflict is detected, abort the transaction and return HTTP 409 Conflict. If no conflicts exist, proceed with persistence.
 
-This validation runs **server-side** (authoritative). The frontend performs the same check optimistically for instant UI feedback but never trusts it — the API is the source of truth.
+---
 
+## 5. Architecture Decision Records (ADRs)
 
-## API Design
+| ADR # | Decision | Context / Rationale | Consequences |
+| :--- | :--- | :--- | :--- |
+| **ADR-01** | Decoupled Spring Boot + React | Separates business domain logic from visualization and client-side interactions. | Clean API contract; separate build steps. |
+| **ADR-02** | Three.js for 3D Room View | High performance, rich WebGL libraries, and robust OrbitControls / raycasting support. | High dependency on browser WebGL support. |
+| **ADR-03** | Instanced Mesh for 10k+ Devices | To maintain FPS > 40, rendering individual unique BoxGeometries for thousands of devices causes draw-call bottlenecks. Instanced meshes share geometry and materials, executing in a single draw-call. | Requires centralizing mesh updates and tracking instance index offsets. |
+| **ADR-04** | Authoritative Server-side Collision | Client-side layout tools are optimistic for speed, but the database integrity relies on Spring Boot's service validations. | Slightly higher API overhead during device installation. |
+| **ADR-05** | No Authentication in MVP | Allows zero-friction sandbox usage. | Security checks and login screens must be implemented in a subsequent deployment phase. |
+| **ADR-06** | Frontend Public Asset Bundling | Serve faceplate and texture images directly from the React static public directory (`frontend/public/`). | Eliminates backend file I/O overhead and complex file upload handling; assets are bundled with the web client. |
+| **ADR-07** | Dual-Face (Front/Rear) Texture Mapping | 3D device materials map to front face, rear face and while 2D rack elevation renders the active faceplate. | Ensures accurate hardware visualization regardless of installation orientation. |
+| **ADR-08** | Loki, Tempo, and Promtail for Observability | Rather than using Jaeger, we utilize Loki (log aggregation), Tempo (distributed traces), and Promtail (log collection agent) integrated with Prometheus and Grafana for full observability. | Centralized monitoring stack using standard Grafana agents. |
+| **ADR-09** | SSE In-Memory Caching for Telemetry | To avoid sub-second latency delays during subscription, the controllers maintain thread-safe cache logs. Connecting clients receive the baseline immediately without waiting for the 5s scheduler. | Clients receive instant, responsive telemetry data on connection (<10ms). |
 
-RESTful JSON API. Base path: `/api/v1`.
+---
 
-### Endpoints
+## 6. CI/CD Pipeline Design
 
-#### Rooms
-
-| Method   | Path                      | Description                     | Request Body            | Response         |
-| -------- | ------------------------- | ------------------------------- | ----------------------- | ---------------- |
-| `GET`    | `/rooms`                  | List all rooms                  | —                       | `Room[]`         |
-| `POST`   | `/rooms`                  | Create a room                   | `CreateRoomDTO`         | `Room`           |
-| `GET`    | `/rooms/:id`              | Get room with racks             | —                       | `RoomDetailDTO`  |
-| `PUT`    | `/rooms/:id`              | Update room                     | `UpdateRoomDTO`         | `Room`           |
-| `DELETE` | `/rooms/:id`              | Delete room (cascade racks)     | —                       | `204`            |
-| `POST`   | `/rooms/:id/floor-plan`   | Upload floor plan image         | `multipart/form-data`   | `Room`           |
-
-#### Racks
-
-| Method   | Path                            | Description                          | Request Body            | Response          |
-| -------- | ------------------------------- | ------------------------------------ | ----------------------- | ----------------- |
-| `GET`    | `/rooms/:roomId/racks`          | List racks in a room                 | —                       | `Rack[]`          |
-| `POST`   | `/rooms/:roomId/racks`          | Create a rack in a room              | `CreateRackDTO`         | `Rack`            |
-| `GET`    | `/racks/:id`                    | Get rack with devices and PDUs       | —                       | `RackDetailDTO`   |
-| `PUT`    | `/racks/:id`                    | Update rack (position, name)         | `UpdateRackDTO`         | `Rack`            |
-| `DELETE` | `/racks/:id`                    | Delete rack (cascade devices)        | —                       | `204`             |
-| `GET`    | `/racks/:id/utilization`        | Get U-slot usage and free count      | —                       | `UtilizationDTO`  |
-
-#### Devices
-
-| Method   | Path                            | Description                          | Request Body            | Response         |
-| -------- | ------------------------------- | ------------------------------------ | ----------------------- | ---------------- |
-| `POST`   | `/racks/:rackId/devices`        | Install a device in a rack           | `InstallDeviceDTO`      | `Device`         |
-| `PUT`    | `/devices/:id`                  | Update device (move to different U)  | `UpdateDeviceDTO`       | `Device`         |
-| `DELETE` | `/devices/:id`                  | Remove device from rack              | —                       | `204`            |
-
-#### Device Types (Catalog)
-
-| Method   | Path                            | Description                          | Request Body            | Response         |
-| -------- | ------------------------------- | ------------------------------------ | ----------------------- | ---------------- |
-| `GET`    | `/device-types`                 | List all device types                | —                       | `DeviceType[]`   |
-| `POST`   | `/device-types`                 | Create a device type                 | `CreateDeviceTypeDTO`   | `DeviceType`     |
-| `PUT`    | `/device-types/:id`             | Update a device type                 | `UpdateDeviceTypeDTO`   | `DeviceType`     |
-| `DELETE` | `/device-types/:id`             | Delete a device type                 | —                       | `204`            |
-| `POST`   | `/device-types/:id/image`       | Upload device type image             | `multipart/form-data`   | `DeviceType`     |
-
-#### PDUs
-
-| Method   | Path                            | Description                          | Request Body            | Response         |
-| -------- | ------------------------------- | ------------------------------------ | ----------------------- | ---------------- |
-| `POST`   | `/racks/:rackId/pdus`           | Attach a PDU to a rack               | `CreatePduDTO`          | `Pdu`            |
-| `DELETE` | `/pdus/:id`                     | Detach a PDU                         | —                       | `204`            |
-
-### Key DTOs
-
-```text
-CreateRoomDTO     { name, location?, widthM, depthM, heightM? }
-RoomDetailDTO     { ...Room, racks: Rack[], rackCount, totalCapacityU, usedU }
-CreateRackDTO     { name, totalUnits, posX, posY, rotationDeg? }
-RackDetailDTO     { ...Rack, devices: Device[], pdus: Pdu[], freeUnits, occupiedUnits }
-InstallDeviceDTO  { deviceTypeId, name?, startU, face? }
-UtilizationDTO    { totalUnits, occupiedUnits, freeUnits, utilizationPercent, slots: SlotMap[] }
-```
-
-
-## Frontend Architecture
-
-### Page Structure
-
-```text
-App
-├── RoomListPage          — grid/list of all rooms; create/edit room modal
-├── RoomViewPage          — 3D visualization of a single room
-│   ├── ThreeCanvas       — Three.js scene (floor, racks, devices)
-│   ├── RoomToolbar       — search rack, zoom controls, utilization legend
-│   └── RackInfoPanel     — side panel showing selected rack summary
-└── RackDetailPage        — 2D rack editor for a single rack
-    ├── RackDiagram2D     — SVG/Canvas front-face view with U-slot grid
-    ├── DevicePanel       — device catalog sidebar for drag-and-drop install
-    └── DeviceInfoModal   — selected device details
-```
-
-### 3D Room Viewer (Three.js)
+The system implements automated builds, testing, and container packaging using a unified GitHub Actions pipeline.
 
 ```mermaid
 flowchart LR
-    subgraph Scene["Three.js Scene"]
-        floor["Floor Plane<br/>(room dimensions)"]
-        rackMeshes["Rack Meshes<br/>(box geometry per rack)"]
-        deviceMeshes["Device Meshes<br/>(nested in racks)"]
-        lights["Ambient + Directional<br/>Lighting"]
-    end
-
-    subgraph Controls["Interaction"]
-        orbit["OrbitControls<br/>(rotate, zoom, pan)"]
-        raycaster["Raycaster<br/>(hover, click detection)"]
-        search["Search → Camera<br/>fly-to animation"]
-        isolate["Isolate mode<br/>(dim non-selected)"]
-    end
-
-    subgraph UI["Overlay UI"]
-        tooltip["Hover Tooltip<br/>(device info)"]
-        legend["Color Legend<br/>(utilization thresholds)"]
-        searchBar["Search Bar"]
-    end
-
-    orbit --> Scene
-    raycaster --> rackMeshes
-    raycaster --> deviceMeshes
-    search --> rackMeshes
-    raycaster --> tooltip
+    Start([Git Commit / PR]) --> Trigger{CI Pipeline}
+    Trigger --> Lint["Lint & Format Check"]
+    Trigger --> Test["Unit & Integration Tests"]
+    Lint & Test --> Quality{"Quality Gate (Jacoco / Sonar)"}
+    Quality -- Fail --> Terminate([Abort Build])
+    Quality -- Pass --> Dockerize["Docker Multi-Stage Build"]
+    Dockerize --> Push["Push Registry (GHCR/DockerHub)"]
+    Push --> Deploy["Local Orchestration / CD Trigger"]
 ```
+---
 
-**Capacity color coding logic:**
+## 7. Quality Gates
 
-| Free U %         | Color          | Meaning                |
-| ---------------- | -------------- | ---------------------- |
-| > 50%            | 🟢 Green       | Plenty of space        |
-| 20% – 50%       | 🟡 Yellow      | Moderate utilization   |
-| < 20%            | 🔴 Red         | Nearly full            |
-| 0% (full)        | ⚫ Dark Red     | No free slots          |
+To guarantee development speed without sacrificing runtime stability (FPS > 40 under high load), code must pass the following quality thresholds before being merged into `main` or `develop`:
 
-Thresholds are configurable via a settings panel.
+### Static Analysis and Code Rules
+*   **0 Blocker / Critical Bugs**: No warning labels or safety issues detected by SonarQube.
+*   **Zero Syntax & Linter Errors**: ESLint configurations must be completely clean on the frontend; Checkstyle/Spotless checks must compile warning-free on the backend.
+*   **Complexity Thresholds**: Cognitive complexity of React rendering components must remain low; complex 3D computations (like instanced mesh coordinates) must be isolated into helper functions with dedicated unit tests.
 
-**Key 3D interactions:**
+### Test Coverage Requirements
+*   **Backend Test Coverage**: Minimum **80% line and branch coverage** verified by Jacoco. Focus on validating U-slot collision boundaries and room coordinate validations.
 
-1. **Orbit** — `OrbitControls` from Three.js for rotate, zoom, pan
-2. **Hover** — `Raycaster` detects hovered rack/device → shows tooltip overlay with name, type, U-position
-3. **Click rack** — selects the rack, opens info panel, highlights it
-4. **Search** — text input → find rack by name → animate camera to rack position (`TWEEN` or `gsap`)
-5. **Isolate** — selected rack stays opaque, all others become semi-transparent (material opacity 0.15)
-6. **View 2D** — button on selected rack → navigates to `RackDetailPage` for that rack
-
-### 2D Rack Editor
-
-The 2D view renders a single rack as a vertical grid of U-slots:
-
-```text
-┌─────────────────────────────┐
-│  Rack: RACK-A01 (42U)      │
-├─────────────────────────────┤
-│ U42 │                       │  ← empty slot
-│ U41 │                       │
-│ U40 │ ┌───────────────────┐ │
-│ U39 │ │  Server Dell R740  │ │  ← 2U device (image scaled)
-│ U38 │ └───────────────────┘ │
-│ U37 │                       │
-│ ... │                       │
-│ U03 │ ┌───────────────────┐ │
-│ U02 │ │  Switch Cisco 3850 │ │  ← 1U device
-│ U01 │ └───────────────────┘ │
-└─────────────────────────────┘
-        [+ Add Device]
-```
-
-**Interactions:**
-- **Drag from catalog** — drag a device type from the sidebar → drop onto an empty U-slot range → calls `POST /racks/:id/devices`
-- **Click device** — opens detail modal (name, type, dimensions, status)
-- **Remove device** — context menu or button → calls `DELETE /devices/:id`
-- **Hover slot** — highlights the slot range; shows "available" or "occupied"
-
-
-## Backend Package Structure
-
-```text
-com.simpolette.dcv
-├── config/                  — CORS, WebMvc, file storage config
-├── room/
-│   ├── Room.java            — JPA entity
-│   ├── RoomRepository.java  — Spring Data JPA
-│   ├── RoomService.java     — business logic
-│   ├── RoomController.java  — REST endpoints
-│   └── dto/                 — CreateRoomDTO, UpdateRoomDTO, RoomDetailDTO
-├── rack/
-│   ├── Rack.java
-│   ├── RackRepository.java
-│   ├── RackService.java
-│   ├── RackController.java
-│   └── dto/
-├── device/
-│   ├── Device.java
-│   ├── DeviceRepository.java
-│   ├── DeviceService.java
-│   ├── DeviceController.java
-│   └── dto/
-├── devicetype/
-│   ├── DeviceType.java
-│   ├── DeviceTypeRepository.java
-│   ├── DeviceTypeService.java
-│   ├── DeviceTypeController.java
-│   └── dto/
-├── pdu/
-│   ├── Pdu.java
-│   ├── PduRepository.java
-│   ├── PduService.java
-│   ├── PduController.java
-│   └── dto/
-├── image/
-│   └── ImageService.java    — file upload/serve logic
-├── validation/
-│   └── SlotValidator.java   — U-slot collision detection
-└── exception/
-    ├── GlobalExceptionHandler.java
-    ├── ResourceNotFoundException.java
-    └── SlotConflictException.java
-```
-
-
-## Architecture Decision Records (ADR)
-
-| #   | Decision                                  | Why                                                                                        | Trade-off                                                         |
-| --- | ----------------------------------------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| 1   | Spring Boot + React vs full-stack framework | Separation of concerns; backend team uses Java, frontend uses JS/TS; independent scaling  | Two build systems; CORS config needed                             |
-| 2   | Three.js vs Babylon.js for 3D             | Larger community, more examples, lighter bundle for our use case                           | Babylon has better built-in physics (not needed here)             |
-| 3   | SVG/Canvas 2D rack view vs Three.js 2D    | Simpler DOM-based interaction for drag-and-drop; better accessibility                      | Two rendering paradigms to maintain                               |
-| 4   | Server-side slot validation vs client-only | Prevents data corruption from concurrent edits or API misuse                               | Extra round-trip for validation; mitigated by optimistic UI       |
-| 5   | PostgreSQL vs NoSQL                       | Strong relational model (room → rack → device); foreign key integrity                      | Schema migrations needed on changes                               |
-| 6   | Local file storage vs cloud (S3)          | Simplest setup for MVP; no cloud credentials needed                                        | Not durable across server rebuilds; migrate to S3 for production  |
-| 7   | No auth in MVP vs basic auth              | Sandbox model — faster development, no user management overhead                            | Must add auth before any multi-user or production deployment      |
-| 8   | REST vs GraphQL                           | Simpler for CRUD-heavy domain; well-supported by Spring Boot                               | 3D view may over-fetch; can add projection DTOs as needed         |
-| 9   | Box geometry for racks vs loaded 3D models | Fast to render, predictable sizing, no asset pipeline needed                               | Less realistic appearance; can swap for GLTF models later         |
+### Container Security
+*   **Vulnerability Scan**: Docker images undergo standard automated vulnerability scans using Snyk during the build stage.

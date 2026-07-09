@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useRoomStore } from '../../stores/useRoomStore'
 import { useRackStore } from '../../stores/useRackStore'
 import { useTelemetryStore } from '../../stores/useTelemetryStore'
+import { useUpsTelemetryStore } from '../../stores/useUpsTelemetryStore'
 import RoomScene3D from './RoomScene3D'
 import RackSidebar2D from './RackSidebar2D'
 import CreateRackSidebar2D from './CreateRackSidebar2D'
@@ -16,8 +17,9 @@ export default function RoomDetailsPage() {
   const roomId = Number(id)
 
   const { rooms, loading: roomsLoading, fetchRooms } = useRoomStore()
-  const { racks, loading: racksLoading, fetchRacksForRoom } = useRackStore()
-  const { connectStream } = useTelemetryStore()
+  const { racks, loading: racksLoading, fetchRacksForRoom, searchQuery, clearSearch } = useRackStore()
+  const { connectStream: connectRackStream, disconnectStream: disconnectRackStream } = useTelemetryStore()
+  const { connectStream: connectUpsStream, disconnectStream: disconnectUpsStream } = useUpsTelemetryStore()
 
   const [selectedRackId, setSelectedRackId] = useState<number | null>(null)
   const [isUpsSelected, setIsUpsSelected] = useState(false)
@@ -29,9 +31,32 @@ export default function RoomDetailsPage() {
   const [isolatedRackIds, setIsolatedRackIds] = useState<number[]>([])
   const [newRackCoords, setNewRackCoords] = useState<{ posX: number; posY: number; rotationDeg: number; length: number } | null>(null)
 
+  // Clear search query when a rack is selected (search mode auto clear)
   useEffect(() => {
-    connectStream()
-  }, [connectStream])
+    if (selectedRackId !== null && searchQuery) {
+      clearSearch()
+    }
+  }, [selectedRackId, searchQuery, clearSearch])
+
+  // Manage Rack telemetry stream based on active selection
+  useEffect(() => {
+    if (selectedRackId !== null) {
+      connectRackStream(selectedRackId)
+    } else {
+      disconnectRackStream()
+    }
+    return () => {
+      disconnectRackStream()
+    }
+  }, [selectedRackId, connectRackStream, disconnectRackStream])
+
+  // Manage UPS room-wide telemetry stream on page mount/unmount
+  useEffect(() => {
+    connectUpsStream()
+    return () => {
+      disconnectUpsStream()
+    }
+  }, [connectUpsStream, disconnectUpsStream])
 
   useEffect(() => {
     if (rooms.length === 0) {

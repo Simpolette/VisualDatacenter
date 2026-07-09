@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeft, RotateCcw, Plus, Focus, Search, X, Loader2 } from 'lucide-react'
+import { ArrowLeft, RotateCcw, Plus, Focus, Search, X, Loader2, Trash2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import type { Room } from '../../stores/useRoomStore'
+import { useRoomStore, type Room } from '../../stores/useRoomStore'
 import { useRackStore } from '../../stores/useRackStore'
+import Modal from '../Modal/Modal'
 
 export interface RoomDetailsHeaderProps {
   room: Room
@@ -36,6 +37,25 @@ export function RoomDetailsHeader({
   const navigate = useNavigate()
   const { searchQuery, searchRacks, clearSearch, searchLoading, searchMatchedRackIds } = useRackStore()
   const [localQuery, setLocalQuery] = useState(searchQuery)
+  const deleteRoom = useRoomStore((s) => s.deleteRoom)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteRoom(room.id)
+      setIsDeleteModalOpen(false)
+      navigate('/rooms')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete room'
+      setDeleteError(message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -45,6 +65,12 @@ export function RoomDetailsHeader({
     }, 300)
     return () => clearTimeout(timer)
   }, [localQuery, room.id, searchRacks, searchQuery])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLocalQuery(searchQuery)
+  }, [searchQuery])
+
 
   if (workspaceMode === 'PLACEMENT_PENDING' || workspaceMode === 'PLACEMENT_DRAGGING' || workspaceMode === 'CREATION_FORM') {
     return (
@@ -126,6 +152,14 @@ export function RoomDetailsHeader({
                 {room.location}
               </span>
             )}
+            <button
+              onClick={() => setIsDeleteModalOpen(true)}
+              className="p-1 rounded text-text-muted hover:text-danger hover:bg-danger-alpha-10 transition-all cursor-pointer"
+              title="Delete Room"
+              id="btn-delete-room-header"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
           <p className="text-[10px] text-text-secondary mt-1">
             {room.widthM}m × {room.lengthM}m Floor
@@ -233,6 +267,50 @@ export function RoomDetailsHeader({
           <span>Add Rack</span>
         </button>
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => !isDeleting && setIsDeleteModalOpen(false)}
+        title="Delete Room"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-text-secondary leading-relaxed">
+            Are you sure you want to delete room <strong className="text-text-primary">{room.name}</strong>?
+          </p>
+          <div className="p-3 bg-danger-alpha-10 border border-danger-alpha-20 rounded-lg text-xs text-danger-light leading-normal">
+            This will permanently delete the room, all of its racks, and all devices/PDUs installed in those racks. This action cannot be undone.
+          </div>
+
+          {deleteError && (
+            <p className="text-xs text-danger font-medium">{deleteError}</p>
+          )}
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              onClick={() => setIsDeleteModalOpen(false)}
+              disabled={isDeleting}
+              className="px-4 py-2 border border-border bg-transparent text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+              className="px-4 py-2 bg-danger hover:bg-danger-hover text-text-primary rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              id="confirm-delete-room-header"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <span>Delete Room</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

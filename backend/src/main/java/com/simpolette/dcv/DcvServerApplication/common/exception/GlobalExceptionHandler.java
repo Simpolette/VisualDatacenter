@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
-        return buildResponse(HttpStatus.CONFLICT, "Data integrity violation: " + ex.getMostSpecificCause().getMessage());
+        return buildResponse(HttpStatus.CONFLICT,
+                "Data integrity violation: " + ex.getMostSpecificCause().getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

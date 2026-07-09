@@ -10,9 +10,9 @@ export function RackTelemetryCard({ deviceId }: RackTelemetryCardProps) {
   const deviceAlarms = alarms.filter((a) => a.deviceId === deviceId)
 
   return (
-    <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
+    <div className="p-4 rounded-xl bg-canvas/50 border border-border space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+        <h4 className="text-xs font-bold text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
           Live Telemetry Stream
         </h4>
@@ -20,20 +20,20 @@ export function RackTelemetryCard({ deviceId }: RackTelemetryCardProps) {
       {deviceMetrics.length > 0 ? (
         <div className="grid grid-cols-2 gap-2">
           {deviceMetrics.map((m) => (
-            <div key={m.metricKey} className="p-2 rounded-lg bg-slate-950/70 border border-slate-800/80">
-              <span className="text-[10px] text-slate-500 font-mono font-bold uppercase">{m.metricKey}</span>
-              <p className="text-sm font-bold text-white mt-0.5">
+            <div key={m.metricKey} className="p-2 rounded-lg bg-canvas border border-border">
+              <span className="text-[10px] text-text-muted font-mono font-bold uppercase">{m.metricKey}</span>
+              <p className="text-sm font-bold text-text-primary mt-0.5">
                 {m.metricValue} <span className="text-xs text-cyan-400 font-normal">{m.unit}</span>
               </p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-xs text-slate-500 italic">Listening for live SNMP/Modbus polling metric ticks...</p>
+        <p className="text-xs text-text-muted italic">Listening for live SNMP/Modbus polling metric ticks...</p>
       )}
 
       {deviceAlarms.length > 0 && (
-        <div className="pt-2 border-t border-slate-800/60 space-y-2">
+        <div className="pt-2 border-t border-border/60 space-y-2">
           <h5 className="text-[11px] font-bold text-rose-400 uppercase tracking-wider">Active Alarms</h5>
           {deviceAlarms.map((alarm) => (
             <div key={alarm.id} className="p-2.5 rounded-lg bg-rose-950/30 border border-rose-800/50 flex items-start justify-between gap-2">

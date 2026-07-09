@@ -171,6 +171,7 @@ interface RackState {
   detailsLoading: boolean;
   error: string | null;
   detailsError: string | null;
+  selectedDeviceId: number | null;
   selectedDeviceDetails: DeviceDetails | null;
   deviceDetailsLoading: boolean;
   deviceDetailsError: string | null;
@@ -186,12 +187,14 @@ interface RackState {
   fetchRacksForRoom: (roomId: number) => Promise<void>;
   fetchRackDetails: (rackId: number) => Promise<RackDetails>;
   clearSelectedRack: () => void;
+  selectDevice: (id: number | null) => void;
   fetchDeviceDetails: (deviceId: number) => Promise<DeviceDetails>;
   clearSelectedDeviceDetails: () => void;
   createRack: (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => Promise<Rack>;
   fetchDeviceTypes: () => Promise<void>;
   installDevice: (rackId: number, dto: { deviceTypeId: number; name?: string; startU: number; face?: string; ipAddress?: string; port?: number; snmpCommunity?: string }) => Promise<void>;
   deleteDevice: (deviceId: number, rackId: number) => Promise<void>;
+  deleteRack: (roomId: number, rackId: number) => Promise<void>;
   fetchModuleTypes: () => Promise<void>;
   installModule: (deviceId: number, bayId: number, moduleTypeId: number, rackId: number) => Promise<void>;
   uninstallModule: (deviceId: number, moduleId: number, rackId: number) => Promise<void>;
@@ -208,6 +211,7 @@ export const useRackStore = create<RackState>((set, get) => ({
   detailsLoading: false,
   error: null,
   detailsError: null,
+  selectedDeviceId: null,
   selectedDeviceDetails: null,
   deviceDetailsLoading: false,
   deviceDetailsError: null,
@@ -245,7 +249,7 @@ export const useRackStore = create<RackState>((set, get) => ({
     }
   },
 
-  clearSelectedRack: () => set({ selectedRackDetails: null, detailsError: null, selectedDeviceDetails: null, deviceDetailsError: null }),
+  clearSelectedRack: () => set({ selectedRackDetails: null, detailsError: null, selectedDeviceDetails: null, deviceDetailsError: null, selectedDeviceId: null }),
 
   fetchDeviceDetails: async (deviceId: number) => {
     set({ deviceDetailsLoading: true, deviceDetailsError: null });
@@ -261,6 +265,15 @@ export const useRackStore = create<RackState>((set, get) => ({
   },
 
   clearSelectedDeviceDetails: () => set({ selectedDeviceDetails: null, deviceDetailsError: null }),
+
+  selectDevice: (id: number | null) => {
+    set({ selectedDeviceId: id });
+    if (id !== null) {
+      get().fetchDeviceDetails(id);
+    } else {
+      get().clearSelectedDeviceDetails();
+    }
+  },
 
   createRack: async (roomId: number, rackData: { name: string; totalUnits: number; posX: number; posY: number; rotationDeg: number; length: number }) => {
     const response = await api.post<Rack>(`/rooms/${roomId}/racks`, rackData);
@@ -291,6 +304,14 @@ export const useRackStore = create<RackState>((set, get) => ({
       selectedDeviceDetails: state.selectedDeviceDetails?.id === deviceId ? null : state.selectedDeviceDetails
     }));
     await get().fetchRackDetails(rackId);
+  },
+
+  deleteRack: async (roomId: number, rackId: number) => {
+    await api.delete(`/racks/${rackId}`);
+    if (get().selectedRackDetails?.id === rackId) {
+      get().clearSelectedRack();
+    }
+    await get().fetchRacksForRoom(roomId);
   },
 
   fetchModuleTypes: async () => {

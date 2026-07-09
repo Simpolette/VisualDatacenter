@@ -94,20 +94,20 @@ export default function CreateRackSidebar2D({
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Placement Info summary cards */}
-        <div className="grid grid-cols-2 gap-3 bg-slate-900/40 border border-slate-800/80 p-4 rounded-xl">
+        <div className="grid grid-cols-2 gap-3 bg-canvas/40 border border-border p-4 rounded-xl">
           <div className="space-y-1">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Database className="w-3 h-3 text-slate-400" /> Coords (X, Y)
+            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <Database className="w-3 h-3 text-text-muted" /> Coords (X, Y)
             </span>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-text-primary">
               {coords.posX.toFixed(1)}m, {coords.posY.toFixed(1)}m
             </p>
           </div>
           <div className="space-y-1">
-            <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1">
-              <Compass className="w-3 h-3 text-slate-400" /> Size & Rotation
+            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider flex items-center gap-1">
+              <Compass className="w-3 h-3 text-text-muted" /> Size & Rotation
             </span>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-sm font-semibold text-text-primary">
               1x{coords.length} {coords.length === 1 ? 'cell' : 'cells'} @ {coords.rotationDeg}°
             </p>
           </div>
@@ -115,7 +115,7 @@ export default function CreateRackSidebar2D({
 
         {/* Input Name */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+          <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider block">
             Rack Name
           </label>
           <input
@@ -123,7 +123,7 @@ export default function CreateRackSidebar2D({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="e.g. Rack A"
-            className="w-full bg-slate-900 border border-slate-800 text-white rounded-lg focus:outline-none focus:border-primary px-3.5 py-2 text-sm transition-colors"
+            className="w-full bg-canvas border border-border text-text-primary rounded-lg focus:outline-none focus:border-primary px-3.5 py-2 text-sm transition-colors"
             required
             disabled={submitting}
             maxLength={50}
@@ -132,13 +132,13 @@ export default function CreateRackSidebar2D({
 
         {/* Select Capacity */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+          <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider block">
             Total Height (U)
           </label>
           <select
             value={totalUnits}
             onChange={(e) => setTotalUnits(Number(e.target.value))}
-            className="w-full bg-slate-900 border border-slate-800 text-white rounded-lg focus:outline-none focus:border-primary px-3 py-2 text-sm transition-colors cursor-pointer"
+            className="w-full bg-canvas border border-border text-text-primary rounded-lg focus:outline-none focus:border-primary px-3 py-2 text-sm transition-colors cursor-pointer"
             disabled={submitting}
           >
             <option value={42}>42 U (Standard)</option>
@@ -177,7 +177,7 @@ export default function CreateRackSidebar2D({
             type="button"
             onClick={onClose}
             disabled={submitting}
-            className="w-full py-2 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+            className="w-full py-2 bg-canvas border border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-xl text-xs font-semibold transition-all cursor-pointer"
           >
             Cancel
           </button>

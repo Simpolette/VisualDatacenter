@@ -149,6 +149,7 @@ When a rack is selected in the 3D viewport, the system SHALL visualize the rack 
 - The faceplate texture and length positioning of each device mesh SHALL align with the front of the rack if mounted `FRONT` (case-insensitive default), and align with the back of the rack if mounted `REAR`.
 - Internal 3D device meshes SHALL only render once detailed backend rack information (`isDetailsLoaded`) is loaded, preventing visual size flashing from fallback dimensions.
 - When a rack is unselected, the system SHALL cleanly transition back to its solid utilization clay box using distinct element keys (`rack-solid-{id}` and `rack-xray-{id}`) to prevent multi-material state reconciliation leaks.
+- **Each device mesh SHALL respond to pointer events: `onPointerOver` to display a hover tooltip and emissive glow, `onPointerOut` to clear hover state, and `onClick` to set the global `selectedDeviceId` in `useRackStore`.**
 
 #### Scenario: Selected rack cabinet mesh changes to translucent frame
 - **WHEN** the user selects a rack in the 3D viewport
@@ -169,6 +170,10 @@ When a rack is selected in the 3D viewport, the system SHALL visualize the rack 
 #### Scenario: Device mesh faceplate texture matches mount orientation
 - **WHEN** a device mesh is rendered in the stack
 - **THEN** if the device is `FRONT` mounted, its front-panel bezel texture loaded via `useTexture` is mapped to the positive Z face of its geometry and its length aligns with the front of the rack; if the device is `REAR` mounted, its front-panel bezel texture is mapped to the negative Z face of its geometry and its length aligns with the back of the rack.
+
+#### Scenario: Device meshes respond to pointer events
+- **WHEN** a device mesh is rendered inside a selected rack's X-ray view
+- **THEN** the device mesh SHALL have `onPointerOver`, `onPointerOut`, and `onClick` handlers that trigger hover tooltip display, hover glow effects, and device selection via the global store respectively.
 
 ### Requirement: Isolation mode toolbar toggle
 The unified workspace toolbar SHALL include an "Isolate" toggle button with a focus icon. The button SHALL enter `ISOLATION_SELECT` mode when clicked from `NORMAL` mode, and return to `NORMAL` mode when clicked from `ISOLATION_SELECT` or `ISOLATION_VIEW` mode.
