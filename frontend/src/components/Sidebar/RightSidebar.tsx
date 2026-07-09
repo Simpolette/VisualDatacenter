@@ -32,26 +32,26 @@ export default function RightSidebar({
 
   return (
     <div
-      className={`absolute top-0 right-0 h-full w-[450px] bg-slate-950/95 backdrop-blur-md border-l border-slate-800 shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-out transform ${
+      className={`absolute top-0 right-0 h-full w-[450px] bg-surface border-l border-border shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-out transform ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
       id={id}
     >
       {/* Header Panel */}
-      <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+      <div className="p-6 border-b border-border flex items-center justify-between">
         <div>
           {subtitle && (
             <span className="text-xs font-semibold text-primary uppercase tracking-wider block">
               {subtitle}
             </span>
           )}
-          <h2 className="text-xl font-bold text-white mt-0.5" id={id ? `${id}-title` : undefined}>
+          <h2 className="text-xl font-bold text-text-primary mt-0.5" id={id ? `${id}-title` : undefined}>
             {title}
           </h2>
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800 hover:border-slate-700 transition-all cursor-pointer"
+          className="p-1.5 rounded-lg bg-canvas border border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover hover:border-border-hover transition-all cursor-pointer"
           id={id ? `btn-close-${id}` : 'btn-close-sidebar'}
           title="Close (Esc)"
         >

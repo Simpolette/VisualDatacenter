@@ -414,11 +414,11 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                         </div>
 
                         {isInstalling && (
-                          <div className="mt-3 pt-3 border-t border-slate-900 flex flex-col gap-2">
+                          <div className="mt-3 pt-3 border-t border-border flex flex-col gap-2">
                             <select
                               value={selectedModuleTypeId}
                               onChange={(e) => setSelectedModuleTypeId(e.target.value)}
-                              className="w-full px-2.5 py-1.5 text-xs bg-slate-950 border border-slate-800 rounded-lg text-white focus:outline-none focus:ring-1 focus:ring-primary"
+                              className="w-full px-2.5 py-1.5 text-xs bg-canvas border border-border rounded-lg text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
                             >
                               <option value="">Select Module Type...</option>
                               {moduleTypes.map((mt) => (
@@ -443,7 +443,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                                   setSelectedModuleTypeId('')
                                 }}
                                 disabled={installLoading}
-                                className="px-2 py-1 text-[10px] font-bold border border-slate-700 bg-slate-900 hover:bg-slate-850 text-slate-355 rounded transition-colors cursor-pointer"
+                                className="px-2 py-1 text-[10px] font-bold border border-border bg-canvas hover:bg-surface-hover text-text-secondary rounded transition-colors cursor-pointer"
                               >
                                 Cancel
                               </button>
@@ -455,38 +455,38 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-slate-600 italic">No module bays available for this device type.</p>
+                <p className="text-xs text-text-muted italic">No module bays available for this device type.</p>
               )}
             </div>
 
             <div className="space-y-4 pt-2">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Physical Components</h4>
+              <h4 className="text-xs font-bold text-text-secondary uppercase tracking-widest">Physical Components</h4>
               
               <div className="space-y-2">
-                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Console Ports</h5>
+                <h5 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Console Ports</h5>
                 {activeDevice.consolePorts && activeDevice.consolePorts.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
                     {activeDevice.consolePorts.map((cp: ConsolePort) => (
-                      <div key={cp.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
-                        <span className="text-xs font-mono font-bold text-white truncate">{cp.name}</span>
-                        <span className="text-[9px] font-bold text-slate-450 bg-slate-950 px-1 py-0.5 rounded border border-slate-800 uppercase tracking-wide">
+                      <div key={cp.id} className="flex items-center justify-between p-2 rounded bg-canvas/40 border border-border">
+                        <span className="text-xs font-mono font-bold text-text-primary truncate">{cp.name}</span>
+                        <span className="text-[9px] font-bold text-text-secondary bg-canvas px-1 py-0.5 rounded border border-border uppercase tracking-wide">
                           {cp.type}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-650 italic">No console ports.</p>
+                  <p className="text-xs text-text-muted italic">No console ports.</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Power Ports</h5>
+                <h5 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Power Ports</h5>
                 {activeDevice.powerPorts && activeDevice.powerPorts.length > 0 ? (
                   <div className="grid grid-cols-2 gap-2">
                     {activeDevice.powerPorts.map((pp: PowerPort) => (
-                      <div key={pp.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
-                        <span className="text-xs font-mono font-bold text-white truncate">{pp.name}</span>
+                      <div key={pp.id} className="flex items-center justify-between p-2 rounded bg-canvas/40 border border-border">
+                        <span className="text-xs font-mono font-bold text-text-primary truncate">{pp.name}</span>
                         <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20 uppercase tracking-wide">
                           {pp.type}
                         </span>
@@ -494,18 +494,18 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-650 italic">No power ports.</p>
+                  <p className="text-xs text-text-muted italic">No power ports.</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <h5 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Network Interfaces</h5>
+                <h5 className="text-[10px] font-bold text-text-muted uppercase tracking-wider">Network Interfaces</h5>
                 {activeDevice.interfaces && activeDevice.interfaces.length > 0 ? (
                   <div className="space-y-1.5">
                     {activeDevice.interfaces.map((i: Interface & { moduleId?: number }) => (
-                      <div key={i.id} className="flex items-center justify-between p-2 rounded bg-slate-900/50 border border-slate-800/60">
+                      <div key={i.id} className="flex items-center justify-between p-2 rounded bg-canvas/40 border border-border">
                         <div className="flex items-center gap-2 overflow-hidden mr-2">
-                          <span className="text-xs font-mono font-bold text-white truncate">{i.name}</span>
+                          <span className="text-xs font-mono font-bold text-text-primary truncate">{i.name}</span>
                           {i.moduleId && (
                             <span className="text-[8px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/25 px-1 py-0.5 rounded-sm shrink-0 uppercase tracking-wider">
                               Slot {activeDevice.moduleBays?.find((mb: ModuleBay) => mb.installedModule?.id === i.moduleId)?.name || 'Module'}
@@ -514,7 +514,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {i.macAddress && (
-                            <span className="text-[9px] font-mono text-slate-500">
+                            <span className="text-[9px] font-mono text-text-muted">
                               {i.macAddress}
                             </span>
                           )}
@@ -526,25 +526,25 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-650 italic">No network interfaces.</p>
+                  <p className="text-xs text-text-muted italic">No network interfaces.</p>
                 )}
               </div>
             </div>
           </div>
         ) : null) : (
           <div className="space-y-6">
-            <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-xl space-y-3">
+            <div className="bg-canvas/40 border border-border p-4 rounded-xl space-y-3">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400">Total Capacity</span>
-                <span className="font-semibold text-white">{totalUnits} U</span>
+                <span className="text-text-secondary">Total Capacity</span>
+                <span className="font-semibold text-text-primary">{totalUnits} U</span>
               </div>
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400">Utilization</span>
+                <span className="text-text-secondary">Utilization</span>
                 <span className={`font-semibold ${utilizationText}`}>
                   {occupiedUnits} U used ({utilizationRate.toFixed(1)}%)
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+              <div className="w-full h-2 bg-canvas rounded-full overflow-hidden border border-border">
                 <div
                   className={`h-full ${utilizationColor} transition-all duration-500`}
                   style={{ width: `${utilizationRate}%` }}
@@ -557,7 +557,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 onClick={() => setShowInstallForm((prev) => !prev)}
                 className={`w-full mt-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                   showInstallForm
-                    ? 'bg-slate-800 text-slate-300 border border-slate-700'
+                    ? 'bg-surface-hover text-text-primary border border-border-hover'
                     : 'bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20'
                 }`}
               >
@@ -566,7 +566,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
               </button>
 
               {confirmDeleteRack ? (
-                <div className="pt-3 border-t border-slate-800/60 space-y-2">
+                <div className="pt-3 border-t border-border space-y-2">
                   <p className="text-[11px] text-rose-300 leading-normal font-semibold">
                     Are you sure you want to delete this rack? This will also delete all devices and PDUs installed in it.
                   </p>
@@ -578,7 +578,7 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                       type="button"
                       onClick={() => setConfirmDeleteRack(false)}
                       disabled={deleteRackLoading}
-                      className="px-2.5 py-1.5 text-[10px] font-bold border border-slate-700 bg-slate-950 text-slate-400 hover:text-white rounded transition-colors cursor-pointer"
+                      className="px-2.5 py-1.5 text-[10px] font-bold border border-border bg-canvas text-text-secondary hover:text-text-primary rounded transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -611,8 +611,8 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
             </div>
 
             {showInstallForm && rackId && (
-              <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-xl">
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">Install New Device</h3>
+              <div className="bg-canvas/50 border border-border p-4 rounded-xl">
+                <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wider mb-4">Install New Device</h3>
                 <InstallDeviceForm
                   rackId={rackId}
                   rack={rack}
@@ -630,13 +630,13 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
             )}
 
             {/* PDU Management Section */}
-            <div className="bg-slate-900/50 border border-slate-800/80 p-4 rounded-xl space-y-3">
+            <div className="bg-canvas/40 border border-border p-4 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <h4 className="text-xs font-bold text-text-secondary uppercase tracking-wider">
                     Power Distribution Units (PDUs)
                   </h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">
+                  <p className="text-[10px] text-text-muted mt-0.5">
                     {rack.pdus && rack.pdus.length > 0
                       ? `${rack.pdus.length} / 2 PDUs attached`
                       : 'No PDUs attached'}
@@ -667,26 +667,26 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                   {rack.pdus.map((pdu) => (
                     <div
                       key={pdu.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-slate-950/70 border border-slate-800/80"
+                      className="flex items-center justify-between p-3 rounded-lg bg-canvas border border-border"
                     >
                       <div className="flex items-center gap-2.5">
                         <span className="w-2 h-2 rounded-full bg-amber-400 shadow-sm shadow-amber-400/50" />
                         <div>
-                          <p className="text-xs font-bold text-white leading-tight">{pdu.name}</p>
-                          <p className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          <p className="text-xs font-bold text-text-primary leading-tight">{pdu.name}</p>
+                          <p className="text-[10px] text-text-secondary font-mono mt-0.5">
                             {pdu.outletCount} Outlets
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-amber-300 border border-slate-700/60 uppercase tracking-wide">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-surface-hover text-amber-400 border border-border uppercase tracking-wide">
                           {pdu.position}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleDeletePdu(pdu.id)}
                           disabled={deletingPduId === pdu.id}
-                          className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-950/40 transition-colors cursor-pointer disabled:opacity-50"
+                          className="p-1 rounded text-text-muted hover:text-rose-450 hover:bg-rose-950/20 transition-colors cursor-pointer disabled:opacity-50"
                           title="Remove PDU"
                         >
                           {deletingPduId === pdu.id ? (
@@ -701,35 +701,35 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                 </div>
               ) : (
                 !showAddPduForm && (
-                  <p className="text-xs text-slate-500 italic">No vertical or rear PDUs installed.</p>
+                  <p className="text-xs text-text-muted italic">No vertical or rear PDUs installed.</p>
                 )
               )}
 
               {/* Add PDU Form */}
               {showAddPduForm && (
-                <form onSubmit={handleCreatePdu} className="pt-2 border-t border-slate-800 space-y-3">
+                <form onSubmit={handleCreatePdu} className="pt-2 border-t border-border space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                       PDU Name
                     </label>
                     <input
                       type="text"
                       value={pduName}
                       onChange={(e) => setPduName(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500"
+                      className="w-full bg-canvas border border-border text-text-primary rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-primary"
                       placeholder="e.g. Primary PDU"
                       required
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                         Position
                       </label>
                       <select
                         value={pduPosition}
                         onChange={(e) => setPduPosition(e.target.value as 'LEFT' | 'RIGHT' | 'REAR')}
-                        className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500 cursor-pointer"
+                        className="w-full bg-canvas border border-border text-text-primary rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-primary cursor-pointer"
                       >
                         <option value="LEFT" disabled={rack.pdus?.some((p) => p.position === 'LEFT')}>LEFT</option>
                         <option value="RIGHT" disabled={rack.pdus?.some((p) => p.position === 'RIGHT')}>RIGHT</option>
@@ -737,13 +737,13 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                       </select>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      <label className="text-[10px] font-bold text-text-secondary uppercase tracking-wider block">
                         Outlets
                       </label>
                       <select
                         value={pduOutletCount}
                         onChange={(e) => setPduOutletCount(Number(e.target.value))}
-                        className="w-full bg-slate-950 border border-slate-800 text-white rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-amber-500 cursor-pointer"
+                        className="w-full bg-canvas border border-border text-text-primary rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-primary cursor-pointer"
                       >
                         <option value={8}>8 Outlets</option>
                         <option value={12}>12 Outlets</option>
@@ -757,14 +757,14 @@ export default function RackSidebar2D({ rackId, onClose }: RackSidebar2DProps) {
                       type="button"
                       onClick={() => setShowAddPduForm(false)}
                       disabled={pduLoading}
-                      className="px-3 py-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-950 rounded-lg border border-slate-800 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 text-xs font-semibold text-text-secondary hover:text-text-primary bg-canvas rounded-lg border border-border transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={pduLoading}
-                      className="px-3 py-1.5 text-xs font-semibold text-slate-950 bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+                      className="px-3 py-1.5 text-xs font-semibold text-background bg-amber-400 hover:bg-amber-300 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
                     >
                       {pduLoading ? (
                         <>
