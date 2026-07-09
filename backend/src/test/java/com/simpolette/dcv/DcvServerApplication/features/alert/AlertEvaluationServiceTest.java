@@ -31,8 +31,8 @@ class AlertEvaluationServiceTest {
     @DisplayName("Should create new CRITICAL alarm when CPU usage exceeds 90%")
     void evaluateMetrics_CpuCritical_CreatesAlarm() {
         TelemetryMetricDto metric = new TelemetryMetricDto(1L, "CPU_USAGE", 95.0, "%", Instant.now());
-        when(alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(eq(1L), eq("CPU_USAGE"), anyList()))
-                .thenReturn(Optional.empty());
+        when(alarmRepository.findByStatusIn(anyList()))
+                .thenReturn(java.util.Collections.emptyList());
 
         alertEvaluationService.evaluateMetrics(List.of(metric));
 
@@ -48,8 +48,8 @@ class AlertEvaluationServiceTest {
         EquipmentAlarm existing = new EquipmentAlarm(1L, "CPU_USAGE", AlarmSeverity.WARNING, AlarmStatus.TRIGGERED, "High CPU", Instant.now());
         TelemetryMetricDto metric = new TelemetryMetricDto(1L, "CPU_USAGE", 95.0, "%", Instant.now());
 
-        when(alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(eq(1L), eq("CPU_USAGE"), anyList()))
-                .thenReturn(Optional.of(existing));
+        when(alarmRepository.findByStatusIn(anyList()))
+                .thenReturn(List.of(existing));
 
         alertEvaluationService.evaluateMetrics(List.of(metric));
 
@@ -62,8 +62,8 @@ class AlertEvaluationServiceTest {
         EquipmentAlarm existing = new EquipmentAlarm(1L, "CPU_USAGE", AlarmSeverity.CRITICAL, AlarmStatus.TRIGGERED, "High CPU", Instant.now());
         TelemetryMetricDto metric = new TelemetryMetricDto(1L, "CPU_USAGE", 30.0, "%", Instant.now());
 
-        when(alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(eq(1L), eq("CPU_USAGE"), anyList()))
-                .thenReturn(Optional.of(existing));
+        when(alarmRepository.findByStatusIn(anyList()))
+                .thenReturn(List.of(existing));
 
         alertEvaluationService.evaluateMetrics(List.of(metric));
 
@@ -77,8 +77,8 @@ class AlertEvaluationServiceTest {
     @DisplayName("Should trigger WARNING for low battery level")
     void evaluateMetrics_BatteryLow_TriggersWarning() {
         TelemetryMetricDto metric = new TelemetryMetricDto(2L, "BATTERY_LEVEL", 25.0, "%", Instant.now());
-        when(alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(eq(2L), eq("BATTERY_LEVEL"), anyList()))
-                .thenReturn(Optional.empty());
+        when(alarmRepository.findByStatusIn(anyList()))
+                .thenReturn(java.util.Collections.emptyList());
 
         alertEvaluationService.evaluateMetrics(List.of(metric));
 
@@ -89,8 +89,8 @@ class AlertEvaluationServiceTest {
     @DisplayName("Should trigger CRITICAL for high temperature")
     void evaluateMetrics_HighTemp_TriggersCritical() {
         TelemetryMetricDto metric = new TelemetryMetricDto(3L, "TEMPERATURE", 60.0, "°C", Instant.now());
-        when(alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(eq(3L), eq("TEMPERATURE"), anyList()))
-                .thenReturn(Optional.empty());
+        when(alarmRepository.findByStatusIn(anyList()))
+                .thenReturn(java.util.Collections.emptyList());
 
         alertEvaluationService.evaluateMetrics(List.of(metric));
 

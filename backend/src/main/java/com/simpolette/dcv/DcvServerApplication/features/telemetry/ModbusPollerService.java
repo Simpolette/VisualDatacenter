@@ -24,6 +24,7 @@ public class ModbusPollerService {
         this(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
     public ModbusPollerService(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
     }

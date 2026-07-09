@@ -9,7 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "Devices", description = "Endpoints for installing, updating, and removing rack devices and modules")
 public class DeviceController {
 
     private final DeviceService deviceService;

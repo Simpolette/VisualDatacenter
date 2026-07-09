@@ -8,7 +8,8 @@ import java.time.Instant;
 public class TelemetryLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "telemetry_logs_seq")
+    @SequenceGenerator(name = "telemetry_logs_seq", sequenceName = "telemetry_logs_id_seq", allocationSize = 1000)
     private Long id;
 
     @Column(nullable = false)

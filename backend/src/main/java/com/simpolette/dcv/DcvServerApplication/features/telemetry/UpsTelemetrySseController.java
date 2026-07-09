@@ -3,6 +3,9 @@ package com.simpolette.dcv.DcvServerApplication.features.telemetry;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +14,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RestController
 @RequestMapping("/api/v1/telemetry")
 @CrossOrigin(origins = "*")
+@Tag(name = "Telemetry", description = "Endpoints for real-time telemetry streaming over Server-Sent Events (SSE)")
 public class UpsTelemetrySseController {
 
     private final List<SseEmitter> emitters = new CopyOnWriteArrayList<>();
@@ -27,6 +31,14 @@ public class UpsTelemetrySseController {
     private final List<Object> latestMetricsCache = new CopyOnWriteArrayList<>();
 
     @GetMapping(value = "/ups/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(
+        summary = "Subscribe to UPS telemetry stream",
+        description = "Establishes an SSE stream returning real-time UPS device telemetry metrics."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Successfully established the UPS telemetry stream event channel"
+    )
     public SseEmitter subscribe(jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("X-Accel-Buffering", "no");
         response.setHeader("Cache-Control", "no-cache, no-transform");

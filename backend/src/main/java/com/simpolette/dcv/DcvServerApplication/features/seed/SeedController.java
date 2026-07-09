@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/seed")
+@Tag(name = "Seed", description = "Endpoints for seeding the database with demo or scale-test devices and rooms")
 public class SeedController {
 
     private final SeedService seedService;

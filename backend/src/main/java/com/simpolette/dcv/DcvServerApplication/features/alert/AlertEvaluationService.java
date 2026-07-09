@@ -19,28 +19,31 @@ public class AlertEvaluationService {
 
     @Transactional
     public void evaluateMetrics(List<TelemetryMetricDto> metrics) {
+        List<AlarmStatus> activeStatuses = List.of(AlarmStatus.TRIGGERED, AlarmStatus.ACKNOWLEDGED);
+        List<EquipmentAlarm> activeAlarms = alarmRepository.findByStatusIn(activeStatuses);
+        java.util.Map<String, EquipmentAlarm> activeAlarmsMap = new java.util.HashMap<>();
+        for (EquipmentAlarm alarm : activeAlarms) {
+            activeAlarmsMap.put(alarm.getDeviceId() + ":" + alarm.getMetricKey(), alarm);
+        }
+
         for (TelemetryMetricDto metric : metrics) {
-            evaluateMetric(metric);
+            evaluateMetric(metric, activeAlarmsMap);
         }
     }
 
-    private void evaluateMetric(TelemetryMetricDto metric) {
+    private void evaluateMetric(TelemetryMetricDto metric, java.util.Map<String, EquipmentAlarm> activeAlarmsMap) {
         AlarmSeverity severity = determineSeverity(metric.metricKey(), metric.metricValue());
-        List<AlarmStatus> activeStatuses = List.of(AlarmStatus.TRIGGERED, AlarmStatus.ACKNOWLEDGED);
-
-        Optional<EquipmentAlarm> existingAlarmOpt = alarmRepository.findByDeviceIdAndMetricKeyAndStatusIn(
-                metric.deviceId(), metric.metricKey(), activeStatuses
-        );
+        String mapKey = metric.deviceId() + ":" + metric.metricKey();
+        EquipmentAlarm existingAlarm = activeAlarmsMap.get(mapKey);
 
         if (severity != null) {
             String message = String.format("%s threshold exceeded for Device #%d: %.1f%s",
                     metric.metricKey(), metric.deviceId(), metric.metricValue(), metric.unit() != null ? metric.unit() : "");
 
-            if (existingAlarmOpt.isPresent()) {
-                EquipmentAlarm alarm = existingAlarmOpt.get();
-                alarm.setSeverity(severity);
-                alarm.setMessage(message);
-                alarmRepository.save(alarm);
+            if (existingAlarm != null) {
+                existingAlarm.setSeverity(severity);
+                existingAlarm.setMessage(message);
+                alarmRepository.save(existingAlarm);
             } else {
                 EquipmentAlarm newAlarm = new EquipmentAlarm(
                         metric.deviceId(),
@@ -51,12 +54,13 @@ public class AlertEvaluationService {
                         Instant.now()
                 );
                 alarmRepository.save(newAlarm);
+                activeAlarmsMap.put(mapKey, newAlarm);
             }
-        } else if (existingAlarmOpt.isPresent()) {
-            EquipmentAlarm alarm = existingAlarmOpt.get();
-            alarm.setStatus(AlarmStatus.RESOLVED);
-            alarm.setResolvedAt(Instant.now());
-            alarmRepository.save(alarm);
+        } else if (existingAlarm != null) {
+            existingAlarm.setStatus(AlarmStatus.RESOLVED);
+            existingAlarm.setResolvedAt(Instant.now());
+            alarmRepository.save(existingAlarm);
+            activeAlarmsMap.remove(mapKey);
         }
     }
 

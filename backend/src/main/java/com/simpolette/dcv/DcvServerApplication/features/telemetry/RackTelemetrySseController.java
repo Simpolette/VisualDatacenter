@@ -3,6 +3,9 @@ package com.simpolette.dcv.DcvServerApplication.features.telemetry;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,6 +16,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @RestController
 @RequestMapping("/api/v1/telemetry")
 @CrossOrigin(origins = "*")
+@Tag(name = "Telemetry", description = "Endpoints for real-time telemetry streaming over Server-Sent Events (SSE)")
 public class RackTelemetrySseController {
 
     private final Map<Long, List<SseEmitter>> rackEmitters = new ConcurrentHashMap<>();
@@ -29,6 +33,14 @@ public class RackTelemetrySseController {
     private final Map<Long, List<Object>> latestRackMetricsCache = new ConcurrentHashMap<>();
 
     @GetMapping(value = "/rack/{rackId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(
+        summary = "Subscribe to rack telemetry stream",
+        description = "Establishes an SSE stream returning real-time device telemetry metrics for the specified rack."
+    )
+    @ApiResponse(
+        responseCode = "200",
+        description = "Successfully established the telemetry stream event channel"
+    )
     public SseEmitter subscribe(@PathVariable Long rackId, jakarta.servlet.http.HttpServletResponse response) {
         response.setHeader("X-Accel-Buffering", "no");
         response.setHeader("Cache-Control", "no-cache, no-transform");

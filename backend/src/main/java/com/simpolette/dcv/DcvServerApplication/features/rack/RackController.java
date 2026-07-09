@@ -6,9 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 
 @RestController
+@Tag(name = "Racks", description = "Endpoints for managing server racks within rooms")
 public class RackController {
 
     private final RackService rackService;
