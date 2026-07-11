@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "PDUs", description = "Endpoints for attaching and detaching Power Distribution Units (PDUs) to server racks")
 public class PduController {
 
     private final PduService pduService;

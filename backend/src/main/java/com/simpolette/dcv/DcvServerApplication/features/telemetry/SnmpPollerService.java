@@ -33,6 +33,7 @@ public class SnmpPollerService {
         this(new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
     }
 
+    @org.springframework.beans.factory.annotation.Autowired
     public SnmpPollerService(MeterRegistry meterRegistry) {
         this.meterRegistry = meterRegistry;
         try {

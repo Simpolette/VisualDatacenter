@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/metrics")
 @CrossOrigin(origins = "*")
+@Tag(name = "UI Metrics", description = "Endpoints for receiving client-side performance and telemetry metrics")
 public class UiMetricsController {
 
     private static final Logger log = LoggerFactory.getLogger(UiMetricsController.class);

@@ -9,12 +9,14 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/alarms")
 @CrossOrigin(origins = "*")
+@Tag(name = "Alarms", description = "Endpoints for retrieving, acknowledging, and managing active or resolved equipment alarms")
 public class EquipmentAlarmController {
 
     private final EquipmentAlarmRepository alarmRepository;
