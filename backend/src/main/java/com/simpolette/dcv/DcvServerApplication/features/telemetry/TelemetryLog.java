@@ -4,12 +4,13 @@ import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "telemetry_logs")
+@Table(name = "telemetry_logs", indexes = {
+    @Index(name = "idx_telemetry_device_time", columnList = "deviceId, timestamp")
+})
 public class TelemetryLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "telemetry_logs_seq")
-    @SequenceGenerator(name = "telemetry_logs_seq", sequenceName = "telemetry_logs_id_seq", allocationSize = 1000)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
