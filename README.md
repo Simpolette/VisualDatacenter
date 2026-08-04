@@ -107,6 +107,16 @@ cd frontend
 npm run build
 ```
 
+### Performance & Load Testing (k6)
+
+To benchmark API endpoints and verify latency thresholds (p95 < 250ms, p99 < 600ms):
+
+```bash
+./test/load-testing/run-load-test.sh http://localhost:3000/api/v1
+```
+
+*Note: This runs k6 via Docker. Ensure the backend containers are running (`docker-compose up`) before starting the load test.*
+
 ---
 
 ## 📄 License

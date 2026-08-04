@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.Instant;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 @RestController
 @RequestMapping("/api/v1/alarms")
 @CrossOrigin(origins = "*")
@@ -37,6 +39,7 @@ public class EquipmentAlarmController {
 
 
     @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('noc_viewer', 'dc_manager', 'platform_admin')")
     public ResponseEntity<List<EquipmentAlarmDto>> getActiveAlarms() {
         List<AlarmStatus> activeStatuses = List.of(AlarmStatus.TRIGGERED, AlarmStatus.ACKNOWLEDGED);
         List<EquipmentAlarmDto> list = alarmRepository.findByStatusIn(activeStatuses).stream()
@@ -46,6 +49,7 @@ public class EquipmentAlarmController {
     }
 
     @PostMapping("/{id}/acknowledge")
+    @PreAuthorize("hasAnyRole('dc_manager', 'platform_admin')")
     public ResponseEntity<EquipmentAlarmDto> acknowledgeAlarm(
             @PathVariable Long id,
             @Valid @RequestBody AcknowledgeAlarmRequest request) {

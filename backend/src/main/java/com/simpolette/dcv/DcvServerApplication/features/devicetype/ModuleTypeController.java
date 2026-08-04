@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 @RestController
@@ -21,22 +22,26 @@ public class ModuleTypeController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('noc_viewer', 'dc_manager', 'platform_admin')")
     public ResponseEntity<List<ModuleType>> list() {
         return ResponseEntity.ok(moduleTypeService.findAll());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('noc_viewer', 'dc_manager', 'platform_admin')")
     public ResponseEntity<ModuleType> getById(@PathVariable Long id) {
         return ResponseEntity.ok(moduleTypeService.findById(id));
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('dc_manager', 'platform_admin')")
     public ResponseEntity<ModuleType> create(@Valid @RequestBody CreateModuleTypeDTO dto) {
         ModuleType created = moduleTypeService.create(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('dc_manager', 'platform_admin')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         moduleTypeService.delete(id);
         return ResponseEntity.noContent().build();

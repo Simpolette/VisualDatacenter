@@ -1,0 +1,144 @@
+{
+  "realm": "vdt",
+  "enabled": true,
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "roles": {
+    "realm": [
+      {
+        "name": "noc_viewer",
+        "description": "Read-only access to assigned datacenter rooms, racks, devices, and telemetry"
+      },
+      {
+        "name": "dc_manager",
+        "description": "Read and write access to assigned datacenter rooms, racks, devices, and alarms"
+      },
+      {
+        "name": "platform_admin",
+        "description": "Full access to all rooms, system settings, database seeding, and user administration"
+      }
+    ]
+  },
+  "groups": [],
+  "defaultRoles": [
+    "noc_viewer"
+  ],
+  "requiredCredentials": [
+    "password"
+  ],
+  "clients": [
+    {
+      "clientId": "vdt-app",
+      "name": "Visual Datacenter Frontend",
+      "enabled": true,
+      "publicClient": true,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "http://localhost:5173",
+        "http://localhost/*",
+        "http://localhost"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "http://localhost",
+        "*"
+      ],
+      "fullScopeAllowed": true
+    },
+    {
+      "clientId": "vdt-api",
+      "name": "Visual Datacenter Backend API",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "vdt-api-secret-key-12345",
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "standardFlowEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@visualdatacenter.local",
+      "firstName": "Platform",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "platform_admin"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users",
+          "query-realms"
+        ]
+      }
+    },
+    {
+      "username": "manager",
+      "enabled": true,
+      "email": "manager@visualdatacenter.local",
+      "firstName": "DC",
+      "lastName": "Manager",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "dc_manager"
+      ]
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "email": "viewer@visualdatacenter.local",
+      "firstName": "NOC",
+      "lastName": "Viewer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "noc_viewer"
+      ]
+    },
+    {
+      "username": "service-account-vdt-api",
+      "enabled": true,
+      "serviceAccountClientId": "vdt-api",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users",
+          "query-realms",
+          "manage-realm"
+        ]
+      }
+    }
+  ]
+}

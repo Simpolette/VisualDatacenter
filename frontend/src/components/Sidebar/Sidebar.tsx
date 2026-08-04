@@ -1,6 +1,9 @@
 import { NavLink } from 'react-router-dom'
+import { useAuthStore } from '../../stores/useAuthStore'
 
 function Sidebar() {
+  const { user, isAdmin, logout } = useAuthStore()
+
   const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium border-l-3 transition-all duration-150 cursor-pointer ${
       isActive
@@ -39,16 +42,6 @@ function Sidebar() {
       {/* Section 2: Navigation */}
       <nav className="flex-1 flex flex-col justify-between py-3 overflow-y-auto">
         <div className="flex flex-col gap-1 px-3">
-          {/* <NavLink to="/" end className={navLinkClasses} id="nav-dashboard">
-            <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
-              <rect x="2" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-              <rect x="11" y="2" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-              <rect x="2" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-              <rect x="11" y="11" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-            </svg>
-            <span>Dashboard</span>
-          </NavLink> */}
-
           <NavLink to="/rooms" className={navLinkClasses} id="nav-rooms">
             <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
               <rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
@@ -58,23 +51,51 @@ function Sidebar() {
             </svg>
             <span>Rooms</span>
           </NavLink>
-        </div>
 
-        {/* <div className="flex flex-col gap-1 px-3">
-          <NavLink to="/settings" className={navLinkClasses} id="nav-settings">
-            <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
-              <circle cx="10" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
-              <path
-                d="M10 1v2M10 17v2M1 10h2M17 10h2M3.5 3.5l1.4 1.4M15.1 15.1l1.4 1.4M16.5 3.5l-1.4 1.4M4.9 15.1l-1.4 1.4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            <span>Settings</span>
-          </NavLink>
-        </div> */}
+          {/* Administration Section */}
+          {isAdmin() && (
+            <div className="mt-4 pt-4 border-t border-border">
+              <span className="px-4 text-[10px] font-bold text-text-secondary uppercase tracking-wider block mb-2">
+                Administration
+              </span>
+              <NavLink to="/admin/users" className={navLinkClasses} id="nav-admin-users">
+                <svg className="shrink-0 w-5 h-5" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M10 10a4 4 0 100-8 4 4 0 000 8zM3 18e1a7 7 0 0114 0"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <span>User Management</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
       </nav>
+
+      {/* Section 3: User Footer */}
+      <div className="p-4 border-t border-border bg-surface shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="overflow-hidden">
+            <div className="text-sm font-semibold text-text-primary truncate">
+              {user?.username || 'Logged In'}
+            </div>
+            <div className="text-[11px] text-text-secondary capitalize truncate">
+              {user?.roles?.[0] || 'User'}
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            title="Logout"
+            className="p-2 rounded-lg bg-surface-hover hover:bg-rose-500/20 hover:text-rose-400 text-text-secondary transition-colors cursor-pointer"
+          >
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </aside>
   )
 }

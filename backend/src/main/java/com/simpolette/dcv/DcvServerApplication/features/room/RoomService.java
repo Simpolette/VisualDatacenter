@@ -16,14 +16,25 @@ import java.util.List;
 public class RoomService {
 
     private final RoomRepository roomRepository;
+    private final RoomAccessService roomAccessService;
 
-    public RoomService(RoomRepository roomRepository) {
+    public RoomService(RoomRepository roomRepository, RoomAccessService roomAccessService) {
         this.roomRepository = roomRepository;
+        this.roomAccessService = roomAccessService;
     }
 
     @Transactional(readOnly = true)
     public List<RoomResponseDTO> list() {
-        return roomRepository.findAll().stream()
+        if (roomAccessService.isPlatformAdmin()) {
+            return roomRepository.findAll().stream()
+                    .map(RoomResponseDTO::from)
+                    .toList();
+        }
+        List<Long> assignedRoomIds = roomAccessService.getAssignedRoomIds();
+        if (assignedRoomIds.isEmpty()) {
+            return List.of();
+        }
+        return roomRepository.findAllById(assignedRoomIds).stream()
                 .map(RoomResponseDTO::from)
                 .toList();
     }

@@ -11,11 +11,35 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vdt_user -d vdt_db"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.0
+    container_name: keycloak
+    restart: always
+    command: start-dev --import-realm
+    environment:
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak_db
+      - KC_DB_USERNAME=vdt_user
+      - KC_DB_PASSWORD=vdt_password
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HTTP_ENABLED=true
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/vdt-realm.json:/opt/keycloak/data/import/vdt-realm.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   backend:
     build:
@@ -34,9 +58,14 @@ services:
       - TELEMETRY_MODBUS_PORT=502
       - TELEMETRY_MODBUS_UNIT_ID=1
       - OTLP_TRACING_ENDPOINT=http://tempo:4318/v1/traces
+      - KEYCLOAK_ISSUER_URI=http://localhost:8080/realms/vdt
+      - KEYCLOAK_JWK_SET_URI=http://keycloak:8080/realms/vdt/protocol/openid-connect/certs
+      - KEYCLOAK_ADMIN_SERVER_URL=http://keycloak:8080
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_started
       mock-snmp-server:
         condition: service_started
       mock-modbus-ups:
